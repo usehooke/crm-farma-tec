@@ -16,9 +16,10 @@ import { AnimatePresence } from 'framer-motion';
 
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
-import { auth } from './services/firebaseConfig';
+import { auth, hasValidConfig } from './services/firebaseConfig';
 import { Auth } from './views/Auth';
 import { fazerPullDaNuvem } from './services/syncService';
+import { ConfigErrorScreen } from './components/ConfigErrorScreen';
 
 function App() {
   const { medicos, adicionarMedico, atualizarMedico, adicionarLog } = useMedicos();
@@ -31,6 +32,8 @@ function App() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
+    if (!hasValidConfig) return;
+
     const constSubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Usuário logado: Garante que os dados mais recentes são baixados
@@ -85,6 +88,10 @@ function App() {
       adicionarMedico({ ...dados, logVisitas: [] });
     }
   };
+
+  if (!hasValidConfig) {
+    return <ConfigErrorScreen />;
+  }
 
   if (isAuthLoading) {
     return (

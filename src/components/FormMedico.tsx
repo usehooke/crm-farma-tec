@@ -11,12 +11,10 @@ interface FormMedicoProps {
 
 const STATUS_OPCIONAL = ['Prospecção', 'Apresentada', 'Parceiro Ativo', 'Monitoramento'] as const;
 
-export const AVAILABLE_TAGS = [
-    { id: 'alto-potencial', label: 'Alto Potencial', cor: 'bg-purple-100 text-purple-700 border-purple-200' },
-    { id: 'fiel', label: 'Prescritor Fiel', cor: 'bg-green-100 text-green-700 border-green-200' },
-    { id: 'dificil', label: 'Difícil Acesso', cor: 'bg-slate-200 text-slate-600 border-slate-300' },
-    { id: 'concorrencia', label: 'Usa Concorrente', cor: 'bg-orange-100 text-orange-700 border-orange-200' },
-    { id: 'opiniao', label: 'Formador de Opinião', cor: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+export const DEFAULT_TAGS = [
+    { id: '1', name: 'Prescritor Alto', color: 'bg-green-500' },
+    { id: '2', name: 'Potencial', color: 'bg-blue-500' },
+    { id: '3', name: 'KOL', color: 'bg-purple-500' }
 ];
 
 export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedicoProps) {
@@ -29,6 +27,7 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
         ultimoContato: new Date().toISOString(),
         tags: []
     });
+    const [availableTags, setAvailableTags] = useState<{ id: string, name: string, color: string }[]>([]);
 
     useEffect(() => {
         if (medicoEditando) {
@@ -53,6 +52,17 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
             });
         }
     }, [medicoEditando, isOpen]);
+
+    useEffect(() => {
+        if (isOpen) {
+            const savedTags = localStorage.getItem('@FarmaClinIQ:vip_tags');
+            if (savedTags) {
+                setAvailableTags(JSON.parse(savedTags));
+            } else {
+                setAvailableTags(DEFAULT_TAGS);
+            }
+        }
+    }, [isOpen]);
 
     const toggleTag = (tagId: string) => {
         setFormData(prev => {
@@ -160,19 +170,20 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Classificação (Tags)</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Classificação VIP</label>
                         <div className="flex flex-wrap gap-2">
-                            {AVAILABLE_TAGS.map(tag => {
+                            {availableTags.map(tag => {
                                 const isSelected = formData.tags?.includes(tag.id);
                                 return (
                                     <button
                                         key={tag.id}
                                         type="button"
                                         onClick={() => toggleTag(tag.id)}
-                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${isSelected ? `${tag.cor} ring-2 ring-offset-1 ring-slate-300` : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
+                                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all flex items-center gap-1.5 ${isSelected ? `bg-slate-800 text-white border-slate-800 ring-2 ring-offset-1 ring-slate-300` : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
                                             }`}
                                     >
-                                        {tag.label}
+                                        <div className={`w-2 h-2 rounded-full ${tag.color}`} />
+                                        {tag.name}
                                     </button>
                                 );
                             })}

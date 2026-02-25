@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Calendar, Database, ShieldCheck, LogOut } from 'lucide-react';
+import { User, Calendar, Database, ShieldCheck, LogOut, Tag, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { auth } from '../services/firebaseConfig';
 import { fazerPushParaNuvem } from '../services/syncService';
@@ -10,13 +10,28 @@ export const Configuracoes = () => {
     const [nome, setNome] = useState('');
     const [googleConectado, setGoogleConectado] = useState(false);
     const [isSyncing, setIsSyncing] = useState(false);
+    const [vipTags, setVipTags] = useState<{ id: string, name: string, color: string }[]>([]);
+    const [novaTagNome, setNovaTagNome] = useState('');
+
+    const defaultTags = [
+        { id: '1', name: 'Prescritor Alto', color: 'bg-green-500' },
+        { id: '2', name: 'Potencial', color: 'bg-blue-500' },
+        { id: '3', name: 'KOL', color: 'bg-purple-500' }
+    ];
 
     // Simula a checagem inicial do token no LocalStorage
     useEffect(() => {
         const token = localStorage.getItem('@farmaTec:google_api_key');
         const nomeSalvo = localStorage.getItem('@FarmaClinIQ:user_nome');
+        const tagsSalvas = localStorage.getItem('@FarmaClinIQ:vip_tags');
+
         if (token) setGoogleConectado(true);
         if (nomeSalvo) setNome(nomeSalvo);
+        if (tagsSalvas) {
+            setVipTags(JSON.parse(tagsSalvas));
+        } else {
+            setVipTags(defaultTags);
+        }
     }, []);
 
     const handleSalvarPerfil = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,6 +43,44 @@ export const Configuracoes = () => {
         const profile = JSON.parse(profileStr);
         profile.nome = e.target.value;
         localStorage.setItem('@farmaTec:profile', JSON.stringify(profile));
+    };
+
+    const salvarTags = (novasTags: typeof vipTags) => {
+        setVipTags(novasTags);
+        localStorage.setItem('@FarmaClinIQ:vip_tags', JSON.stringify(novasTags));
+    };
+
+    const handleAtualizarNomeTag = (id: string, novoNome: string) => {
+        const tagsAtualizadas = vipTags.map(tag =>
+            tag.id === id ? { ...tag, name: novoNome } : tag
+        );
+        salvarTags(tagsAtualizadas);
+    };
+
+    const handleAdicionarTag = () => {
+        if (!novaTagNome.trim()) return;
+
+        // Cores disponíveis para novas tags
+        const cores = ['bg-pink-500', 'bg-orange-500', 'bg-teal-500', 'bg-indigo-500', 'bg-red-500'];
+        const corAleatoria = cores[Math.floor(Math.random() * cores.length)];
+
+        const novaTag = {
+            id: Date.now().toString(),
+            name: novaTagNome.trim(),
+            color: corAleatoria
+        };
+
+        salvarTags([...vipTags, novaTag]);
+        setNovaTagNome('');
+    };
+
+    const handleRemoverTag = (id: string) => {
+        if (vipTags.length <= 1) {
+            toast.error('Você precisa ter pelo menos uma tag.');
+            return;
+        }
+        const tagsAtualizadas = vipTags.filter(tag => tag.id !== id);
+        salvarTags(tagsAtualizadas);
     };
 
     const handleGoogleLogin = () => {
@@ -90,7 +143,10 @@ export const Configuracoes = () => {
 
     const handleLogoutApp = () => {
         signOut(auth).then(() => {
-            // Unmount handled by onAuthStateChanged
+            localStorage.removeItem('@farmaTec:google_api_key');
+            localStorage.removeItem('@FarmaClinIQ:user_nome');
+            localStorage.removeItem('@farmaTec:profile');
+            // A redireção para Auth.tsx ocorrerá automaticamente via onAuthStateChanged no App.tsx
         });
     };
 
@@ -161,6 +217,52 @@ export const Configuracoes = () => {
                     </div>
                 </section>
 
+                {/* Bloco 2.5: Etiquetas Customizadas */}
+                <section className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Tag size={18} className="text-primary" />
+                        <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide">Etiquetas VIP</h2>
+                    </div>
+
+                    <div className="space-y-3 mb-4">
+                        {vipTags.map((tag) => (
+                            <div key={tag.id} className="flex items-center gap-3">
+                                <div className={`w-4 h-4 rounded-full ${tag.color} shadow-sm shrink-0`} />
+                                <input
+                                    type="text"
+                                    value={tag.name}
+                                    onChange={(e) => handleAtualizarNomeTag(tag.id, e.target.value)}
+                                    className="flex-1 bg-brand-white border-none rounded-xl px-3 py-2 text-sm text-brand-dark font-medium shadow-inner outline-none focus:ring-1 focus:ring-primary transition-all"
+                                />
+                                <button
+                                    onClick={() => handleRemoverTag(tag.id)}
+                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors shrink-0"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200">
+                        <input
+                            type="text"
+                            value={novaTagNome}
+                            onChange={(e) => setNovaTagNome(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAdicionarTag()}
+                            placeholder="Nova etiqueta..."
+                            className="flex-1 bg-transparent border-b border-slate-300 pb-2 text-sm text-brand-dark outline-none focus:border-primary transition-colors"
+                        />
+                        <button
+                            onClick={handleAdicionarTag}
+                            disabled={!novaTagNome.trim()}
+                            className="p-2 bg-surface rounded-xl text-primary shadow-[2px_2px_5px_#e5e5e5,-2px_-2px_5px_#ffffff] active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all shrink-0"
+                        >
+                            <Plus size={18} />
+                        </button>
+                    </div>
+                </section>
+
                 {/* Bloco 3: Nuvem e Dados */}
                 <section className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
                     <div className="flex items-center gap-2 mb-4">
@@ -195,9 +297,9 @@ export const Configuracoes = () => {
 
                     <button
                         onClick={handleLogoutApp}
-                        className="w-full mt-2 flex justify-center items-center gap-2 text-sm font-bold text-red-500 bg-brand-white py-3 border border-red-100 rounded-xl shadow-[4px_4px_10px_#e5e5e5,-4px_-4px_10px_#ffffff] active:scale-95 transition-transform"
+                        className="w-full mt-2 flex justify-center items-center gap-2 text-sm font-bold text-red-500 bg-surface py-3 rounded-xl shadow-[inset_4px_4px_8px_#e5e5e5,inset_-4px_-4px_8px_#ffffff] active:scale-95 transition-transform"
                     >
-                        <LogOut size={16} /> Terminar Sessão
+                        <LogOut size={16} /> Sair da Conta
                     </button>
                 </section>
             </div>
