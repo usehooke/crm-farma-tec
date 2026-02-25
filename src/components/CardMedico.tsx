@@ -15,6 +15,16 @@ export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedico
         ? differenceInDays(new Date(), parseISO(medico.ultimoContato))
         : 999;
 
+    // Helper to get initials for the avatar
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map(n => n[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase();
+    };
+
     const isUrgent = daysSince > 30;
     const isWarning = medico.status === 'Apresentada' && daysSince > 7 && !isUrgent;
 
@@ -45,19 +55,45 @@ export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedico
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className={`border-[1.5px] p-4 rounded-xl bg-white shadow-sm mb-3 transition-all hover:shadow-md ${borderClass}`}
+            className={`p-4 rounded-2xl bg-brand-white mb-4 transition-all shadow-[5px_5px_15px_#f2f2f2,-5px_-5px_15px_#ffffff] hover:shadow-[8px_8px_20px_#ebebeb,-8px_-8px_20px_#ffffff] ${borderClass !== 'border-slate-200' ? `border ${borderClass}` : 'border border-transparent'}`}
         >
-            <div className="flex justify-between items-start gap-2">
-                <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-slate-100/80 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wide border border-slate-200">
-                            {medico.especialidade}
-                        </span>
+            <div className="flex gap-3">
+                {/* Avatar */}
+                <div className="w-10 h-10 shrink-0 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 font-bold text-sm border border-slate-200 shadow-sm relative">
+                    {getInitials(medico.nome)}
+                    {/* Indicador de Status Simples (bolinha) associado ao avatar? Ou mantemos no seletor? Manteremos o seletor. */}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                        <div className="flex-1">
+                            <h3 className="font-bold text-brand-dark text-[15px] leading-tight line-clamp-1">{medico.nome}</h3>
+                            <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-slate-500 text-[11px] font-medium truncate">
+                                    {medico.especialidade}
+                                </span>
+                                {medico.localizacao && (
+                                    <>
+                                        <span className="text-slate-300">•</span>
+                                        <span className="text-slate-500 text-[11px] truncate">
+                                            {medico.localizacao}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* WhatsApp Flutuante Menor */}
+                        <a
+                            href={zapLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 bg-primary hover:bg-opacity-90 text-white w-8 h-8 flex items-center justify-center rounded-full transition-all shadow-[2px_2px_5px_#d1d5db,-2px_-2px_5px_#ffffff]"
+                            title="Conversar no WhatsApp"
+                        >
+                            <Phone size={14} className="fill-current" />
+                        </a>
                     </div>
-                    <h3 className="font-bold text-slate-800 text-lg leading-tight line-clamp-1">{medico.nome}</h3>
-                    {medico.localizacao && (
-                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{medico.localizacao}</p>
-                    )}
 
                     {/* Exibição de Tags VIPs */}
                     {medico.tags && medico.tags.length > 0 && (
@@ -74,18 +110,6 @@ export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedico
                         </div>
                     )}
                 </div>
-
-                <select
-                    value={medico.status}
-                    onChange={(e) => onUpdateStatus(medico.id, e.target.value as Medico['status'])}
-                    className={`${getStatusColor(medico.status)} font-medium text-[11px] px-2 py-1.5 rounded-lg focus:ring-0 cursor-pointer border-none outline-none text-center shadow-sm appearance-none min-w-[100px]`}
-                    title="Alterar Status"
-                >
-                    <option value="Prospecção">Prospecção</option>
-                    <option value="Apresentada">Apresentada</option>
-                    <option value="Parceiro Ativo">Parceiro Ativo</option>
-                    <option value="Monitoramento">Monitoramento</option>
-                </select>
             </div>
 
             {/* Alertas Visuais */}
@@ -115,29 +139,35 @@ export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedico
                 </div>
             </div>
 
-            <div className="mt-4 flex gap-2">
-                <a
-                    href={callLink}
-                    className="shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-700 w-10 h-10 flex items-center justify-center rounded-lg transition-colors border border-slate-200"
-                    title="Ligar (Telefone)"
+            {/* Linha de Ações Inferior Minimalista */}
+            <div className="mt-3.5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                <select
+                    value={medico.status}
+                    onChange={(e) => onUpdateStatus(medico.id, e.target.value as Medico['status'])}
+                    className={`${getStatusColor(medico.status)} font-semibold text-[10px] px-2 py-1 rounded-lg focus:ring-0 cursor-pointer border-none outline-none text-center appearance-none min-w-[90px]`}
+                    title="Alterar Status"
                 >
-                    <Smartphone size={18} />
-                </a>
-                <a
-                    href={zapLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 bg-green-500 hover:bg-green-600 text-white text-center flex items-center justify-center h-10 rounded-lg text-sm font-bold transition-all shadow-sm shadow-green-200"
-                >
-                    <Phone size={14} className="mr-1.5" />
-                    WhatsApp
-                </a>
-                <button
-                    onClick={() => onViewHistory(medico)}
-                    className="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 h-10 rounded-lg text-sm font-bold transition-all shadow-sm"
-                >
-                    Ver Histórico
-                </button>
+                    <option value="Prospecção">Prospecção</option>
+                    <option value="Apresentada">Apresentada</option>
+                    <option value="Parceiro Ativo">Parceiro Ativo</option>
+                    <option value="Monitoramento">Monitoramento</option>
+                </select>
+
+                <div className="flex gap-1.5">
+                    <a
+                        href={callLink}
+                        className="bg-slate-50 hover:bg-slate-100 text-slate-600 w-7 h-7 flex items-center justify-center rounded-lg transition-colors border border-slate-200"
+                        title="Ligar (Telefone)"
+                    >
+                        <Smartphone size={14} />
+                    </a>
+                    <button
+                        onClick={() => onViewHistory(medico)}
+                        className="bg-brand-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 h-7 rounded-lg text-xs font-bold transition-all shadow-sm"
+                    >
+                        Histórico
+                    </button>
+                </div>
             </div>
         </motion.div>
     );

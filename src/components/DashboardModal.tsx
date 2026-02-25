@@ -1,9 +1,15 @@
-import { X, Download, TrendingUp, Users } from 'lucide-react';
+import { X, Download, TrendingUp, Users, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
+
+// @ts-ignore - Ignore type errors for jsPDF and autotable if any exist
+import jsPDF from 'jspdf';
+// @ts-ignore
+import autoTable from 'jspdf-autotable';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import type { Medico } from '../hooks/useMedicos';
+import { parseISO } from 'date-fns';
 import { toast } from 'sonner';
 
 interface DashboardModalProps {
@@ -17,6 +23,7 @@ const COLORS = ['#94A3B8', '#FCD34D', '#34D399', '#F87171'];
 
 export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModalProps) {
     const dashboardRef = useRef<HTMLDivElement>(null);
+    const [showChart, setShowChart] = useState(false);
 
     const totalMedicos = medicos.length;
     const ativos = medicos.filter(m => m.status === 'Parceiro Ativo').length;
@@ -55,6 +62,90 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
         }
     };
 
+    const gerarPDF = () => {
+        const doc = new jsPDF();
+
+        // Configurações e Cabeçalho
+        doc.setFontSize(22);
+        doc.setTextColor(30, 41, 59); // slate-800
+        doc.text('Farma Tec Corporativo', 14, 22);
+
+        doc.setFontSize(11);
+        doc.setTextColor(100, 116, 139); // slate-500
+        doc.text('Relatório Oficial de Atividades', 14, 30);
+
+        const dataEmissao = new Date().toLocaleDateString('pt-BR');
+        doc.setFontSize(9);
+        doc.text(`Emitido em: ${dataEmissao}`, 14, 36);
+
+        // Prepara os logs
+        const tableBody: any[] = [];
+        const todosLogs = medicos.flatMap(m =>
+            m.logVisitas.map(log => ({
+                medicoNome: m.nome,
+                especialidade: m.especialidade,
+                data: parseISO(log.data),
+                dataStr: new Date(log.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                nota: log.nota
+            }))
+        );
+
+        todosLogs.sort((a, b) => b.data.getTime() - a.data.getTime());
+
+        todosLogs.forEach(log => {
+            // Limita tamanho da nota para caber bem na tabela
+            const notaResumida = log.nota.length > 200 ? log.nota.substring(0, 200) + '...' : log.nota;
+            tableBody.push([
+                log.dataStr,
+                log.medicoNome,
+                log.especialidade,
+                notaResumida
+            ]);
+        });
+
+        // Configuração do autoTable (Estilo Hooke)
+        autoTable(doc, {
+            startY: 45,
+            head: [['Data', 'Contato', 'Especialidade', 'Registro']],
+            body: tableBody,
+            headStyles: {
+                fillColor: [30, 41, 59], // bg-slate-800
+                textColor: 255,
+                fontStyle: 'bold',
+                halign: 'left'
+            },
+            bodyStyles: {
+                textColor: [51, 65, 85], // text-slate-700
+                fontSize: 9
+            },
+            alternateRowStyles: {
+                fillColor: [248, 250, 252] // bg-slate-50
+            },
+            styles: {
+                cellPadding: 4,
+                lineColor: [226, 232, 240], // border-slate-200
+                lineWidth: 0.1
+            },
+            columnStyles: {
+                0: { cellWidth: 22 },
+                1: { cellWidth: 46 },
+                2: { cellWidth: 35 },
+                3: { cellWidth: 'auto' }
+            },
+            didDrawPage: (data: any) => {
+                // Numeração de página no rodapé
+                const str = `Página ${data.pageNumber}`;
+                doc.setFontSize(8);
+                doc.setTextColor(148, 163, 184); // slate-400
+                doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
+            }
+        });
+
+        const safeDate = new Date().toISOString().split('T')[0];
+        doc.save(`Relatorio_Tecnico_${safeDate}.pdf`);
+        toast.success('Relatório PDF Gerado com sucesso!');
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -74,12 +165,15 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
                                 <h2 className="text-xl font-black text-slate-800 tracking-tight">Analytics Avançado</h2>
                                 <p className="text-xs text-slate-500">Visão Geral do Funil V3</p>
                             </div>
-                            <div className="flex gap-2">
-                                <button onClick={exportarPNG} className="bg-elmeco-navy text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center shadow-md active:scale-95 transition-all">
-                                    <Download size={14} className="mr-1.5" /> Exportar (PNG)
+                            <div className="flex gap-2 flex-wrap sm:flex-nowrap justify-end items-center mt-2 sm:mt-0">
+                                <button onClick={gerarPDF} className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-xl text-[11px] font-bold flex items-center shadow-sm active:scale-95 transition-all w-fit">
+                                    <FileText size={14} className="mr-1.5 text-elmeco-navy" /> Gerar PDF
                                 </button>
-                                <button onClick={onClose} className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors">
-                                    <X size={20} />
+                                <button onClick={exportarPNG} className="bg-slate-800 text-white px-3 py-2 rounded-xl text-[11px] font-bold flex items-center shadow-md active:scale-95 transition-all w-fit">
+                                    <Download size={14} className="mr-1.5" /> Exportar Flyer
+                                </button>
+                                <button onClick={onClose} className="p-2 h-[34px] w-[34px] flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors">
+                                    <X size={18} />
                                 </button>
                             </div>
                         </div>
@@ -95,44 +189,62 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                                        <div className="flex items-center gap-2 text-slate-500 mb-2">
-                                            <Users size={16} className="text-blue-500" />
-                                            <span className="text-xs font-bold uppercase tracking-wide">Base Total</span>
+                                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-3">
+                                        <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+                                            <Users size={14} className="text-blue-500" />
+                                            <span className="text-[10px] font-bold uppercase tracking-wide">Base Total</span>
                                         </div>
-                                        <p className="text-3xl font-black text-slate-800">{totalMedicos}</p>
+                                        <p className="text-2xl font-black text-slate-800">{totalMedicos}</p>
                                     </div>
 
-                                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                                        <div className="flex items-center gap-2 text-slate-500 mb-2">
-                                            <TrendingUp size={16} className="text-green-500" />
-                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Conversão</span>
+                                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-3">
+                                        <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+                                            <TrendingUp size={14} className="text-green-500" />
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Conversão</span>
                                         </div>
-                                        <p className="text-3xl font-black text-green-600">{taxaConversao}%</p>
+                                        <p className="text-2xl font-black text-green-600">{taxaConversao}%</p>
                                     </div>
                                 </div>
+
+                                {/* Toggle Gráfico */}
+                                <button
+                                    onClick={() => setShowChart(!showChart)}
+                                    className="w-full bg-white border border-slate-200 rounded-xl p-3 flex justify-between items-center shadow-sm text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        Distribuição no Funil <span className="text-[10px] font-normal text-slate-400">(&gt; {ativos} Parceiros Ativos)</span>
+                                    </span>
+                                    {showChart ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                </button>
 
                                 {/* Funil Chart */}
-                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4 flex items-center justify-between">
-                                        <span>Distribuição no Funil</span>
-                                        <span className="bg-slate-100 px-2 py-0.5 rounded text-[10px]">&gt; {ativos} Parceiros Ativos</span>
-                                    </h3>
-                                    <div className="h-40 w-full">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <BarChart data={chartData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-                                                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                                                <YAxis hide />
-                                                <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ fontSize: '11px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-                                                <Bar dataKey="quantidade" radius={[4, 4, 4, 4]} barSize={32}>
-                                                    {chartData.map((_, index) => (
-                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                    ))}
-                                                </Bar>
-                                            </BarChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                </div>
+                                <AnimatePresence>
+                                    {showChart && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 pt-5 mt-1">
+                                                <div className="h-36 w-full">
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <BarChart data={chartData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+                                                            <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                                                            <YAxis hide />
+                                                            <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ fontSize: '11px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                                                            <Bar dataKey="quantidade" radius={[4, 4, 4, 4]} barSize={28}>
+                                                                {chartData.map((_, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                                ))}
+                                                            </Bar>
+                                                        </BarChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
                                 {/* Additional Stats / Highlights Row */}
                                 <div className="grid grid-cols-2 gap-3">
