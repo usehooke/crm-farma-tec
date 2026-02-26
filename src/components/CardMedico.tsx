@@ -2,7 +2,7 @@ import { differenceInDays, parseISO } from 'date-fns';
 import { Phone, Clock, FileText, Smartphone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Medico } from '../hooks/useMedicos';
-import { AVAILABLE_TAGS } from './FormMedico';
+import { useConfig } from '../context/ConfigContext';
 
 interface CardMedicoProps {
     medico: Medico;
@@ -11,6 +11,7 @@ interface CardMedicoProps {
 }
 
 export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedicoProps) {
+    const { vipTags } = useConfig();
     const daysSince = medico.ultimoContato
         ? differenceInDays(new Date(), parseISO(medico.ultimoContato))
         : 999;
@@ -99,11 +100,11 @@ export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedico
                     {medico.tags && medico.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                             {medico.tags.map(tagId => {
-                                const tagData = AVAILABLE_TAGS.find(t => t.id === tagId);
+                                const tagData = vipTags.find(t => t.id === tagId);
                                 if (!tagData) return null;
                                 return (
-                                    <span key={tagId} className={`text-[9px] px-1.5 py-0.5 rounded font-bold border uppercase tracking-wider ${tagData.cor}`}>
-                                        {tagData.label}
+                                    <span key={tagId} className={`text-[9px] px-1.5 py-0.5 rounded font-bold border uppercase tracking-wider ${tagData.color}`}>
+                                        {tagData.name}
                                     </span>
                                 );
                             })}

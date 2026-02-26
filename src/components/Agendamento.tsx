@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Calendar, Clock, FileText, CalendarCheck2, User } from 'lucide-react';
 import { syncVisitaGoogleCalendar, type VisitaEvent } from '../services/googleCalendar';
 import type { Medico } from '../hooks/useMedicos';
+import { useConfig } from '../context/ConfigContext';
 import { toast } from 'sonner';
 
 interface AgendamentoProps {
@@ -11,13 +12,14 @@ interface AgendamentoProps {
 }
 
 export const Agendamento = ({ medicos, adicionarLog }: AgendamentoProps) => {
+    const { googleConectado } = useConfig();
 
     const [selectedMedico, setSelectedMedico] = useState('');
     const [tipoVisita, setTipoVisita] = useState('Técnica');
     const [dataAgenda, setDataAgenda] = useState('');
     const [horaAgenda, setHoraAgenda] = useState('');
     const [observacoes, setObservacoes] = useState('');
-    const [syncGoogle, setSyncGoogle] = useState(true);
+    const [syncGoogle, setSyncGoogle] = useState(googleConectado);
 
     // Variantes para a entrada suave da tela
     const pageVariants = {
@@ -175,12 +177,18 @@ export const Agendamento = ({ medicos, adicionarLog }: AgendamentoProps) => {
                         Sync Google Calendar
                     </span>
                     <button
-                        onClick={() => setSyncGoogle(!syncGoogle)}
-                        className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out ${syncGoogle ? 'bg-brand-teal' : 'bg-slate-300'}`}
+                        onClick={() => {
+                            if (!googleConectado) {
+                                toast.error('Conecte sua conta Google nas configurações primeiro.');
+                                return;
+                            }
+                            setSyncGoogle(!syncGoogle);
+                        }}
+                        className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out ${syncGoogle && googleConectado ? 'bg-brand-teal' : 'bg-slate-300'}`}
                     >
                         <motion.div
                             className="w-4 h-4 bg-white rounded-full shadow-sm"
-                            animate={{ x: syncGoogle ? 24 : 0 }}
+                            animate={{ x: (syncGoogle && googleConectado) ? 24 : 0 }}
                         />
                     </button>
                 </div>

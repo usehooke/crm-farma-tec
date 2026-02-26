@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Calendar, BarChart2, Settings } from 'lucide-react';
+import { Home, Calendar, BarChart2, Settings, BookOpen } from 'lucide-react';
 import { BannerInstalacao } from './BannerInstalacao';
 
-export type ViewName = 'home' | 'agenda' | 'documentos' | 'configuracoes';
+export type ViewName = 'home' | 'agenda' | 'documentos' | 'protocolos' | 'configuracoes';
 
 // Interfaces para tipagem do componente
 interface MainLayoutProps {
@@ -17,7 +17,8 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
     const navItems = [
         { id: 'home', label: 'Início', icon: Home },
         { id: 'agenda', label: 'Agenda', icon: Calendar },
-        { id: 'documentos', label: 'Relatórios', icon: BarChart2 },
+        { id: 'documentos', label: 'Docs', icon: BarChart2 },
+        { id: 'protocolos', label: 'Biblioteca', icon: BookOpen },
         { id: 'configuracoes', label: 'Ajustes', icon: Settings },
     ] as const;
 

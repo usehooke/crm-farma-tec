@@ -1,8 +1,10 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { differenceInDays, parseISO } from 'date-fns';
-import { Search, Filter, Users, TrendingUp, Calendar as CalendarIcon } from 'lucide-react';
+import { Search, Filter, Users, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Medico } from '../hooks/useMedicos';
+import { useConfig } from '../context/ConfigContext';
+import { useModal } from '../context/ModalContext';
 import { CardMedico } from './CardMedico';
 import { CardAlerta } from './CardAlerta';
 
@@ -14,53 +16,47 @@ interface ViewHomeProps {
 }
 
 export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHomeProps) {
-    const [nomeUsuario, setNomeUsuario] = useState('');
+    const { nomeUsuario } = useConfig();
+    const { openModal } = useModal();
     const [activeTab, setActiveTab] = useState<Medico['status']>('Prospecção');
     const [searchQuery, setSearchQuery] = useState('');
     const [showUrgentOnly, setShowUrgentOnly] = useState(false);
-
-    // Busca o nome salvo na tela de Configurações
-    useEffect(() => {
-        const nomeSalvo = localStorage.getItem('@FarmaClinIQ:user_nome');
-        if (nomeSalvo) {
-            setNomeUsuario(nomeSalvo);
-        } else {
-            // Fallback para profile antigo
-            const profile = localStorage.getItem('@farmaTec:profile');
-            if (profile) {
-                try {
-                    const parsed = JSON.parse(profile);
-                    if (parsed.nome) setNomeUsuario(parsed.nome.split(' ')[0]);
-                } catch (e) { }
-            }
-        }
-    }, []);
+    const [rankingLimit, setRankingLimit] = useState<number | null>(null);
 
     // --- Lógica de Filtros e Busca ---
     const medicosFiltrados = useMemo(() => {
-        return medicos.filter(m => {
-            // 1. Filtro da Aba
-            if (m.status !== activeTab) return false;
+        let lista = medicos;
 
-            // 2. Filtro de Urgência (Follow-up)
-            if (showUrgentOnly) {
+        // 1. Filtro da Aba
+        lista = lista.filter(m => m.status === activeTab);
+
+        // 2. Filtro de Ranking (Baseado na ordem da lista)
+        if (rankingLimit) {
+            lista = lista.slice(0, rankingLimit);
+        }
+
+        // 3. Filtro de Urgência (Follow-up)
+        if (showUrgentOnly) {
+            lista = lista.filter(m => {
                 const daysSince = m.ultimoContato ? differenceInDays(new Date(), parseISO(m.ultimoContato)) : 999;
                 const isUrgent = daysSince > 30;
                 const isWarning = m.status === 'Apresentada' && daysSince > 7 && !isUrgent;
-                if (!isUrgent && !isWarning) return false;
-            }
+                return isUrgent || isWarning;
+            });
+        }
 
-            // 3. Busca por Texto
-            if (searchQuery) {
-                const q = searchQuery.toLowerCase();
-                return m.nome.toLowerCase().includes(q) ||
-                    m.especialidade.toLowerCase().includes(q) ||
-                    m.localizacao.toLowerCase().includes(q);
-            }
+        // 4. Busca por Texto
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            lista = lista.filter(m =>
+                m.nome.toLowerCase().includes(q) ||
+                m.especialidade.toLowerCase().includes(q) ||
+                m.localizacao.toLowerCase().includes(q)
+            );
+        }
 
-            return true;
-        });
-    }, [medicos, activeTab, searchQuery, showUrgentOnly]);
+        return lista;
+    }, [medicos, activeTab, searchQuery, showUrgentOnly, rankingLimit]);
 
     // Animação de entrada em cascata
     const containerVariants = {
@@ -76,13 +72,6 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
         visible: { opacity: 1, y: 0 }
     };
 
-    const scrollToMedicos = () => {
-        const element = document.getElementById('lista-medicos');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
-
     return (
         <motion.main
             className="flex-1 flex flex-col pt-2 bg-brand-white pb-24"
@@ -94,9 +83,9 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
             <motion.header variants={itemVariants} className="px-5 mb-6 mt-4">
                 <h1 className="text-3xl font-bold text-brand-dark tracking-tight">
                     Bom dia,<br />
-                    <span className="text-brand-teal">{nomeUsuario || 'Profissional'}!</span>
+                    <span className="text-brand-teal">{nomeUsuario || 'Ariani'}!</span>
                 </h1>
-                <p className="text-sm text-slate-500 mt-1">Aqui está o seu painel de hoje.</p>
+                <p className="text-sm text-slate-500 mt-1">Aqui está o seu painel de hoje focado em performance.</p>
             </motion.header>
 
             {/* Inteligência de Follow-up */}
@@ -106,26 +95,31 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
 
             {/* Grid de Acesso Rápido Neumórfico */}
             <motion.div variants={itemVariants} className="px-5 mt-6">
-                <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide mb-4">Acesso Rápido</h2>
+                <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide mb-4">Ranking de Performance</h2>
 
-                <div className="grid grid-cols-2 gap-4">
-                    {/* Card: Base de Médicos */}
+                <div className="grid grid-cols-3 gap-3">
                     <button
-                        onClick={scrollToMedicos}
-                        className="flex flex-col items-center justify-center p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] active:scale-95 transition-transform"
+                        onClick={() => setRankingLimit(rankingLimit === 10 ? null : 10)}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 10 ? 'bg-brand-teal text-white shadow-lg' : 'bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]'}`}
                     >
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                            <Users size={20} className="text-primary" />
-                        </div>
-                        <span className="text-xs font-bold text-brand-dark">Meus Médicos</span>
+                        <span className="text-xs font-black uppercase tracking-tighter">Top 10</span>
+                        <span className={`text-[10px] ${rankingLimit === 10 ? 'text-white/60' : 'text-slate-400'}`}>Elite</span>
                     </button>
 
-                    {/* Card: Agenda de Hoje */}
-                    <button className="flex flex-col items-center justify-center p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] active:scale-95 transition-transform">
-                        <div className="w-10 h-10 rounded-full bg-brand-teal/10 flex items-center justify-center mb-3">
-                            <CalendarIcon size={20} className="text-brand-teal" />
-                        </div>
-                        <span className="text-xs font-bold text-brand-dark">Agenda de Hoje</span>
+                    <button
+                        onClick={() => setRankingLimit(rankingLimit === 20 ? null : 20)}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 20 ? 'bg-primary text-white shadow-lg' : 'bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]'}`}
+                    >
+                        <span className="text-xs font-black uppercase tracking-tighter">Top 20</span>
+                        <span className={`text-[10px] ${rankingLimit === 20 ? 'text-white/60' : 'text-slate-400'}`}>Foco</span>
+                    </button>
+
+                    <button
+                        onClick={() => setRankingLimit(rankingLimit === 50 ? null : 50)}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 50 ? 'bg-slate-800 text-white shadow-lg' : 'bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]'}`}
+                    >
+                        <span className="text-xs font-black uppercase tracking-tighter">Top 50</span>
+                        <span className={`text-[10px] ${rankingLimit === 50 ? 'text-white/60' : 'text-slate-400'}`}>Carteira</span>
                     </button>
                 </div>
             </motion.div>
@@ -134,10 +128,13 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
             <motion.div variants={itemVariants} className="px-5 mt-6 mb-8">
                 <div className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] flex items-center justify-between">
                     <div>
-                        <h3 className="text-sm font-bold text-brand-dark">Performance Mensal</h3>
-                        <p className="text-xs text-slate-500">Relatório de Visitação</p>
+                        <h3 className="text-sm font-bold text-brand-dark">Meta Mensal (Ariani)</h3>
+                        <p className="text-xs text-slate-500">Visitas: {medicos.filter(m => m.logVisitas.length > 0).length} / 50</p>
                     </div>
-                    <button className="w-10 h-10 rounded-full bg-brand-white flex items-center justify-center shadow-sm text-primary">
+                    <button
+                        onClick={() => openModal('dashboard')}
+                        className="w-10 h-10 rounded-full bg-brand-white flex items-center justify-center shadow-sm text-primary active:scale-95 transition-transform"
+                    >
                         <TrendingUp size={18} />
                     </button>
                 </div>
@@ -166,7 +163,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
                         className={`px-3 py-2 rounded-xl border flex items-center text-xs font-bold transition-all shadow-sm ${showUrgentOnly ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-brand-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                     >
                         <Filter size={13} className="mr-1.5" />
-                        Filtros
+                        Atrasados
                     </button>
                 </div>
 

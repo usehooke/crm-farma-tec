@@ -45,25 +45,61 @@ export function HistoricoModal({ isOpen, onClose, medico, onAddLog }: HistoricoM
                         </div>
 
                         {/* Timeline */}
-                        <div className="flex-1 overflow-y-auto p-4 hide-scrollbar">
-                            <div className="space-y-4">
+                        <div className="flex-1 overflow-y-auto p-6 hide-scrollbar">
+                            <div className="relative border-l-2 border-slate-200 dark:border-slate-800 ml-4 space-y-8 pb-8">
                                 {medico.logVisitas.length === 0 ? (
-                                    <div className="text-center text-slate-400 py-10">
+                                    <div className="text-center text-slate-400 py-10 -ml-4">
                                         <Calendar size={32} className="mx-auto mb-2 opacity-30" />
                                         <p className="text-sm">Nenhum histórico registrado ainda.</p>
                                     </div>
                                 ) : (
-                                    medico.logVisitas.map((log: LogVisita) => (
-                                        <div key={log.id} className="relative pl-6 before:absolute before:left-2.5 before:top-2 before:bottom-[-20px] before:w-[2px] before:bg-slate-200 last:before:hidden">
-                                            <div className="absolute left-0 top-1.5 w-5 h-5 bg-elmeco-navy rounded-full border-4 border-slate-50 shadow-sm" />
-                                            <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-sm">
-                                                <p className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">
-                                                    {new Date(log.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{log.nota}</p>
+                                    medico.logVisitas.map((log: LogVisita) => {
+                                        const isProtocolo = log.nota.includes('📄');
+                                        const dataLog = new Date(log.data);
+                                        const hoje = new Date();
+                                        const ontem = new Date();
+                                        ontem.setDate(hoje.getDate() - 1);
+
+                                        let dataFormatada = dataLog.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+                                        if (dataLog.toDateString() === hoje.toDateString()) dataFormatada = 'Hoje';
+                                        else if (dataLog.toDateString() === ontem.toDateString()) dataFormatada = 'Ontem';
+
+                                        const horaFormatada = dataLog.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                                        return (
+                                            <div key={log.id} className="relative pl-8">
+                                                {/* Ponto na Timeline */}
+                                                <div className={`absolute -left-[11px] top-1 w-5 h-5 rounded-full border-4 border-slate-50 dark:border-slate-950 shadow-sm flex items-center justify-center ${isProtocolo ? 'bg-brand-teal' : 'bg-primary'
+                                                    }`}>
+                                                    <div className="w-1 h-1 bg-white rounded-full" />
+                                                </div>
+
+                                                <div className={`p-4 rounded-2xl transition-all ${isProtocolo
+                                                        ? 'bg-brand-white dark:bg-slate-900 shadow-[inset_4px_4px_8px_#e5e5e5,inset_-4px_-4px_8px_#ffffff] dark:shadow-none border-l-4 border-brand-teal'
+                                                        : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm'
+                                                    }`}>
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                                            {dataFormatada} • {horaFormatada}
+                                                        </span>
+                                                        {isProtocolo && (
+                                                            <span className="bg-brand-teal/10 text-brand-teal text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                                                                Material Técnico
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className={`text-sm leading-relaxed whitespace-pre-wrap ${isProtocolo ? 'text-brand-dark dark:text-slate-200 font-medium' : 'text-slate-700 dark:text-slate-300'
+                                                        }`}>
+                                                        {isProtocolo ? (
+                                                            <>
+                                                                {log.nota.split(': ')[0]}: <span className="font-bold">{log.nota.split(': ')[1]}</span>
+                                                            </>
+                                                        ) : log.nota}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 )}
                             </div>
                         </div>

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useConfig } from '../context/ConfigContext';
 
 export interface LogVisita {
     id: string;
     data: string; // ISO date string
     nota: string;
+    tipo?: 'presencial' | 'telefonema' | 'envio_material';
 }
 
 // Definição da estrutura do Médico para a V2.0
@@ -18,56 +19,31 @@ export interface Medico {
     tags?: string[];
     proximaVisita?: string;
     logVisitas: LogVisita[];
+    consultor?: string;
     // Legacy prop for migration:
     observacoes?: string;
 }
 
 export function useMedicos() {
-    const [medicos, setMedicos] = useState<Medico[]>(() => {
-        const saved = localStorage.getItem('@FarmaTec:medicos');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            // Migration script from V1 to V2
-            return parsed.map((m: any) => {
-                const migrado: Medico = {
-                    ...m,
-                    logVisitas: m.logVisitas || [],
-                };
-                // Move old observacoes to new logVisitas format if needed
-                if (m.observacoes && typeof m.observacoes === 'string' && migrado.logVisitas.length === 0) {
-                    migrado.logVisitas.push({
-                        id: crypto.randomUUID(),
-                        data: m.ultimoContato || new Date().toISOString(),
-                        nota: m.observacoes
-                    });
-                    delete migrado.observacoes;
-                }
-                return migrado;
-            });
-        }
-        return [];
-    });
-
-    useEffect(() => {
-        localStorage.setItem('@FarmaTec:medicos', JSON.stringify(medicos));
-    }, [medicos]);
+    const { medicos, setMedicos } = useConfig();
 
     const adicionarMedico = (novo: Omit<Medico, 'id'>) => {
         const medicoComId = { ...novo, id: crypto.randomUUID() };
-        setMedicos(prev => [...prev, medicoComId]);
+        setMedicos([...medicos, medicoComId]);
     };
 
     const atualizarMedico = (id: string, dados: Partial<Medico>) => {
-        setMedicos(prev => prev.map(m => m.id === id ? { ...m, ...dados } : m));
+        setMedicos(medicos.map(m => m.id === id ? { ...m, ...dados } : m));
     };
 
-    const adicionarLog = (idMedico: string, nota: string) => {
-        setMedicos(prev => prev.map(m => {
+    const adicionarLog = (idMedico: string, nota: string, tipo: LogVisita['tipo'] = 'presencial') => {
+        setMedicos(medicos.map(m => {
             if (m.id === idMedico) {
                 const novoLog: LogVisita = {
                     id: crypto.randomUUID(),
                     data: new Date().toISOString(),
-                    nota
+                    nota,
+                    tipo
                 };
                 return {
                     ...m,
@@ -80,7 +56,7 @@ export function useMedicos() {
     };
 
     const removerMedico = (id: string) => {
-        setMedicos(prev => prev.filter(m => m.id !== id));
+        setMedicos(medicos.filter(m => m.id !== id));
     };
 
     const exportarBackup = () => {

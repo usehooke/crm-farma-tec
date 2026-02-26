@@ -1,16 +1,17 @@
-import { X, Download, TrendingUp, Users, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { X, Download, TrendingUp, Users, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import html2canvas from 'html2canvas';
 
-// @ts-ignore - Ignore type errors for jsPDF and autotable if any exist
+// @ts-ignore
 import jsPDF from 'jspdf';
 // @ts-ignore
 import autoTable from 'jspdf-autotable';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import type { Medico } from '../hooks/useMedicos';
 import { parseISO } from 'date-fns';
 import { toast } from 'sonner';
+import { calcularStatsMensais } from '../utils/stats';
 
 interface DashboardModalProps {
     isOpen: boolean;
@@ -19,131 +20,101 @@ interface DashboardModalProps {
     tabs: Medico['status'][];
 }
 
-const COLORS = ['#94A3B8', '#FCD34D', '#34D399', '#F87171'];
+const COLORS = ['#94A3B8', '#FCD34D', '#10B981', '#F87171'];
 
 export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModalProps) {
     const dashboardRef = useRef<HTMLDivElement>(null);
-    const [showChart, setShowChart] = useState(false);
-
+    const stats = calcularStatsMensais(medicos);
     const totalMedicos = medicos.length;
-    const ativos = medicos.filter(m => m.status === 'Parceiro Ativo').length;
-    const taxaConversao = totalMedicos > 0 ? ((ativos / totalMedicos) * 100).toFixed(1) : '0';
 
     const chartData = tabs.map(tab => ({
         name: tab,
         quantidade: medicos.filter(m => m.status === tab).length
     }));
 
-    const duvidasTotal = medicos.reduce((acc, m) => acc + m.logVisitas.length, 0);
-
     const exportarPNG = async () => {
         if (!dashboardRef.current) return;
-
-        // Mostra Toast de carregamento temporário
         const toastId = toast.loading('Gerando imagem...');
-
         try {
             const canvas = await html2canvas(dashboardRef.current, {
-                scale: 2, // Retira blur no mobile
-                backgroundColor: '#FAFAF9', // bg-stone-50
+                scale: 2,
+                backgroundColor: '#FAFAF9',
                 useCORS: true,
             });
-
             const image = canvas.toDataURL("image/png", 1.0);
-
             const a = document.createElement("a");
             a.href = image;
-            a.download = `Relatorio-FarmaTec-${new Date().toISOString().split('T')[0]}.png`;
+            a.download = `IQ-Insights-${new Date().toISOString().split('T')[0]}.png`;
             a.click();
-            toast.success('Flyer gerado com sucesso!', { id: toastId });
+            toast.success('Dashboard exportado!', { id: toastId });
         } catch (e) {
-            toast.error('Erro ao gerar a imagem.', { id: toastId });
-            console.error(e);
+            toast.error('Erro ao gerar imagem.', { id: toastId });
         }
     };
 
     const gerarPDF = () => {
         const doc = new jsPDF();
-
-        // Configurações e Cabeçalho
         doc.setFontSize(22);
-        doc.setTextColor(30, 41, 59); // slate-800
-        doc.text('Farma Tec Corporativo', 14, 22);
+        doc.setTextColor(19, 78, 74);
+        doc.text('Elmeco IQ Insights', 14, 22);
 
         doc.setFontSize(11);
-        doc.setTextColor(100, 116, 139); // slate-500
-        doc.text('Relatório Oficial de Atividades', 14, 30);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Relatório Mensal de Performance e Engajamento Científico', 14, 30);
 
-        const dataEmissao = new Date().toLocaleDateString('pt-BR');
         doc.setFontSize(9);
-        doc.text(`Emitido em: ${dataEmissao}`, 14, 36);
+        doc.text(`Emitido: ${new Date().toLocaleDateString('pt-BR')} | Base: ${totalMedicos} Médicos`, 14, 36);
 
-        // Prepara os logs
+        autoTable(doc, {
+            startY: 45,
+            head: [['KPI', 'Valor', 'Impacto']],
+            body: [
+                ['Alcance Científico', stats.alcanceCientifico.toString(), 'Protocolos Enviados'],
+                ['Frequência Visitação', stats.frequenciaVisitacao.toString(), 'Visitas Realizadas'],
+                ['Top Interesse', stats.protocoloMaisEnviado, 'Material mais buscado'],
+                ['Taxa de Engajamento', `${stats.taxaEngajamento.toFixed(1)}%`, 'Conversão de Material']
+            ],
+            theme: 'striped',
+            headStyles: { fillColor: [19, 78, 74] }
+        });
+
         const tableBody: any[] = [];
         const todosLogs = medicos.flatMap(m =>
             m.logVisitas.map(log => ({
                 medicoNome: m.nome,
-                especialidade: m.especialidade,
                 data: parseISO(log.data),
-                dataStr: new Date(log.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-                nota: log.nota
+                dataStr: new Date(log.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+                nota: log.nota,
+                isProtocolo: log.nota.includes('📄')
             }))
         );
 
         todosLogs.sort((a, b) => b.data.getTime() - a.data.getTime());
 
         todosLogs.forEach(log => {
-            // Limita tamanho da nota para caber bem na tabela
-            const notaResumida = log.nota.length > 200 ? log.nota.substring(0, 200) + '...' : log.nota;
             tableBody.push([
                 log.dataStr,
                 log.medicoNome,
-                log.especialidade,
-                notaResumida
+                log.isProtocolo ? 'ENVIO PROTOCOLO' : 'VISITA',
+                log.nota
             ]);
         });
 
-        // Configuração do autoTable (Estilo Hooke)
         autoTable(doc, {
-            startY: 45,
-            head: [['Data', 'Contato', 'Especialidade', 'Registro']],
+            startY: (doc as any).lastAutoTable.finalY + 15,
+            head: [['Data', 'Contato', 'Tipo', 'Descrição']],
             body: tableBody,
-            headStyles: {
-                fillColor: [30, 41, 59], // bg-slate-800
-                textColor: 255,
-                fontStyle: 'bold',
-                halign: 'left'
-            },
-            bodyStyles: {
-                textColor: [51, 65, 85], // text-slate-700
-                fontSize: 9
-            },
-            alternateRowStyles: {
-                fillColor: [248, 250, 252] // bg-slate-50
-            },
-            styles: {
-                cellPadding: 4,
-                lineColor: [226, 232, 240], // border-slate-200
-                lineWidth: 0.1
-            },
-            columnStyles: {
-                0: { cellWidth: 22 },
-                1: { cellWidth: 46 },
-                2: { cellWidth: 35 },
-                3: { cellWidth: 'auto' }
-            },
-            didDrawPage: (data: any) => {
-                // Numeração de página no rodapé
-                const str = `Página ${data.pageNumber}`;
-                doc.setFontSize(8);
-                doc.setTextColor(148, 163, 184); // slate-400
-                doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
+            headStyles: { fillColor: [30, 41, 59] },
+            didParseCell: (data) => {
+                if (data.row.cells[2].text[0] === 'ENVIO PROTOCOLO') {
+                    data.cell.styles.textColor = [19, 78, 74];
+                    data.cell.styles.fontStyle = 'bold';
+                }
             }
         });
 
-        const safeDate = new Date().toISOString().split('T')[0];
-        doc.save(`Relatorio_Tecnico_${safeDate}.pdf`);
-        toast.success('Relatório PDF Gerado com sucesso!');
+        doc.save(`IQ_Insights_${new Date().toISOString().split('T')[0]}.pdf`);
+        toast.success('Relatório PDF Gerado!');
     };
 
     if (!isOpen) return null;
@@ -157,112 +128,105 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-                        className="w-full max-w-[600px] bg-slate-50 min-h-[75vh] max-h-[95vh] sm:rounded-2xl rounded-t-2xl flex flex-col shadow-2xl relative"
+                        className="w-full max-w-[600px] bg-slate-50 dark:bg-slate-950 min-h-[75vh] max-h-[95vh] sm:rounded-2xl rounded-t-2xl flex flex-col shadow-2xl relative"
                     >
-                        {/* Header Não-Exportável */}
-                        <div className="bg-white p-4 border-b border-slate-200 rounded-t-2xl flex justify-between items-center sticky top-0 z-10 shrink-0">
+                        <div className="bg-white dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-800 rounded-t-2xl flex justify-between items-center sticky top-0 z-10 shrink-0">
                             <div>
-                                <h2 className="text-xl font-black text-slate-800 tracking-tight">Analytics Avançado</h2>
-                                <p className="text-xs text-slate-500">Visão Geral do Funil V3</p>
+                                <h2 className="text-xl font-black text-slate-800 dark:text-white tracking-tight italic">IQ Insights</h2>
+                                <p className="text-xs text-slate-500">Inteligência Médica Elmeco</p>
                             </div>
-                            <div className="flex gap-2 flex-wrap sm:flex-nowrap justify-end items-center mt-2 sm:mt-0">
-                                <button onClick={gerarPDF} className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-xl text-[11px] font-bold flex items-center shadow-sm active:scale-95 transition-all w-fit">
-                                    <FileText size={14} className="mr-1.5 text-elmeco-navy" /> Gerar PDF
+                            <div className="flex gap-2">
+                                <button onClick={gerarPDF} className="p-2.5 bg-brand-teal/10 text-brand-teal rounded-xl hover:bg-brand-teal/20 transition-all">
+                                    <FileText size={18} />
                                 </button>
-                                <button onClick={exportarPNG} className="bg-slate-800 text-white px-3 py-2 rounded-xl text-[11px] font-bold flex items-center shadow-md active:scale-95 transition-all w-fit">
-                                    <Download size={14} className="mr-1.5" /> Exportar Flyer
-                                </button>
-                                <button onClick={onClose} className="p-2 h-[34px] w-[34px] flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors">
+                                <button onClick={onClose} className="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-xl">
                                     <X size={18} />
                                 </button>
                             </div>
                         </div>
 
-                        {/* View do Canvas Exportável */}
-                        <div className="flex-1 overflow-y-auto hide-scrollbar bg-slate-50 relative pb-10">
-                            <div ref={dashboardRef} className="p-5 flex flex-col gap-5 relative bg-slate-50">
+                        <div className="flex-1 overflow-y-auto hide-scrollbar bg-slate-50 dark:bg-slate-950 p-5 space-y-5">
+                            <div ref={dashboardRef} className="space-y-5 bg-slate-50 dark:bg-slate-950 p-1">
 
-                                {/* Marca d'água invisível a olho, clara no print */}
-                                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-200">
-                                    <span className="font-black text-slate-800 text-lg tracking-wider uppercase">Farma Tec.</span>
-                                    <span className="text-xs bg-slate-200 text-slate-600 px-2 rounded-md font-bold">Relatório Executivo</span>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-3">
-                                        <div className="flex items-center gap-1.5 text-slate-500 mb-1">
-                                            <Users size={14} className="text-blue-500" />
-                                            <span className="text-[10px] font-bold uppercase tracking-wide">Base Total</span>
-                                        </div>
-                                        <p className="text-2xl font-black text-slate-800">{totalMedicos}</p>
-                                    </div>
-
-                                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-3">
-                                        <div className="flex items-center gap-1.5 text-slate-500 mb-1">
-                                            <TrendingUp size={14} className="text-green-500" />
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Conversão</span>
-                                        </div>
-                                        <p className="text-2xl font-black text-green-600">{taxaConversao}%</p>
-                                    </div>
-                                </div>
-
-                                {/* Toggle Gráfico */}
-                                <button
-                                    onClick={() => setShowChart(!showChart)}
-                                    className="w-full bg-white border border-slate-200 rounded-xl p-3 flex justify-between items-center shadow-sm text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
-                                >
-                                    <span className="flex items-center gap-2">
-                                        Distribuição no Funil <span className="text-[10px] font-normal text-slate-400">(&gt; {ativos} Parceiros Ativos)</span>
-                                    </span>
-                                    {showChart ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                                </button>
-
-                                {/* Funil Chart */}
-                                <AnimatePresence>
-                                    {showChart && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            className="overflow-hidden"
-                                        >
-                                            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 pt-5 mt-1">
-                                                <div className="h-36 w-full">
-                                                    <ResponsiveContainer width="100%" height="100%">
-                                                        <BarChart data={chartData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-                                                            <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                                                            <YAxis hide />
-                                                            <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ fontSize: '11px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-                                                            <Bar dataKey="quantidade" radius={[4, 4, 4, 4]} barSize={28}>
-                                                                {chartData.map((_, index) => (
-                                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                                ))}
-                                                            </Bar>
-                                                        </BarChart>
-                                                    </ResponsiveContainer>
-                                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal">
+                                                <TrendingUp size={16} />
                                             </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-
-                                {/* Additional Stats / Highlights Row */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 flex justify-between items-center">
-                                        <div>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Histórico Vivo</p>
-                                            <p className="text-sm font-bold text-slate-700 mt-0.5">{duvidasTotal} anotações</p>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Meta Mensal</span>
                                         </div>
+                                        <p className="text-3xl font-black text-brand-dark dark:text-white">
+                                            {medicos.filter(m => m.logVisitas.length > 0).length}<span className="text-slate-300 text-lg font-normal">/50</span>
+                                        </p>
+                                        <p className="text-[10px] text-slate-500 mt-1">Visitas vs Meta Ariani</p>
                                     </div>
-                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 flex justify-between items-center">
-                                        <div>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Última Refrescada</p>
-                                            <p className="text-sm font-bold text-slate-700 mt-0.5 uppercase">{new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</p>
+
+                                    <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                <Users size={16} />
+                                            </div>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ranking</span>
                                         </div>
+                                        <p className="text-3xl font-black text-primary">TOP 50</p>
+                                        <p className="text-[10px] text-slate-500 mt-1">Carteira SP Unificada</p>
                                     </div>
                                 </div>
 
+                                <div className="bg-brand-dark dark:bg-slate-900 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden text-left">
+                                    <div className="relative z-10">
+                                        <span className="text-[10px] font-black text-brand-teal uppercase tracking-[0.2em]">Consultora Responsável</span>
+                                        <h3 className="text-xl font-bold mt-1 mb-4 italic line-clamp-1">Ariani - Performance SP</h3>
+                                        <div className="flex items-center gap-4">
+                                            <div>
+                                                <p className="text-2xl font-black text-brand-teal">{stats.frequenciaVisitacao}</p>
+                                                <p className="text-[10px] text-slate-400 uppercase font-bold">Total Interações</p>
+                                            </div>
+                                            <div className="w-px h-8 bg-slate-700" />
+                                            <div>
+                                                <p className="text-2xl font-black text-white">{totalMedicos}</p>
+                                                <p className="text-[10px] text-slate-400 uppercase font-bold">Médicos na Carteira</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                                        <TrendingUp size={120} />
+                                    </div>
+                                </div>
+
+                                <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Evolução do Funil</h4>
+                                    <div className="h-40 w-full">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={chartData}>
+                                                <XAxis dataKey="name" hide />
+                                                <Tooltip
+                                                    cursor={{ fill: 'transparent' }}
+                                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                                                />
+                                                <Bar dataKey="quantidade" radius={[10, 10, 10, 10]} barSize={40}>
+                                                    {chartData.map((_, index) => (
+                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    ))}
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                    <div className="flex justify-between mt-4">
+                                        {chartData.map((d, i) => (
+                                            <div key={i} className="text-center">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{d.name.split(' ')[0]}</p>
+                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{d.quantidade}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
+
+                            <button onClick={exportarPNG} className="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+                                <Download size={18} /> Exportar Painel de Visita
+                            </button>
                         </div>
                     </motion.div>
                 </div>

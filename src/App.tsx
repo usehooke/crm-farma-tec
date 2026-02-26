@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useMedicos, type Medico } from './hooks/useMedicos';
-import { FormMedico } from './components/FormMedico';
-import { HistoricoModal } from './components/HistoricoModal';
-import { DashboardModal } from './components/DashboardModal';
+import { useMedicos } from './hooks/useMedicos';
 import { Plus } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { MainLayout } from './components/MainLayout';
@@ -11,8 +8,9 @@ import { Documentos } from './components/Documentos';
 import { Configuracoes } from './components/Configuracoes';
 import { Agendamento } from './components/Agendamento';
 import { SplashScreen } from './components/SplashScreen';
+import { Protocolos } from './components/Protocolos';
 import type { ViewName } from './components/MainLayout';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
@@ -21,8 +19,13 @@ import { Auth } from './views/Auth';
 import { fazerPullDaNuvem } from './services/syncService';
 import { ConfigErrorScreen } from './components/ConfigErrorScreen';
 
-function App() {
-  const { medicos, adicionarMedico, atualizarMedico, adicionarLog } = useMedicos();
+import { ConfigProvider, useConfig } from './context/ConfigContext';
+import { ModalProvider, useModal } from './context/ModalContext';
+
+function AppContent() {
+  const { loadingConfig, setUser } = useConfig();
+  const { openModal } = useModal();
+  const { medicos, atualizarMedico, adicionarLog } = useMedicos();
 
   const [currentView, setCurrentView] = useState<ViewName>('home');
   const [showSplash, setShowSplash] = useState(true);
@@ -35,12 +38,11 @@ function App() {
     if (!hasValidConfig) return;
 
     const constSubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user); // Sincroniza com o ConfigContext para isolar LocalStorage
       if (user) {
         // Usuário logado: Garante que os dados mais recentes são baixados
         try {
           await fazerPullDaNuvem(user.uid);
-          // Como alteramos o LocalStorage diretamente pelo service, um window.location.reload() 
-          // ou apenas forçar o state do PWA poderia ser feito. No mínimo gravamos o usuário logado para liberar tela.
         } catch (e) {
           console.error("Erro ao puxar dados nativos da nuvem", e);
         }
@@ -52,17 +54,7 @@ function App() {
     return () => constSubscribe();
   }, []);
 
-  // Modals
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
-  const [medicoEditando, setMedicoEditando] = useState<Medico | null>(null);
-
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [medicoHistorico, setMedicoHistorico] = useState<Medico | null>(null);
-
-
-
-  const tabs: Medico['status'][] = ['Prospecção', 'Apresentada', 'Parceiro Ativo', 'Monitoramento'];
+  const tabs: typeof medicos[0]['status'][] = ['Prospecção', 'Apresentada', 'Parceiro Ativo', 'Monitoramento'];
 
   useEffect(() => {
     // Splash screen timer
@@ -70,36 +62,44 @@ function App() {
     return () => clearTimeout(timer);
   }, [currentView]); // Re-fetch when view changes
 
-  // --- UI Helpers ---
-  const openNewForm = () => {
-    setMedicoEditando(null);
-    setIsFormOpen(true);
-  };
-
-  const openHistory = (medico: Medico) => {
-    setMedicoHistorico(medico);
-    setIsHistoryOpen(true);
-  };
-
-  const handleSaveForm = (dados: Omit<Medico, 'id' | 'logVisitas'>) => {
-    if (medicoEditando) {
-      atualizarMedico(medicoEditando.id, dados);
-    } else {
-      adicionarMedico({ ...dados, logVisitas: [] });
-    }
-  };
-
   if (!hasValidConfig) {
     return <ConfigErrorScreen />;
   }
 
-  if (isAuthLoading) {
+  if (isAuthLoading || loadingConfig) {
     return (
-      <div className="min-h-screen bg-brand-white flex justify-center items-center">
-        {/* Simple Loader Placeholder */}
-        <div className="w-12 h-12 rounded-2xl bg-brand-teal flex items-center justify-center text-white font-black text-2xl animate-pulse">
-          IQ
-        </div>
+      <div className="min-h-screen bg-brand-white flex flex-col justify-center items-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-24 h-24 rounded-[32px] bg-surface shadow-[10px_10px_20px_#e5e5e5,-10px_-10px_20px_#ffffff] flex items-center justify-center relative overflow-hidden"
+        >
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0]
+            }}
+            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            className="w-12 h-12 rounded-2xl bg-brand-teal flex items-center justify-center text-white font-black text-2xl shadow-lg z-10"
+          >
+            IQ
+          </motion.div>
+
+          {/* Soft Ripple effect */}
+          <motion.div
+            animate={{ scale: [1, 2], opacity: [0.3, 0] }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeOut" }}
+            className="absolute inset-0 bg-brand-teal/10 rounded-full"
+          />
+        </motion.div>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-6 text-slate-400 font-bold text-xs uppercase tracking-[0.2em]"
+        >
+          Iniciando FarmaclinIQ
+        </motion.p>
       </div>
     );
   }
@@ -119,56 +119,34 @@ function App() {
       <MainLayout activeTab={currentView} setActiveTab={setCurrentView}>
         {/* Dynamic View Routing */}
         {currentView === 'home' && (
-          <ViewHome medicos={medicos} atualizarMedico={atualizarMedico} openHistory={openHistory} tabs={tabs} />
+          <ViewHome medicos={medicos} atualizarMedico={atualizarMedico} openHistory={(m) => openModal('historico', m)} tabs={tabs} />
         )}
         {currentView === 'agenda' && <Agendamento medicos={medicos} adicionarLog={adicionarLog} />}
         {currentView === 'documentos' && <Documentos />}
+        {currentView === 'protocolos' && <Protocolos />}
         {currentView === 'configuracoes' && <Configuracoes />}
       </MainLayout>
 
       {/* FAB Oculto temporariamente, as Views devem prover seus botões de ação (Ex: Agendamento FAB) ou ViewHome */}
       {currentView === 'home' && (
         <button
-          onClick={openNewForm}
+          onClick={() => openModal('form')}
           className="fixed bottom-24 right-6 bg-primary hover:bg-opacity-90 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-[4px_4px_10px_#e2e8f0,-4px_-4px_10px_#ffffff] transition-all active:scale-95 z-40"
           title="Novo Registro"
         >
           <Plus size={28} />
         </button>
       )}
-
-      {/* Modals mantidos no root */}
-      <FormMedico
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSave={handleSaveForm}
-        medicoEditando={medicoEditando}
-      />
-
-      <HistoricoModal
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-        medico={medicoHistorico}
-        onAddLog={(id, nota) => {
-          adicionarLog(id, nota);
-          if (medicoHistorico) {
-            setMedicoHistorico({
-              ...medicoHistorico,
-              logVisitas: [{ id: crypto.randomUUID(), nota, data: new Date().toISOString() }, ...medicoHistorico.logVisitas],
-              ultimoContato: new Date().toISOString()
-            });
-          }
-        }}
-      />
-
-      <DashboardModal
-        isOpen={isDashboardOpen}
-        onClose={() => setIsDashboardOpen(false)}
-        medicos={medicos}
-        tabs={tabs}
-      />
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ConfigProvider>
+      <ModalProvider>
+        <AppContent />
+      </ModalProvider>
+    </ConfigProvider>
+  );
+}

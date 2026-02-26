@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 
 export const importarPlanilhaMedicos = async (
     ficheiro: File,
+    uid: string,
     onSuccess: (quantidade: number) => void,
     onError: (erro: string) => void
 ) => {
@@ -16,33 +17,60 @@ export const importarPlanilhaMedicos = async (
             const primeiraFolha = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[primeiraFolha];
 
-            // Converte a folha para um array de objetos JSON
-            const linhasRaw: any[] = XLSX.utils.sheet_to_json(worksheet);
+            // Converte a folha para um array de objetos JSON, pulando a primeira linha de título
+            const linhasRaw: any[] = XLSX.utils.sheet_to_json(worksheet, { range: 1 });
 
             if (linhasRaw.length === 0) {
                 throw new Error("A folha de cálculo está vazia.");
             }
 
             // Mapeamento e Sanitização dos Dados
-            const novosMedicos = linhasRaw.map((linha) => ({
-                id: crypto.randomUUID(),
-                nome: linha.Nome || linha.NOME || linha.nome || 'Sem Nome',
-                especialidade: linha.Especialidade || linha.ESPECIALIDADE || 'Geral',
-                telefone: linha.Telefone || linha.TELEFONE || '',
-                status: 'Prospecção',
-                localizacao: 'N/A', // Campos obrigatórios pela interface Medico
-                tags: linha.Tags ? linha.Tags.split(',').map((t: string) => t.trim()) : ['Novo'],
-                ultimoContato: new Date().toISOString(),
-                logVisitas: [] // Inicializa o histórico vazio para o cálculo de Follow-up
-            }));
+            const novosMedicos = linhasRaw.map((linha) => {
+                const nome = linha.CLIENTE || linha.Cliente || linha.Nome || linha.NOME || linha.nome || 'Sem Nome';
 
-            // Fundir com os dados existentes no LocalStorage da V2
-            const medicosExistentesRaw = localStorage.getItem('@FarmaTec:medicos');
+                // Lógica de Telefone Inteligente (55 + DDD + NÚMERO)
+                let telFinal = '';
+                const ddd = String(linha.DDD || '').replace(/\D/g, '');
+                const num = String(linha['NÚMERO'] || linha.Numero || linha.numero || '').replace(/\D/g, '');
+                const telSimples = String(linha.Telefone || linha.TELEFONE || '').replace(/\D/g, '');
+
+                if (ddd && num) {
+                    telFinal = `55${ddd}${num}`;
+                } else if (telSimples) {
+                    // Se já tiver Telefone, mas não começar com 55, adicionamos
+                    telFinal = telSimples.startsWith('55') ? telSimples : `55${telSimples}`;
+                }
+
+                // Localização consolidada
+                const cidade = linha.CIDADE || linha.Cidade || '';
+                const bairro = linha.BAIRRO || linha.Bairro || '';
+                const localizacao = [cidade, bairro].filter(Boolean).join(' - ') || 'N/A';
+
+                return {
+                    id: crypto.randomUUID(),
+                    nome: nome,
+                    especialidade: linha.Especialidade || linha.ESPECIALIDADE || 'Geral',
+                    telefone: telFinal,
+                    status: 'Prospecção',
+                    localizacao: localizacao,
+                    tags: linha.Tags ? linha.Tags.split(',').map((t: string) => t.trim()) : ['Novo'],
+                    ultimoContato: new Date().toISOString(),
+                    logVisitas: [],
+                    consultor: 'Ariani', // Unificação de Carteira
+                    ownerId: uid
+                };
+            });
+
+            // Chave dinâmica baseada no UID para isolamento
+            const STORAGE_KEY = `@FarmaClinIQ:${uid}:medicos`;
+
+            // Fundir com os dados existentes no LocalStorage isolado
+            const medicosExistentesRaw = localStorage.getItem(STORAGE_KEY);
             const medicosExistentes = medicosExistentesRaw ? JSON.parse(medicosExistentesRaw) : [];
 
             const baseAtualizada = [...medicosExistentes, ...novosMedicos];
 
-            localStorage.setItem('@FarmaTec:medicos', JSON.stringify(baseAtualizada));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(baseAtualizada));
 
             onSuccess(novosMedicos.length);
         } catch (error: any) {

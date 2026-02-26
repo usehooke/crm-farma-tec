@@ -2,25 +2,55 @@ import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, FileDown, UploadCloud } from 'lucide-react';
 import { importarPlanilhaMedicos } from '../services/excelService';
+import { fazerPushParaNuvem } from '../services/syncService';
 import { gerarRelatorioPDF } from '../services/pdfService';
 import { FunilChart } from './FunilChart';
+import { useConfig } from '../context/ConfigContext';
+import { toast } from 'sonner';
 
 export const Documentos = () => {
+    const { user } = useConfig();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
+    const [isSincronizando, setIsSincronizando] = useState(false);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        if (!user) {
+            setMensagem({ texto: "Você precisa estar logado para importar dados.", tipo: 'erro' });
+            return;
+        }
+
         importarPlanilhaMedicos(
             file,
-            (qtd) => {
-                setMensagem({ texto: `${qtd} médicos importados com sucesso!`, tipo: 'sucesso' });
+            user.uid,
+            async (qtd: number) => {
+                setMensagem({ texto: `${qtd} médicos importados localmente. Iniciando sincronização...`, tipo: 'sucesso' });
                 if (fileInputRef.current) fileInputRef.current.value = ''; // Limpa o input
-                setTimeout(() => setMensagem(null), 4000); // Remove o aviso após 4 segundos
+
+                // Inicia Sincronização com Nuvem
+                setIsSincronizando(true);
+                try {
+                    const STORAGE_KEY = `@FarmaClinIQ:${user.uid}:medicos`;
+                    const medicosRaw = localStorage.getItem(STORAGE_KEY) || '[]';
+                    const medicosAtualizados = JSON.parse(medicosRaw);
+
+                    await fazerPushParaNuvem(user.uid, medicosAtualizados);
+
+                    setMensagem({ texto: "Importação concluída! Seus dados estão protegidos e sincronizados.", tipo: 'sucesso' });
+                    toast.success('Importação concluída e sincronizada!', { icon: '✅' });
+                } catch (error) {
+                    console.error("Erro na sincronização:", error);
+                    setMensagem({ texto: "Importado localmente, mas falhou ao subir para nuvem.", tipo: 'erro' });
+                    toast.error('Erro ao sincronizar com a nuvem.');
+                } finally {
+                    setIsSincronizando(false);
+                    setTimeout(() => setMensagem(null), 6000);
+                }
             },
-            (erro) => {
+            (erro: string) => {
                 setMensagem({ texto: erro, tipo: 'erro' });
                 setTimeout(() => setMensagem(null), 4000);
             }
@@ -51,8 +81,6 @@ export const Documentos = () => {
             )}
 
             <div className="space-y-6">
-
-                {/* O novo Dashboard Visual */}
                 <FunilChart />
 
                 {/* Bloco 1: Importação de Planilha (Excel) */}
@@ -72,7 +100,6 @@ export const Documentos = () => {
                         Selecionar Ficheiro
                     </button>
 
-                    {/* Input oculto acionado pelo botão Neumórfico */}
                     <input
                         type="file"
                         accept=".xlsx, .xls, .csv"
@@ -99,6 +126,26 @@ export const Documentos = () => {
                         Extrair em PDF
                     </button>
                 </div>
+
+                {/* Loader Neumórfico de Sincronização */}
+                {isSincronizando && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-brand-white/80 backdrop-blur-sm px-6"
+                    >
+                        <div className="bg-surface p-8 rounded-3xl shadow-[20px_20px_60px_#bebebe,-20px_-20px_60px_#ffffff] flex flex-col items-center text-center max-w-sm w-full">
+                            <div className="w-16 h-16 rounded-full border-4 border-slate-100 border-t-primary animate-spin mb-6" />
+                            <h3 className="text-xl font-bold text-brand-dark mb-2">Quase Pronto!</h3>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                                Sincronizando novos médicos com o cofre seguro da FarmaClinIQ...
+                            </p>
+                            <div className="mt-6 px-4 py-2 bg-primary/10 rounded-full">
+                                <span className="text-xs font-black text-primary uppercase tracking-[0.2em]">Enviando Dados</span>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
 
             </div>
         </motion.div>

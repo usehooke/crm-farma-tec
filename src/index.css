@@ -24,6 +24,18 @@
     color: var(--color-slate-800);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .dark body {
+    background-color: #020617; /* slate-950 */
+    color: #f8fafc; /* slate-50 */
+  }
+
+  .dark {
+    --color-surface: #0f172a; /* slate-900 */
+    --color-brand-white: #0f172a;
+    --color-brand-dark: #f8fafc;
   }
 }
 

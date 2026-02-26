@@ -1,42 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Calendar, Database, ShieldCheck, LogOut, Tag, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { auth } from '../services/firebaseConfig';
-import { fazerPushParaNuvem } from '../services/syncService';
+import { fazerPushParaNuvem, importarCarteiraTop50 } from '../services/syncService';
 import { signOut } from 'firebase/auth';
+import { useConfig, STORAGE_KEY_MEDICOS } from '../context/ConfigContext';
 
 export const Configuracoes = () => {
-    const [nome, setNome] = useState('');
-    const [googleConectado, setGoogleConectado] = useState(false);
+    const {
+        nomeUsuario,
+        setNomeUsuario,
+        vipTags,
+        salvarVipTags,
+        googleConectado,
+        setGoogleConectado,
+        isDarkMode,
+        setIsDarkMode
+    } = useConfig();
+
     const [isSyncing, setIsSyncing] = useState(false);
-    const [vipTags, setVipTags] = useState<{ id: string, name: string, color: string }[]>([]);
     const [novaTagNome, setNovaTagNome] = useState('');
 
-    const defaultTags = [
-        { id: '1', name: 'Prescritor Alto', color: 'bg-green-500' },
-        { id: '2', name: 'Potencial', color: 'bg-blue-500' },
-        { id: '3', name: 'KOL', color: 'bg-purple-500' }
-    ];
-
-    // Simula a checagem inicial do token no LocalStorage
-    useEffect(() => {
-        const token = localStorage.getItem('@farmaTec:google_api_key');
-        const nomeSalvo = localStorage.getItem('@FarmaClinIQ:user_nome');
-        const tagsSalvas = localStorage.getItem('@FarmaClinIQ:vip_tags');
-
-        if (token) setGoogleConectado(true);
-        if (nomeSalvo) setNome(nomeSalvo);
-        if (tagsSalvas) {
-            setVipTags(JSON.parse(tagsSalvas));
-        } else {
-            setVipTags(defaultTags);
-        }
-    }, []);
-
     const handleSalvarPerfil = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setNome(e.target.value);
-        localStorage.setItem('@FarmaClinIQ:user_nome', e.target.value);
+        setNomeUsuario(e.target.value);
 
         // Também salva no formato antigo para retrocompatibilidade se necessário
         const profileStr = localStorage.getItem('@farmaTec:profile') || '{}';
@@ -45,16 +32,11 @@ export const Configuracoes = () => {
         localStorage.setItem('@farmaTec:profile', JSON.stringify(profile));
     };
 
-    const salvarTags = (novasTags: typeof vipTags) => {
-        setVipTags(novasTags);
-        localStorage.setItem('@FarmaClinIQ:vip_tags', JSON.stringify(novasTags));
-    };
-
     const handleAtualizarNomeTag = (id: string, novoNome: string) => {
         const tagsAtualizadas = vipTags.map(tag =>
             tag.id === id ? { ...tag, name: novoNome } : tag
         );
-        salvarTags(tagsAtualizadas);
+        salvarVipTags(tagsAtualizadas);
     };
 
     const handleAdicionarTag = () => {
@@ -70,7 +52,7 @@ export const Configuracoes = () => {
             color: corAleatoria
         };
 
-        salvarTags([...vipTags, novaTag]);
+        salvarVipTags([...vipTags, novaTag]);
         setNovaTagNome('');
     };
 
@@ -80,7 +62,7 @@ export const Configuracoes = () => {
             return;
         }
         const tagsAtualizadas = vipTags.filter(tag => tag.id !== id);
-        salvarTags(tagsAtualizadas);
+        salvarVipTags(tagsAtualizadas);
     };
 
     const handleGoogleLogin = () => {
@@ -125,7 +107,7 @@ export const Configuracoes = () => {
 
         setIsSyncing(true);
         try {
-            const medicosRaw = localStorage.getItem('@FarmaClinIQ:medicos') || localStorage.getItem('@FarmaTec:medicos') || '[]';
+            const medicosRaw = localStorage.getItem(STORAGE_KEY_MEDICOS) || '[]';
             const medicos = JSON.parse(medicosRaw);
 
             await fazerPushParaNuvem(auth.currentUser.uid, medicos);
@@ -138,6 +120,21 @@ export const Configuracoes = () => {
             toast.error('Falha ao sincronizar com a nuvem.');
         } finally {
             setIsSyncing(false);
+        }
+    };
+
+    const handleImportarVip = async () => {
+        if (!auth.currentUser) return;
+
+        const toastId = toast.loading('Processando Carga VIP SP...');
+        const result = await importarCarteiraTop50(auth.currentUser.uid);
+
+        if (result.success) {
+            toast.success(`✅ ${result.count} Médicos importados com sucesso!`, { id: toastId });
+            // Força um pull para atualizar o estado local
+            window.location.reload(); // Forma mais simples de garantir que o ConfigContext recarregue tudo da nuvem/local
+        } else {
+            toast.error('Erro ao importar base VIP.', { id: toastId });
         }
     };
 
@@ -172,7 +169,7 @@ export const Configuracoes = () => {
                         <label className="block text-xs font-semibold text-slate-500 mb-2">NOME DE EXIBIÇÃO</label>
                         <input
                             type="text"
-                            value={nome}
+                            value={nomeUsuario}
                             onChange={handleSalvarPerfil}
                             placeholder="Ex: Ariani"
                             className="w-full bg-transparent border-b border-slate-300 pb-2 text-brand-dark font-medium outline-none focus:border-primary transition-colors"
@@ -214,6 +211,33 @@ export const Configuracoes = () => {
                                 Conectar Conta
                             </button>
                         )}
+                    </div>
+                </section>
+
+                {/* Bloco 2.2: Personalização (Tema) */}
+                <section className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck size={18} className="text-primary" />
+                            <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide">Aparência</h2>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between p-3 bg-brand-white rounded-xl shadow-inner">
+                        <div className="flex flex-col">
+                            <span className="text-sm font-bold text-brand-dark">Tema Escuro</span>
+                            <span className="text-xs text-slate-500">Reduz o cansaço visual</span>
+                        </div>
+
+                        <button
+                            onClick={() => setIsDarkMode(!isDarkMode)}
+                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out ${isDarkMode ? 'bg-brand-teal' : 'bg-slate-300'}`}
+                        >
+                            <motion.div
+                                className="w-4 h-4 bg-white rounded-full shadow-sm"
+                                animate={{ x: isDarkMode ? 24 : 0 }}
+                            />
+                        </button>
                     </div>
                 </section>
 
@@ -286,6 +310,19 @@ export const Configuracoes = () => {
                         )}
                         {isSyncing ? 'Sincronizando...' : 'Sincronizar Agora'}
                     </button>
+
+                    {/* Botão Secreto Ariani */}
+                    {(auth.currentUser?.email === 'ariani@elmeco.com.br' || auth.currentUser?.email === 'nando@hooke.com.br' || auth.currentUser?.uid === 'MnXg91W7xwNGqAKDE3DzC6dIitg1') && (
+                        <div className="mt-8 pt-6 border-t border-slate-200">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Acesso Administrativo</p>
+                            <button
+                                onClick={handleImportarVip}
+                                className="w-full py-4 bg-brand-white text-brand-teal border-2 border-brand-teal/20 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm hover:bg-brand-teal/5 transition-all flex items-center justify-center gap-2"
+                            >
+                                <ShieldCheck size={16} /> Importar Planilha SP (Vip)
+                            </button>
+                        </div>
+                    )}
                 </section>
 
                 {/* Bloco 4: Segurança */}

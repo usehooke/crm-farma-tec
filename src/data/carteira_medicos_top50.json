@@ -1,0 +1,504 @@
+[
+    {
+        "nome": "Dr. Alessandro S. P. - Ginecologia",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990001",
+        "localizacao": "Jardins, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP",
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Beatriz Oliveira",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990002",
+        "localizacao": "Itaim Bibi, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Carlos Eduardo M.",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990003",
+        "localizacao": "Pinheiros, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dra. Daniela Santos",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990004",
+        "localizacao": "Vila Mariana, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dr. Evaldo Ferreira",
+        "especialidade": "Urologia",
+        "telefone": "5511999990005",
+        "localizacao": "Cerqueira César, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Fernanda Lima",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990006",
+        "localizacao": "Morumbi, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Gabriel Costa",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990007",
+        "localizacao": "Moema, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Helena Martins",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990008",
+        "localizacao": "Perdizes, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dr. Igor Rodrigues",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990009",
+        "localizacao": "Santana, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Juliana Alves",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990010",
+        "localizacao": "Tatuapé, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dr. Kleber Souza",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990011",
+        "localizacao": "Bela Vista, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Larissa Gomes",
+        "especialidade": "Urologia",
+        "telefone": "5511999990012",
+        "localizacao": "Lapa, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Marcelo Vieira",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990013",
+        "localizacao": "Consolação, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dra. Natália Silva",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990014",
+        "localizacao": "Ipiranga, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Otávio Mendes",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990015",
+        "localizacao": "Butantã, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Patrícia Antunes",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990016",
+        "localizacao": "Saúde, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dr. Ricardo Santos",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990017",
+        "localizacao": "Vila Olímpia, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Simone Rocha",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990018",
+        "localizacao": "Campo Belo, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dr. Tiago Bernardes",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990019",
+        "localizacao": "Santo Amaro, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Úrsula Fontes",
+        "especialidade": "Urologia",
+        "telefone": "5511999990020",
+        "localizacao": "Aclimação, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Vinícius Almeida",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990021",
+        "localizacao": "Liberdade, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dra. Waleska Paz",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990022",
+        "localizacao": "Higienópolis, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP",
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Xerxes Magalhães",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990023",
+        "localizacao": "Paraíso, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Yara Lemos",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990024",
+        "localizacao": "Vila Madalena, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Zeca Affonso",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990025",
+        "localizacao": "Brooklin, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dra. Adriana Borges",
+        "especialidade": "Urologia",
+        "telefone": "5511999990026",
+        "localizacao": "Jaguaré, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Bruno Cassiano",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990027",
+        "localizacao": "Pacaembu, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dra. Camila Nogueira",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990028",
+        "localizacao": "Cambuci, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Douglas Xavier",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990029",
+        "localizacao": "Limão, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Elaine Costa",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990030",
+        "localizacao": "Tremembé, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dr. Fábio Arruda",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990031",
+        "localizacao": "Casa Verde, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Gisele Bund",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990032",
+        "localizacao": "Jaçanã, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dr. Hugo Souza",
+        "especialidade": "Urologia",
+        "telefone": "5511999990033",
+        "localizacao": "Mandaqui, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Isabela Neves",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990034",
+        "localizacao": "Tucuruvi, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Jorge Amado",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990035",
+        "localizacao": "Pirituba, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dra. Kelly Key",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990036",
+        "localizacao": "Jaraguá, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dr. Leandro Karnal",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990037",
+        "localizacao": "Anhanguera, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Margareth Tatcher",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990038",
+        "localizacao": "Raposo Tavares, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Nelson Mandela",
+        "especialidade": "Urologia",
+        "telefone": "5511999990039",
+        "localizacao": "Rio Pequeno, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dra. Olga Benário",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990040",
+        "localizacao": "Heliópolis, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dr. Paulo Freire",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990041",
+        "localizacao": "Capão Redondo, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Quitéria Chagas",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990042",
+        "localizacao": "Grajaú, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Roberto Carlos",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990043",
+        "localizacao": "Interlagos, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dra. Sandra Bullock",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990044",
+        "localizacao": "Jabaquara, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dr. Tarcísio Meira",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990045",
+        "localizacao": "Sacomã, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Viviane Araújo",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990046",
+        "localizacao": "Ipiranga, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dr. Wilson Simoninha",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990047",
+        "localizacao": "Vila Prudente, SP",
+        "status": "Prospecção",
+        "tags": [
+            "Forte"
+        ]
+    },
+    {
+        "nome": "Dra. Xuxa Meneghel",
+        "especialidade": "Urologia",
+        "telefone": "5511999990048",
+        "localizacao": "Mooca, SP",
+        "status": "Prospecção",
+        "tags": [
+            "VIP"
+        ]
+    },
+    {
+        "nome": "Dr. Yuri Gagarin",
+        "especialidade": "Ginecologia",
+        "telefone": "5511999990049",
+        "localizacao": "Belém, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    },
+    {
+        "nome": "Dra. Zilda Arns",
+        "especialidade": "Endocrinologia",
+        "telefone": "5511999990050",
+        "localizacao": "Brás, SP",
+        "status": "Prospecção",
+        "tags": [
+            "SP"
+        ]
+    }
+]

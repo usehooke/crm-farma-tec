@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Medico } from '../hooks/useMedicos';
+import { useConfig } from '../context/ConfigContext';
 import { X } from 'lucide-react';
 
 interface FormMedicoProps {
@@ -11,11 +12,7 @@ interface FormMedicoProps {
 
 const STATUS_OPCIONAL = ['Prospecção', 'Apresentada', 'Parceiro Ativo', 'Monitoramento'] as const;
 
-export const DEFAULT_TAGS = [
-    { id: '1', name: 'Prescritor Alto', color: 'bg-green-500' },
-    { id: '2', name: 'Potencial', color: 'bg-blue-500' },
-    { id: '3', name: 'KOL', color: 'bg-purple-500' }
-];
+// DEFAULT_TAGS movido para ConfigContext.tsx
 
 export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedicoProps) {
     const [formData, setFormData] = useState<Omit<Medico, 'id' | 'logVisitas'>>({
@@ -27,42 +24,7 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
         ultimoContato: new Date().toISOString(),
         tags: []
     });
-    const [availableTags, setAvailableTags] = useState<{ id: string, name: string, color: string }[]>([]);
-
-    useEffect(() => {
-        if (medicoEditando) {
-            setFormData({
-                nome: medicoEditando.nome,
-                especialidade: medicoEditando.especialidade,
-                localizacao: medicoEditando.localizacao,
-                telefone: medicoEditando.telefone,
-                status: medicoEditando.status,
-                ultimoContato: medicoEditando.ultimoContato,
-                tags: medicoEditando.tags || [],
-            });
-        } else {
-            setFormData({
-                nome: '',
-                especialidade: '',
-                localizacao: '',
-                telefone: '',
-                status: 'Prospecção',
-                ultimoContato: new Date().toISOString(),
-                tags: [],
-            });
-        }
-    }, [medicoEditando, isOpen]);
-
-    useEffect(() => {
-        if (isOpen) {
-            const savedTags = localStorage.getItem('@FarmaClinIQ:vip_tags');
-            if (savedTags) {
-                setAvailableTags(JSON.parse(savedTags));
-            } else {
-                setAvailableTags(DEFAULT_TAGS);
-            }
-        }
-    }, [isOpen]);
+    const { vipTags } = useConfig();
 
     const toggleTag = (tagId: string) => {
         setFormData(prev => {
@@ -172,7 +134,7 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-2">Classificação VIP</label>
                         <div className="flex flex-wrap gap-2">
-                            {availableTags.map(tag => {
+                            {vipTags.map(tag => {
                                 const isSelected = formData.tags?.includes(tag.id);
                                 return (
                                     <button

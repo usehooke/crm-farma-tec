@@ -10,7 +10,7 @@ export const FunilChart = () => {
 
     useEffect(() => {
         // 1. Busca os dados reais do dispositivo
-        const medicosRaw = localStorage.getItem('@FarmaTec:medicos'); // Ajustado para chave correta
+        const medicosRaw = localStorage.getItem('@FarmaClinIQ:medicos'); // Chave oficial v2.0
         if (medicosRaw) {
             const medicos = JSON.parse(medicosRaw);
 
