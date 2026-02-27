@@ -18,7 +18,7 @@ export function useGoogleCalendar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        const configStr = localStorage.getItem('@farmaTec:googleConfig');
+        const configStr = localStorage.getItem('@FarmaClinQI:googleConfig');
         if (!configStr) return;
 
         const config = JSON.parse(configStr);
@@ -130,3 +130,4 @@ export function useGoogleCalendar() {
         syncVisitToGoogle
     };
 }
+

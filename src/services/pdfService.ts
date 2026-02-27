@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 
 export const gerarRelatorioPDF = () => {
     // 1. Busca os dados consolidados do LocalStorage
-    const medicosRaw = localStorage.getItem('@FarmaTec:medicos'); // Mantendo a chave raiz do array principal
+    const medicosRaw = localStorage.getItem('@FarmaClinQI:medicos'); // Mantendo a chave raiz do array principal
     const nomeUsuario = localStorage.getItem('@FarmaClinIQ:user_nome') || 'Representante';
 
     if (!medicosRaw) {
@@ -77,3 +77,4 @@ export const gerarRelatorioPDF = () => {
     // 6. Download do Arquivo Offline
     doc.save(`FarmaClinIQ_Relatorio_${format(new Date(), 'dd-MM-yyyy')}.pdf`);
 };
+

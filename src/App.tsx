@@ -1,4 +1,4 @@
-console.log('App Iniciado');
+console.log('FarmaClinIQ carregado com sucesso');
 import { useState, useEffect } from 'react';
 import { useMedicos } from './hooks/useMedicos';
 import { Plus } from 'lucide-react';
@@ -122,7 +122,7 @@ const AppContent = () => {
           transition={{ delay: 0.5 }}
           className="mt-6 text-slate-400 font-bold text-xs uppercase tracking-[0.2em]"
         >
-          Iniciando FarmaclinIQ
+          Iniciando FarmaClinIQ
         </motion.p>
       </div>
     );

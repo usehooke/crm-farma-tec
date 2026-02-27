@@ -58,7 +58,7 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
         const doc = new jsPDF();
         doc.setFontSize(22);
         doc.setTextColor(19, 78, 74);
-        doc.text('Elmeco IQ Insights', 14, 22);
+        doc.text('FarmaClinQI Insights', 14, 22);
 
         doc.setFontSize(11);
         doc.setTextColor(100, 116, 139);
@@ -276,3 +276,4 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
         </AnimatePresence>
     );
 }
+

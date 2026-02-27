@@ -28,10 +28,10 @@ export const Configuracoes = () => {
         setNomeUsuario(e.target.value);
 
         // Também salva no formato antigo para retrocompatibilidade se necessário
-        const profileStr = localStorage.getItem('@farmaTec:profile') || '{}';
+        const profileStr = localStorage.getItem('@FarmaClinQI:profile') || '{}';
         const profile = JSON.parse(profileStr);
         profile.nome = e.target.value;
-        localStorage.setItem('@farmaTec:profile', JSON.stringify(profile));
+        localStorage.setItem('@FarmaClinQI:profile', JSON.stringify(profile));
     };
 
     const handleAtualizarNomeTag = (id: string, novoNome: string) => {
@@ -74,7 +74,7 @@ export const Configuracoes = () => {
         if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID') {
             toast.error('Client ID do Google não configurado no código.');
             // Para efeitos de demonstração no ambiente local, forçaremos a conexão:
-            localStorage.setItem('@farmaTec:google_api_key', 'mock_token_for_demo');
+            localStorage.setItem('@FarmaClinQI:google_api_key', 'mock_token_for_demo');
             setGoogleConectado(true);
             toast.success('Mock: Conta conectada com sucesso!');
             return;
@@ -87,7 +87,7 @@ export const Configuracoes = () => {
                 scope: 'https://www.googleapis.com/auth/calendar.events',
                 callback: (tokenResponse: any) => {
                     if (tokenResponse && tokenResponse.access_token) {
-                        localStorage.setItem('@farmaTec:google_api_key', tokenResponse.access_token);
+                        localStorage.setItem('@FarmaClinQI:google_api_key', tokenResponse.access_token);
                         setGoogleConectado(true);
                         toast.success('Conta conectada com sucesso!');
                     }
@@ -142,9 +142,9 @@ export const Configuracoes = () => {
 
     const handleLogoutApp = () => {
         signOut(auth).then(() => {
-            localStorage.removeItem('@farmaTec:google_api_key');
+            localStorage.removeItem('@FarmaClinQI:google_api_key');
             localStorage.removeItem('@FarmaClinIQ:user_nome');
-            localStorage.removeItem('@farmaTec:profile');
+            localStorage.removeItem('@FarmaClinQI:profile');
             // A redireção para Auth.tsx ocorrerá automaticamente via onAuthStateChanged no App.tsx
         });
     };
@@ -210,7 +210,7 @@ export const Configuracoes = () => {
                         {googleConectado ? (
                             <button
                                 onClick={() => {
-                                    localStorage.removeItem('@farmaTec:google_api_key');
+                                    localStorage.removeItem('@FarmaClinQI:google_api_key');
                                     setGoogleConectado(false);
                                     toast.info('Conta desconectada.');
                                 }}
@@ -327,7 +327,7 @@ export const Configuracoes = () => {
                     </button>
 
                     {/* Botão Secreto Ariani */}
-                    {(auth.currentUser?.email === 'ariani@elmeco.com.br' || auth.currentUser?.email === 'nando@hooke.com.br' || auth.currentUser?.uid === 'MnXg91W7xwNGqAKDE3DzC6dIitg1') && (
+                    {(auth.currentUser?.email === 'ariani@elmeco.com.br' || auth.currentUser?.email === 'nando@FarmaClinQI.com.br' || auth.currentUser?.uid === 'MnXg91W7xwNGqAKDE3DzC6dIitg1') && (
                         <div className="mt-8 pt-6 border-t border-slate-200">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Acesso Administrativo</p>
                             <button
@@ -358,3 +358,4 @@ export const Configuracoes = () => {
         </motion.div>
     );
 };
+

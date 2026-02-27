@@ -11,7 +11,7 @@ export interface VisitaEvent {
 
 export const syncVisitaGoogleCalendar = async (visita: VisitaEvent) => {
     // 1. Resgata o token de acesso salvo no LocalStorage (Configurações do Usuário)
-    const accessToken = localStorage.getItem('@farmaTec:google_api_key');
+    const accessToken = localStorage.getItem('@FarmaClinQI:google_api_key');
 
     if (!accessToken) {
         throw new Error('Usuário não autenticado no Google. Configure sua API KEY em Ajustes.');
@@ -61,3 +61,4 @@ export const syncVisitaGoogleCalendar = async (visita: VisitaEvent) => {
 
     return await response.json();
 };
+

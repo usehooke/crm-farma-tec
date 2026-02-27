@@ -42,8 +42,8 @@ export const STORAGE_KEY_MEDICOS = '@FarmaClinIQ:medicos';
 export const STORAGE_KEY_USER = '@FarmaClinIQ:user_nome';
 export const STORAGE_KEY_TAGS = '@FarmaClinIQ:vip_tags';
 export const STORAGE_KEY_PHONE = '@FarmaClinIQ:user_phone';
-export const STORAGE_KEY_GOOGLE = '@farmaTec:google_api_key';
-const LEGACY_KEY_MEDICOS = '@FarmaTec:medicos';
+export const STORAGE_KEY_GOOGLE = '@FarmaClinQI:google_api_key';
+const LEGACY_KEY_MEDICOS = '@FarmaClinQI:medicos';
 
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [nomeUsuario, setNomeUsuarioState] = useState('');
@@ -180,3 +180,4 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 };
 
 export const useConfig = () => useContext(ConfigContext);
+

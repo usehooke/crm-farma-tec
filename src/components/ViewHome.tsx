@@ -234,7 +234,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
             <QRCodeModal
                 isOpen={isQRModalOpen}
                 onClose={() => setIsQRModalOpen(false)}
-                whatsappLink={`https://wa.me/${telefoneUsuario.replace(/\D/g, '') || '5511999999999'}?text=${encodeURIComponent('Olá Ariani, salvei seu contato aqui da Elmeco IQ!')}`}
+                whatsappLink={`https://wa.me/${telefoneUsuario.replace(/\D/g, '') || '5511999999999'}?text=${encodeURIComponent('Olá Ariani, salvei seu contato aqui do FarmaClinIQ!')}`}
             />
         </motion.main>
     );

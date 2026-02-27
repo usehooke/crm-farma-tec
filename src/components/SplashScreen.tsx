@@ -26,9 +26,9 @@ export const SplashScreen = () => {
             >
                 <motion.div className="flex items-center gap-2">
                     {/* Logo Text */}
-                    <h1 className="text-5xl font-black tracking-tighter">
-                        <span className="text-brand-dark">Farma</span>
-                        <span className="text-brand-teal">ClinIQ</span>
+                    <h1 className="text-5xl font-bold tracking-tighter px-2">
+                        <span className="text-brand-dark">FarmaClin</span>
+                        <span className="text-brand-teal font-black">QI</span>
                     </h1>
 
                     {/* Plus Icon (Medical Cross) */}
@@ -63,7 +63,7 @@ export const SplashScreen = () => {
                 transition={{ delay: 1.2 }}
                 className="absolute bottom-10 text-[10px] font-bold uppercase tracking-[0.3em] text-brand-dark"
             >
-                Powered by Elmeco
+                FarmaClinIQ — Gestão Inteligente
             </motion.p>
         </motion.div>
     );

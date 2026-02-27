@@ -47,7 +47,7 @@ export function HistoricoModal({ isOpen, onClose, medico, onAddLog }: HistoricoM
                             </button>
                         </div>
 
-                        {/* Seletor Rápido de Entregáveis Elmeco IQ */}
+                        {/* Seletor Rápido de Entregáveis FarmaClinQI */}
                         <div className="bg-white px-6 py-4 border-b border-slate-100">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                                 <Zap size={10} className="text-brand-teal fill-current" /> Registro Rápido de Entrega

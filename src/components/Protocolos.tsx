@@ -107,7 +107,7 @@ export const Protocolos = () => {
         toast.success('Envio registrado no CRM!');
 
         const msg = window.encodeURIComponent(
-            `Olá Dr(a), conforme conversamos na Elmeco IQ, aqui está o material: *${p.titulo}*\n\nLink: ${p.pdfUrl}`
+            `Olá Dr(a), conforme conversamos na FarmaClinQI, aqui está o material: *${p.titulo}*\n\nLink: ${p.pdfUrl}`
         );
         window.open(`https://api.whatsapp.com/send?phone=${telefone.replace(/\D/g, '')}&text=${msg}`, '_blank');
         setShowShareSheet(false);

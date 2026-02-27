@@ -1,4 +1,4 @@
-# CRM Farma Tec 📊💊
+# CRM FarmaClinQI 📊💊
 
 **Um CRM "Mobile-First" hiper-veloz para Representantes Técnicos e Propagandistas Farmacêuticos.**
 
@@ -48,8 +48,9 @@ Se for a primeira vez sincronizando este código, basta rodar estas linhas no te
 ```bash
 git init
 git add .
-git commit -m "🚀 Release Inicial CRM Farma Tec V4.0 - Mobile CRM, Analytics Excel, Tags Inteligentes"
+git commit -m "🚀 Release Inicial CRM FarmaClinQI V4.0 - Mobile CRM, Analytics Excel, Tags Inteligentes"
 git branch -M main
 git remote add origin https://github.com/SEU-USUARIO/crm-farma-tec.git
 git push -u origin main
 ```
+

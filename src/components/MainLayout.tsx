@@ -30,6 +30,14 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
 
             {/* Área de Conteúdo principal (As telas são injetadas aqui) */}
             <main className="w-full max-w-[600px] h-screen pb-24 overflow-x-hidden relative shadow-xl">
+                {/* Header Fixo do App */}
+                <header className="sticky top-0 z-40 bg-brand-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+                    <h1 className="text-2xl tracking-tighter">
+                        <span className="text-brand-dark font-bold">FarmaClin</span>
+                        <span className="text-brand-teal font-black">QI</span>
+                    </h1>
+                </header>
+
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTab} // O key dinâmico força a re-renderização suave ao trocar de aba
