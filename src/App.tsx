@@ -55,13 +55,18 @@ const AppContent = () => {
         // 2. Só dispara o sync se tivermos o UID garantido
         setSyncInProgress(true);
         try {
-          const medicosNuvem = await fazerPullDaNuvem(user.uid);
+          let medicosNuvem = await fazerPullDaNuvem(user.uid);
 
           if (medicosNuvem.length === 0) {
             const result = await importarCarteiraTop50(user.uid);
             if (result.success) {
-              await fazerPullDaNuvem(user.uid);
+              medicosNuvem = await fazerPullDaNuvem(user.uid);
             }
+          }
+
+          // FIX: Commit the synced data to the global React state so the UI updates
+          if (medicosNuvem.length > 0) {
+            setMedicos(medicosNuvem);
           }
         } catch (e: any) {
           console.error("Erro no handshake de sincronização:", e);
