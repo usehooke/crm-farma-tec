@@ -8,11 +8,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          recharts: ['recharts'],
-          framer: ['framer-motion'],
-          lucide: ['lucide-react']
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('firebase')) return 'firebase';
+            if (id.includes('xlsx')) return 'xlsx';
+            if (id.includes('recharts')) return 'recharts';
+            if (id.includes('framer-motion')) return 'framer';
+            if (id.includes('lucide-react')) return 'lucide';
+            return 'vendor';
+          }
         }
       }
     }
