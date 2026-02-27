@@ -1,15 +1,12 @@
-console.log('FarmaClinIQ carregado com sucesso');
-import { useState, useEffect } from 'react';
+﻿
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useMedicos } from './hooks/useMedicos';
 import { Plus } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { MainLayout } from './components/MainLayout';
 import { ViewHome } from './components/ViewHome';
-import { Documentos } from './components/Documentos';
-import { Configuracoes } from './components/Configuracoes';
 import { Agendamento } from './components/Agendamento';
 import { SplashScreen } from './components/SplashScreen';
-import { Protocolos } from './components/Protocolos';
 import type { ViewName } from './components/MainLayout';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -19,6 +16,11 @@ import { auth, hasValidConfig } from './services/firebaseConfig';
 import { Auth } from './views/Auth';
 import { fazerPullDaNuvem, importarCarteiraTop50 } from './services/syncService';
 import { ConfigErrorScreen } from './components/ConfigErrorScreen';
+
+// Lazy Loaded Views for Performance
+const Documentos = lazy(() => import('./components/Documentos').then(m => ({ default: m.Documentos })));
+const Protocolos = lazy(() => import('./components/Protocolos').then(m => ({ default: m.Protocolos })));
+const Configuracoes = lazy(() => import('./components/Configuracoes').then(m => ({ default: m.Configuracoes })));
 
 import { ConfigProvider, useConfig } from './context/ConfigContext';
 import { ModalProvider, useModal } from './context/ModalContext';
@@ -54,7 +56,7 @@ const AppContent = () => {
             // Se a nuvem estiver vazia e o usuário for a Ariani (ou o perfil inicial)
             // Disparamos o "Seed" automático agora que as permissões estão OK
             if (medicosNuvem.length === 0) {
-              console.log('🌱 Carteira vazia detectada. Iniciando carga inicial para Ariani...');
+
               const result = await importarCarteiraTop50(user.uid);
               if (result.success) {
                 // Após o seed, fazemos um novo pull para atualizar o estado local
@@ -142,13 +144,19 @@ const AppContent = () => {
 
       <MainLayout activeTab={currentView} setActiveTab={setCurrentView}>
         {/* Dynamic View Routing */}
-        {currentView === 'home' && (
-          <ViewHome medicos={medicos} atualizarMedico={atualizarMedico} openHistory={(m) => openModal('historico', m)} tabs={tabs} />
-        )}
-        {currentView === 'agenda' && <Agendamento medicos={medicos} adicionarLog={adicionarLog} />}
-        {currentView === 'documentos' && <Documentos />}
-        {currentView === 'protocolos' && <Protocolos />}
-        {currentView === 'configuracoes' && <Configuracoes />}
+        <Suspense fallback={
+          <div className="flex-1 flex items-center justify-center p-20">
+            <div className="w-10 h-10 border-4 border-brand-teal/20 border-t-brand-teal rounded-full animate-spin" />
+          </div>
+        }>
+          {currentView === 'home' && (
+            <ViewHome medicos={medicos} atualizarMedico={atualizarMedico} openHistory={(m) => openModal('historico', m)} tabs={tabs} />
+          )}
+          {currentView === 'agenda' && <Agendamento medicos={medicos} adicionarLog={adicionarLog} />}
+          {currentView === 'documentos' && <Documentos />}
+          {currentView === 'protocolos' && <Protocolos />}
+          {currentView === 'configuracoes' && <Configuracoes />}
+        </Suspense>
       </MainLayout>
 
       {/* FAB Oculto temporariamente, as Views devem prover seus botões de ação (Ex: Agendamento FAB) ou ViewHome */}
@@ -174,3 +182,4 @@ export default function App() {
     </ConfigProvider>
   );
 }
+

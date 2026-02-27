@@ -1,4 +1,4 @@
-import { doc, getDocs, writeBatch, collection } from 'firebase/firestore';
+﻿import { doc, getDocs, writeBatch, collection } from 'firebase/firestore';
 import { generateUUID } from '../utils/utils';
 import { db } from './firebaseConfig';
 import medicosData from '../data/carteira_medicos_top50.json';
@@ -30,7 +30,7 @@ export const fazerPushParaNuvem = async (uid: string, medicos: any[]) => {
         });
 
         await batch.commit();
-        console.log(`Sucesso: ${medicosValidos.length} médicos sincronizados.`);
+
     } catch (error: any) {
         console.error("Firebase Sync Error Details:", error);
         throw new Error(`Erro no Firestore: ${error.message || 'Erro desconhecido'}`);
@@ -78,3 +78,4 @@ export const importarCarteiraTop50 = async (uid: string) => {
         return { success: false, error };
     }
 };
+

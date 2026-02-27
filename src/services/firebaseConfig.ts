@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+﻿import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -10,8 +10,6 @@ const firebaseConfig = {
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "918911915100",
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
-
-console.log("Firebase Key:", import.meta.env.VITE_FIREBASE_API_KEY);
 
 export const hasValidConfig = !!firebaseConfig.apiKey;
 
@@ -27,3 +25,4 @@ if (hasValidConfig) {
 
 export const auth = firebaseAuth as any;
 export const db = firestoreDb as any;
+

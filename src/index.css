@@ -28,12 +28,15 @@
   }
 
   .dark body {
-    background-color: #020617; /* slate-950 */
-    color: #f8fafc; /* slate-50 */
+    background-color: #020617;
+    /* slate-950 */
+    color: #f8fafc;
+    /* slate-50 */
   }
 
   .dark {
-    --color-surface: #0f172a; /* slate-900 */
+    --color-surface: #0f172a;
+    /* slate-900 */
     --color-brand-white: #0f172a;
     --color-brand-dark: #f8fafc;
   }
@@ -50,4 +53,19 @@
   /* IE and Edge */
   scrollbar-width: none;
   /* Firefox */
+}
+
+@layer components {
+  .transition-neumorphic {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  button,
+  .interactive-surface {
+    @apply transition-neumorphic;
+  }
+
+  button:active {
+    @apply scale-95;
+  }
 }

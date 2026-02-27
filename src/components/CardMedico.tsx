@@ -3,6 +3,7 @@ import { Phone, Clock, FileText, Smartphone, Calendar, Star } from 'lucide-react
 import { motion } from 'framer-motion';
 import type { Medico } from '../hooks/useMedicos';
 import { useConfig } from '../context/ConfigContext';
+import React from 'react';
 
 interface CardMedicoProps {
     medico: Medico;
@@ -10,7 +11,7 @@ interface CardMedicoProps {
     onViewHistory: (medico: Medico) => void;
 }
 
-export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedicoProps) {
+export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }: CardMedicoProps) => {
     const { vipTags } = useConfig();
     const today = new Date().toISOString().split('T')[0];
     const isTodayContact = medico.dataRetorno === today;
@@ -33,7 +34,7 @@ export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedico
     const isWarning = medico.status === 'Apresentada' && daysSince > 7 && !isUrgent;
 
     const zapLink = `https://wa.me/${medico.telefone.replace(/\D/g, '')}?text=${encodeURIComponent(
-        `Olá, Dr(a). ${medico.nome}! Tudo bem? Gostaria de saber como estão os protocolos Elmeco.`
+        `Olá, Dr(a). ${medico.nome}! Tudo bem? Gostaria de saber como estão os protocolos FarmaClinQI.`
     )}`;
 
     const callLink = `tel:${medico.telefone.replace(/\D/g, '')}`;
@@ -187,4 +188,4 @@ export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedico
             </div>
         </motion.div>
     );
-}
+});

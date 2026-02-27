@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+﻿import React, { createContext, useContext, useState, useEffect } from 'react';
 
 import type { User } from 'firebase/auth';
 
@@ -65,7 +65,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (dadosLegados && !localStorage.getItem(STORAGE_KEY_MEDICOS)) {
             localStorage.setItem(STORAGE_KEY_MEDICOS, dadosLegados);
             localStorage.removeItem(LEGACY_KEY_MEDICOS);
-            console.log('✅ Migração de dados legados concluída para nova chave FarmaClinIQ.');
+
         }
 
         // 2. Carga Inicial de Dados de Configuração
@@ -180,4 +180,5 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 };
 
 export const useConfig = () => useContext(ConfigContext);
+
 
