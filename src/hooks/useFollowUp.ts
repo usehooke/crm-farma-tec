@@ -10,14 +10,20 @@ export function useFollowUp(medicos: Medico[]) {
     const hoje = new Date();
 
     const alertas = useMemo(() => {
+        if (!Array.isArray(medicos)) return [];
+
         const medicosAtrasados = medicos.map((medico) => {
+            if (!medico) return { ...medico, diasInativo: 999 };
+
             // Pega a visita mais recente ou a data de contat se array vazio
             let ultimaVisitaStr = medico.ultimoContato;
-            if (medico.logVisitas.length > 0) {
-                // Log items generally have data as ISO string, but sorting might be needed to be completely robust
-                // Let's assume logVisitas is ordered, or we can find the most recent one
-                const logsOrdenados = [...medico.logVisitas].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-                ultimaVisitaStr = logsOrdenados[0].data;
+            if (medico.logVisitas && medico.logVisitas.length > 0) {
+                const logsOrdenados = [...medico.logVisitas].sort((a, b) => {
+                    const timeA = a.data ? new Date(a.data).getTime() : 0;
+                    const timeB = b.data ? new Date(b.data).getTime() : 0;
+                    return timeB - timeA;
+                });
+                ultimaVisitaStr = logsOrdenados[0]?.data || medico.ultimoContato;
             }
 
             const ultimaVisita = ultimaVisitaStr
@@ -31,9 +37,9 @@ export function useFollowUp(medicos: Medico[]) {
 
         // Filtra quem está há mais de 15 dias sem visita
         return medicosAtrasados
-            .filter((m) => m.diasInativo >= 15)
+            .filter((m) => m && m.diasInativo >= 15)
             .sort((a, b) => b.diasInativo - a.diasInativo); // Ordena do mais grave para o menor
     }, [medicos]);
 
-    return { alertas, total: alertas.length };
+    return { alertas, total: (alertas || []).length };
 }

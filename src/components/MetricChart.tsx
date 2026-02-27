@@ -19,11 +19,13 @@ export function MetricChart({ medicos }: MetricChartProps) {
             'Monitoramento': 0
         };
 
-        medicos.forEach(m => {
-            if (counts.hasOwnProperty(m.status)) {
-                counts[m.status as keyof typeof counts]++;
-            }
-        });
+        if (Array.isArray(medicos)) {
+            medicos.forEach(m => {
+                if (m && counts.hasOwnProperty(m.status)) {
+                    counts[m.status as keyof typeof counts]++;
+                }
+            });
+        }
 
         return [
             { name: 'Prospe.', total: counts['Prospecção'], color: '#94a3b8' },
@@ -33,7 +35,7 @@ export function MetricChart({ medicos }: MetricChartProps) {
         ];
     }, [medicos]);
 
-    const totalMedicos = medicos.length;
+    const totalMedicos = Array.isArray(medicos) ? medicos.length : 0;
 
     return (
         <div className="px-5 mb-8">

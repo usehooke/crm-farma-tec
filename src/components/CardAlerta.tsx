@@ -9,8 +9,11 @@ export const CardAlerta = ({ medicos }: { medicos: Medico[] }) => {
 
     if (total === 0) return null; // Espaço em branco mantido se não houver alertas
 
-    const topAlerta = alertas[0];
-    const numeroLimpo = topAlerta.telefone.replace(/\D/g, '');
+    const topAlerta = alertas && alertas.length > 0 ? alertas[0] : null;
+
+    if (!topAlerta) return null;
+
+    const numeroLimpo = (topAlerta.telefone || '').replace(/\D/g, '');
     const temTelefone = numeroLimpo.length >= 10;
     const linkWhats = `https://api.whatsapp.com/send?phone=55${numeroLimpo}&text=Doutor(a)%20${topAlerta.nome},%20bom%20dia!`;
 
@@ -36,8 +39,8 @@ export const CardAlerta = ({ medicos }: { medicos: Medico[] }) => {
                     <span>Atenção Necessária</span>
                 </div>
                 <p className="text-slate-600 dark:text-slate-300 text-[13px] leading-relaxed">
-                    <strong className="text-slate-900 dark:text-white">{total} médicos</strong> estão esfriando. <br />
-                    <span className="font-semibold">{topAlerta.nome}</span> está há <span className="text-orange-600 font-bold">{topAlerta.diasInativo} dias</span> sem visita.
+                    <strong className="text-slate-900 dark:text-white">{total || 0} médicos</strong> estão esfriando. <br />
+                    <span className="font-semibold">{topAlerta?.nome || 'Médico'}</span> está há <span className="text-orange-600 font-bold">{topAlerta?.diasInativo || 0} dias</span> sem visita.
                 </p>
             </div>
 
