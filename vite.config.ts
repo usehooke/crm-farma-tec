@@ -9,13 +9,12 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Separa as bibliotecas pesadas de Excel e Gráficos do código principal
-          'vendor-data': ['xlsx', 'recharts'],
-          'vendor-ui': ['framer-motion', 'lucide-react'],
-          'vendor-firebase': ['firebase/app', 'firebase/firestore', 'firebase/auth'],
-        },
-      },
+          'vendor-excel': ['xlsx'],
+          'vendor-charts': ['recharts'],
+          'vendor-framework': ['framer-motion', 'lucide-react', 'firebase/app', 'firebase/firestore']
+        }
+      }
     },
-    chunkSizeWarningLimit: 600, // Ajusta o limite para o novo padrão
-  },
-})
+    chunkSizeWarningLimit: 600
+  }
+});
