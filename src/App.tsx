@@ -38,15 +38,14 @@ function AppContent() {
   useEffect(() => {
     if (!hasValidConfig) return;
 
-    const constSubscribe = onAuthStateChanged(auth, async (user) => {
+    const constSubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user); // Sincroniza com o ConfigContext para isolar LocalStorage
       if (user) {
         // Usuário logado: Garante que os dados mais recentes são baixados
-        try {
-          await fazerPullDaNuvem(user.uid);
-        } catch (e) {
+        // DISPARA O PULL SEM O AWAIT (em background) para não travar o carregamento do App
+        fazerPullDaNuvem(user.uid).catch((e) => {
           console.error("Erro ao puxar dados nativos da nuvem", e);
-        }
+        });
       }
       setUsuarioLogado(user);
       setIsAuthLoading(false);
