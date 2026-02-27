@@ -30,7 +30,8 @@ const AppContent = () => {
     loadingConfig,
     setUser,
     setCloudSyncError,
-    setSyncInProgress
+    setSyncInProgress,
+    setMedicos
   } = useConfig();
   const { openModal } = useModal();
   const { medicos, atualizarMedico, adicionarLog } = useMedicos();
