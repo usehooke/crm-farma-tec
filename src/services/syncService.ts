@@ -5,18 +5,36 @@ import medicosData from '../data/carteira_medicos_top50.json';
 
 export const fazerPushParaNuvem = async (uid: string, medicos: any[]) => {
     if (!uid) throw new Error("Usuário não autenticado");
+    if (!medicos || medicos.length === 0) return;
 
-    const batch = writeBatch(db);
-    const userRef = doc(db, 'usuarios', uid);
+    try {
+        const batch = writeBatch(db);
+        const userRef = doc(db, 'usuarios', uid);
 
-    batch.set(userRef, { lastSync: new Date().toISOString() }, { merge: true });
+        // Atualiza timestamp de sincronização no perfil do usuário
+        batch.set(userRef, {
+            lastSync: new Date().toISOString(),
+            uid // Garante que o documento do usuário exista
+        }, { merge: true });
 
-    medicos.forEach(medico => {
-        const medicoRef = doc(collection(userRef, 'medicos'), medico.id);
-        batch.set(medicoRef, { ...medico, ownerId: uid });
-    });
+        // Filtra médicos válidos (devem ter um ID)
+        const medicosValidos = medicos.filter(m => m && m.id);
 
-    await batch.commit();
+        // Firestore Batch tem limite de 500 operações. 
+        // Se houver mais de 500, precisamos dividir, mas para 50-100 está ok.
+        medicosValidos.forEach(medico => {
+            const medicoRef = doc(collection(userRef, 'medicos'), medico.id);
+            // Remove campos undefined para evitar erro no Firestore
+            const cleanMedico = JSON.parse(JSON.stringify({ ...medico, ownerId: uid }));
+            batch.set(medicoRef, cleanMedico, { merge: true });
+        });
+
+        await batch.commit();
+        console.log(`Sucesso: ${medicosValidos.length} médicos sincronizados.`);
+    } catch (error: any) {
+        console.error("Firebase Sync Error Details:", error);
+        throw new Error(`Erro no Firestore: ${error.message || 'Erro desconhecido'}`);
+    }
 };
 
 export const fazerPullDaNuvem = async (uid: string) => {
