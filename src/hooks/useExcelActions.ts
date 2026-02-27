@@ -86,7 +86,7 @@ export function useExcelActions(
     }, [medicos, adicionarMedico, atualizarMedico]);
 
 
-    // Relatório 1: Exportar Base do Hooke
+    // Relatório 1: Exportar Base Elmeco IQ
     const exportBase = useCallback(() => {
         const wsData = medicos.map(m => ({
             "Status no Funil": m.status,
@@ -101,9 +101,9 @@ export function useExcelActions(
 
         const ws = XLSX.utils.json_to_sheet(wsData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Base CRM Farma Tec");
+        XLSX.utils.book_append_sheet(wb, ws, "Base CRM Elmeco IQ");
 
-        XLSX.writeFile(wb, `Base_Medicos_${new Date().toISOString().split('T')[0]}.xlsx`);
+        XLSX.writeFile(wb, `Base_Medicos_ElmecoIQ_${new Date().toISOString().split('T')[0]}.xlsx`);
         toast.success('Download da sua Base de Médicos concluído!');
     }, [medicos]);
 
@@ -134,10 +134,10 @@ export function useExcelActions(
 
         const ws = XLSX.utils.json_to_sheet(diarioFlat);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Diário de Visitas");
+        XLSX.utils.book_append_sheet(wb, ws, "Diário de Visitas IQ");
 
-        XLSX.writeFile(wb, `Diario_Bordo_FarmaTec_${new Date().toISOString().split('T')[0]}.xlsx`);
-        toast.success('O Diário de Bordo Corporativo foi baixado perfeitamente.', { icon: '📊' });
+        XLSX.writeFile(wb, `Diario_Bordo_ElmecoIQ_${new Date().toISOString().split('T')[0]}.xlsx`);
+        toast.success('O Diário de Bordo Elmeco IQ foi baixado perfeitamente.', { icon: '📊' });
     }, [medicos]);
 
 

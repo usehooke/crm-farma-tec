@@ -1,4 +1,7 @@
-import { X, Calendar, PlusCircle } from 'lucide-react';
+import {
+    X, Calendar, PlusCircle, Beaker, Microscope,
+    FileStack, ScrollText, BookCopy, BookOpenText, Zap
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import type { LogVisita, Medico } from '../hooks/useMedicos';
@@ -44,6 +47,57 @@ export function HistoricoModal({ isOpen, onClose, medico, onAddLog }: HistoricoM
                             </button>
                         </div>
 
+                        {/* Seletor Rápido de Entregáveis Elmeco IQ */}
+                        <div className="bg-white px-6 py-4 border-b border-slate-100">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Zap size={10} className="text-brand-teal fill-current" /> Registro Rápido de Entrega
+                            </p>
+
+                            <div className="space-y-4">
+                                {/* Linha Científica */}
+                                <div>
+                                    <p className="text-[9px] font-bold text-slate-500 mb-2 uppercase">Linha Científica</p>
+                                    <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                                        {[
+                                            { id: 'amostra', label: 'Amostra', full: 'Amostra de Ativo (Pentravan/Base)', icon: Beaker },
+                                            { id: 'protocolo', label: 'Protocolo', full: 'Protocolo de Tratamento Impresso', icon: FileStack },
+                                            { id: 'lamina', label: 'Lâmina', full: 'Lâmina de Estudo Clínico', icon: Microscope },
+                                        ].map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => onAddLog(medico.id, `🔬 ENTREGA: ${item.full}`)}
+                                                className="flex items-center gap-2 px-3 py-2 bg-brand-white rounded-xl border border-slate-100 shadow-sm active:scale-95 transition-all shrink-0"
+                                            >
+                                                <item.icon size={14} className="text-brand-teal" />
+                                                <span className="text-xs font-bold text-slate-700">{item.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Material de Apoio */}
+                                <div>
+                                    <p className="text-[9px] font-bold text-slate-500 mb-2 uppercase">Material de Apoio</p>
+                                    <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                                        {[
+                                            { id: 'bloco', label: 'Receituário', full: 'Bloco de Receituário Personalizado', icon: ScrollText },
+                                            { id: 'guia', label: 'Guia de Ativos', full: 'Guia de Bolso de Ativos', icon: BookCopy },
+                                            { id: 'lit', label: 'Literatura', full: 'Literatura Técnica Lançamento', icon: BookOpenText },
+                                        ].map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => onAddLog(medico.id, `📄 ENTREGA: ${item.full}`)}
+                                                className="flex items-center gap-2 px-3 py-2 bg-brand-white rounded-xl border border-slate-100 shadow-sm active:scale-95 transition-all shrink-0"
+                                            >
+                                                <item.icon size={14} className="text-indigo-500" />
+                                                <span className="text-xs font-bold text-slate-700">{item.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Timeline */}
                         <div className="flex-1 overflow-y-auto p-6 hide-scrollbar">
                             <div className="relative border-l-2 border-slate-200 dark:border-slate-800 ml-4 space-y-8 pb-8">
@@ -54,7 +108,7 @@ export function HistoricoModal({ isOpen, onClose, medico, onAddLog }: HistoricoM
                                     </div>
                                 ) : (
                                     medico.logVisitas.map((log: LogVisita) => {
-                                        const isProtocolo = log.nota.includes('📄');
+                                        const isProtocolo = log.nota.includes('📄') || log.nota.includes('🔬');
                                         const dataLog = new Date(log.data);
                                         const hoje = new Date();
                                         const ontem = new Date();
@@ -75,8 +129,8 @@ export function HistoricoModal({ isOpen, onClose, medico, onAddLog }: HistoricoM
                                                 </div>
 
                                                 <div className={`p-4 rounded-2xl transition-all ${isProtocolo
-                                                        ? 'bg-brand-white dark:bg-slate-900 shadow-[inset_4px_4px_8px_#e5e5e5,inset_-4px_-4px_8px_#ffffff] dark:shadow-none border-l-4 border-brand-teal'
-                                                        : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm'
+                                                    ? 'bg-brand-white dark:bg-slate-900 shadow-[inset_4px_4px_8px_#e5e5e5,inset_-4px_-4px_8px_#ffffff] dark:shadow-none border-l-4 border-brand-teal'
+                                                    : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm'
                                                     }`}>
                                                     <div className="flex justify-between items-center mb-2">
                                                         <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
