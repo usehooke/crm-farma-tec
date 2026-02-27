@@ -26,14 +26,15 @@ export function useFollowUp(medicos: Medico[]) {
                     ultimaVisitaStr = logsOrdenados[0]?.data || medico.ultimoContato;
                 }
 
-                const ultimaVisita = ultimaVisitaStr
-                    ? parseISO(ultimaVisitaStr)
-                    : new Date(2000, 0, 1);
+                // Se não houver NENHUM contato registrado, não geramos alerta de "atraso"
+                if (!ultimaVisitaStr) return null;
 
+                const ultimaVisita = parseISO(ultimaVisitaStr);
                 const diasInativo = differenceInDays(hoje, ultimaVisita);
 
                 return { ...medico, diasInativo };
-            });
+            })
+            .filter((m): m is AlertaFollowUp => m !== null);
 
         // Filtra quem está há mais de 15 dias sem visita
         return medicosAtrasados
