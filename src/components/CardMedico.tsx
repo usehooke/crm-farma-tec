@@ -42,7 +42,8 @@ export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }:
     if (isWarning) borderClass = "border-yellow-400";
 
     const getStatusColor = (status: Medico['status']) => {
-        switch (status) {
+        const s = status || 'Prospecção';
+        switch (s) {
             case 'Prospecção': return 'bg-slate-100 text-slate-700';
             case 'Apresentada': return 'bg-orange-50 text-orange-700';
             case 'Parceiro Ativo': return 'bg-blue-50 text-blue-700';
@@ -151,7 +152,7 @@ export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }:
                 </div>
 
                 <div className="text-[10px] text-slate-400 font-medium">
-                    {medico.logVisitas.length} log(s)
+                    {medico.logVisitas?.length || 0} log(s)
                 </div>
             </div>
 

@@ -175,7 +175,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
                 <div className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-bold text-brand-dark">Meta Mensal (Ariani)</h3>
-                        <p className="text-xs text-slate-500">Visitas: {medicos.filter(m => m.logVisitas.length > 0).length} / 50</p>
+                        <p className="text-xs text-slate-500">Visitas: {medicos.filter(m => (m.logVisitas?.length || 0) > 0).length} / 50</p>
                     </div>
                     <button
                         onClick={() => openModal('dashboard')}
