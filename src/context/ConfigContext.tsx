@@ -28,6 +28,10 @@ interface ConfigContextData {
     user: User | null;
     setUser: (user: User | null) => void;
     loadingConfig: boolean;
+    cloudSyncError: string | null;
+    setCloudSyncError: (error: string | null) => void;
+    syncInProgress: boolean;
+    setSyncInProgress: (syncing: boolean) => void;
 }
 
 const ConfigContext = createContext<ConfigContextData>({} as ConfigContextData);
@@ -46,6 +50,8 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [medicos, setMedicosState] = useState<any[]>([]);
     const [user, setUser] = useState<User | null>(null);
     const [loadingConfig, setLoadingConfig] = useState(true);
+    const [cloudSyncError, setCloudSyncError] = useState<string | null>(null);
+    const [syncInProgress, setSyncInProgress] = useState(false);
 
     const getStorageKey = (uid: string | undefined) => uid ? `@FarmaClinIQ:${uid}:medicos` : null;
 
@@ -149,7 +155,11 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setMedicos: setMedicosState,
             user,
             setUser,
-            loadingConfig
+            loadingConfig,
+            cloudSyncError,
+            setCloudSyncError,
+            syncInProgress,
+            setSyncInProgress
         }}>
             {children}
         </ConfigContext.Provider>

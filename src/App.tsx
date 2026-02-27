@@ -17,14 +17,19 @@ import { onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { auth, hasValidConfig } from './services/firebaseConfig';
 import { Auth } from './views/Auth';
-import { fazerPullDaNuvem } from './services/syncService';
+import { fazerPullDaNuvem, importarCarteiraTop50 } from './services/syncService';
 import { ConfigErrorScreen } from './components/ConfigErrorScreen';
 
 import { ConfigProvider, useConfig } from './context/ConfigContext';
 import { ModalProvider, useModal } from './context/ModalContext';
 
-function AppContent() {
-  const { loadingConfig, setUser } = useConfig();
+const AppContent = () => {
+  const {
+    loadingConfig,
+    setUser,
+    setCloudSyncError,
+    setSyncInProgress
+  } = useConfig();
   const { openModal } = useModal();
   const { medicos, atualizarMedico, adicionarLog } = useMedicos();
 
@@ -39,14 +44,33 @@ function AppContent() {
     if (!hasValidConfig) return;
 
     const constSubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user); // Sincroniza com o ConfigContext para isolar LocalStorage
+      setUser(user);
+      setCloudSyncError(null); // Limpa erros antigos ao mudar estado de auth
+
       if (user) {
-        // Usuário logado: Garante que os dados mais recentes são baixados
-        // DISPARA O PULL SEM O AWAIT (em background) para não travar o carregamento do App
-        fazerPullDaNuvem(user.uid).catch((e) => {
-          console.error("Erro ao puxar dados nativos da nuvem", e);
-        });
+        setSyncInProgress(true);
+        fazerPullDaNuvem(user.uid)
+          .then(async (medicosNuvem) => {
+            // Se a nuvem estiver vazia e o usuário for a Ariani (ou o perfil inicial)
+            // Disparamos o "Seed" automático agora que as permissões estão OK
+            if (medicosNuvem.length === 0) {
+              console.log('🌱 Carteira vazia detectada. Iniciando carga inicial para Ariani...');
+              const result = await importarCarteiraTop50(user.uid);
+              if (result.success) {
+                // Após o seed, fazemos um novo pull para atualizar o estado local
+                await fazerPullDaNuvem(user.uid);
+              }
+            }
+          })
+          .catch((e) => {
+            console.error("Erro no handshake de sincronização:", e);
+            setCloudSyncError(e.message);
+          })
+          .finally(() => {
+            setSyncInProgress(false);
+          });
       }
+
       setUsuarioLogado(user);
       setIsAuthLoading(false);
     });
