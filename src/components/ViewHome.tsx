@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { differenceInDays, parseISO } from 'date-fns';
-import { Search, Filter, Users, TrendingUp } from 'lucide-react';
+import { Search, Filter, Users, TrendingUp, QrCode } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Medico } from '../hooks/useMedicos';
 import { useConfig } from '../context/ConfigContext';
@@ -8,6 +8,7 @@ import { useModal } from '../context/ModalContext';
 import { CardMedico } from './CardMedico';
 import { CardAlerta } from './CardAlerta';
 import { MetricChart } from './MetricChart';
+import { QRCodeModal } from './QRCodeModal';
 
 interface ViewHomeProps {
     medicos: Medico[];
@@ -23,6 +24,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
     const [searchQuery, setSearchQuery] = useState('');
     const [showUrgentOnly, setShowUrgentOnly] = useState(false);
     const [rankingLimit, setRankingLimit] = useState<number | null>(null);
+    const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
     // --- Lógica de Filtros e Busca ---
     const medicosFiltrados = useMemo(() => {
@@ -81,12 +83,22 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
             animate="visible"
         >
             {/* Cabeçalho de Saudação (Substituindo o original simplório do App.tsx) */}
-            <motion.header variants={itemVariants} className="px-5 mb-6 mt-4">
-                <h1 className="text-3xl font-bold text-brand-dark tracking-tight">
-                    Bom dia,<br />
-                    <span className="text-brand-teal">{nomeUsuario || 'Ariani'}!</span>
-                </h1>
-                <p className="text-sm text-slate-500 mt-1">Aqui está o seu painel de hoje focado em performance.</p>
+            <motion.header variants={itemVariants} className="px-5 mb-6 mt-4 flex justify-between items-start">
+                <div>
+                    <h1 className="text-3xl font-bold text-brand-dark tracking-tight">
+                        Bom dia,<br />
+                        <span className="text-brand-teal">{nomeUsuario || 'Ariani'}!</span>
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">Aqui está o seu painel de hoje focado em performance.</p>
+                </div>
+
+                <button
+                    onClick={() => setIsQRModalOpen(true)}
+                    className="p-4 bg-white rounded-3xl shadow-[6px_6px_15px_#e5e5e5,-6px_-6px_15px_#ffffff] text-primary active:scale-90 transition-all border border-slate-50"
+                    title="Seu Cartão de Visitas Digital"
+                >
+                    <QrCode size={24} />
+                </button>
             </motion.header>
 
             {/* Camada de Analytics Neumórfica */}
@@ -218,6 +230,12 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
                     )}
                 </div>
             </motion.div>
+
+            <QRCodeModal
+                isOpen={isQRModalOpen}
+                onClose={() => setIsQRModalOpen(false)}
+                whatsappLink={`https://wa.me/5511999999999?text=${encodeURIComponent('Olá Ariani, salvei seu contato aqui da Elmeco/Hooke!')}`}
+            />
         </motion.main>
     );
 }
