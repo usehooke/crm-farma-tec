@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Send, BookOpen, ExternalLink, X, Plus, Trash2, Link } from 'lucide-react';
+import { Search, Send, BookOpen, X, Plus, Trash2, Link, PlayCircle, FileText, Globe } from 'lucide-react';
 import { LISTA_PROTOCOLOS, type Protocolo } from '../data/protocolos';
 import { useMedicos } from '../hooks/useMedicos';
 import { useConfig } from '../context/ConfigContext';
@@ -91,6 +91,17 @@ export const Protocolos = () => {
         }
     };
 
+    const getIconForLink = (url: string) => {
+        const normalizedUrl = url.toLowerCase();
+        if (normalizedUrl.includes('youtube.com') || normalizedUrl.includes('youtu.be')) {
+            return <PlayCircle size={12} />;
+        }
+        if (normalizedUrl.includes('.pdf')) {
+            return <FileText size={12} />;
+        }
+        return <Globe size={12} />;
+    };
+
     const dispararWhatsapp = (telefone: string, p: Protocolo, idMedico: string) => {
         adicionarLog(idMedico, `📄 Enviado Protocolo: ${p.titulo} via Biblioteca IQ`, 'envio_material');
         toast.success('Envio registrado no CRM!');
@@ -162,7 +173,7 @@ export const Protocolos = () => {
                                     onClick={() => window.open(p.pdfUrl, '_blank')}
                                     className="flex-1 py-2 bg-brand-white dark:bg-slate-800 rounded-xl text-brand-dark dark:text-slate-200 text-[10px] font-black border border-slate-100 dark:border-slate-700 flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all"
                                 >
-                                    <ExternalLink size={12} /> VER MATERIAL
+                                    {getIconForLink(p.pdfUrl)} VER MATERIAL
                                 </button>
                                 <button
                                     onClick={() => handleShareClick(p)}
