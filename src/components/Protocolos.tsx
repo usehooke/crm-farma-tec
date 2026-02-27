@@ -162,7 +162,7 @@ export const Protocolos = () => {
                                     onClick={() => window.open(p.pdfUrl, '_blank')}
                                     className="flex-1 py-2 bg-brand-white dark:bg-slate-800 rounded-xl text-brand-dark dark:text-slate-200 text-[10px] font-black border border-slate-100 dark:border-slate-700 flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-all"
                                 >
-                                    <ExternalLink size={12} /> VER PDF
+                                    <ExternalLink size={12} /> VER MATERIAL
                                 </button>
                                 <button
                                     onClick={() => handleShareClick(p)}
@@ -254,7 +254,7 @@ export const Protocolos = () => {
                                 </div>
 
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block">Link do PDF (Drive/Site)</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block">Link do Material (PDF, Site ou Vídeo)</label>
                                     <div className="relative">
                                         <Link size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                         <input
@@ -262,7 +262,7 @@ export const Protocolos = () => {
                                             className="w-full pl-12 pr-4 py-4 rounded-2xl bg-brand-white dark:bg-slate-800 border-none shadow-inner text-sm outline-none focus:ring-2 focus:ring-primary/20"
                                             value={novoProtocolo.pdfUrl}
                                             onChange={e => setNovoProtocolo({ ...novoProtocolo, pdfUrl: e.target.value })}
-                                            placeholder="https://..."
+                                            placeholder="https://youtube.com/... ou site..."
                                         />
                                     </div>
                                 </div>
