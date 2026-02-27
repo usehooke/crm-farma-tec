@@ -56,16 +56,13 @@
 }
 
 @layer components {
-  .transition-neumorphic {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
 
   button,
   .interactive-surface {
-    @apply transition-neumorphic;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   button:active {
-    @apply scale-95;
+    transform: scale(0.95);
   }
 }
