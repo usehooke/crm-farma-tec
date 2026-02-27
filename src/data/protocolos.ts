@@ -1,7 +1,7 @@
 export interface Protocolo {
     id: string;
     titulo: string;
-    categoria: 'Hormonal' | 'Emagrecimento' | 'Longevidade' | 'Estética';
+    categoria: string;
     descricao: string;
     pdfUrl: string;
     capaUrl: string;
