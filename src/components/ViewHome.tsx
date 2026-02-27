@@ -33,19 +33,21 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
 
     // --- Lógica de Filtros e Busca ---
     const medicosFiltrados = useMemo(() => {
-        let lista = medicos;
+        if (!Array.isArray(medicos)) return [];
+        let lista = [...medicos];
 
         // 1. Filtro da Aba
-        lista = lista.filter(m => m.status === activeTab);
+        lista = lista.filter(m => m && m.status === activeTab);
 
-        // 2. Filtro de Ranking (Baseado na ordem da lista)
+        // 2. Filtro de Ranking
         if (rankingLimit) {
             lista = lista.slice(0, rankingLimit);
         }
 
-        // 3. Filtro de Urgência (Follow-up)
+        // 3. Filtro de Urgência
         if (showUrgentOnly) {
             lista = lista.filter(m => {
+                if (!m) return false;
                 const daysSince = m.ultimoContato ? differenceInDays(new Date(), parseISO(m.ultimoContato)) : 999;
                 const isUrgent = daysSince > 30;
                 const isWarning = m.status === 'Apresentada' && daysSince > 7 && !isUrgent;
@@ -53,14 +55,16 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
             });
         }
 
-        // 4. Busca por Texto (Usando o valor de baixa prioridade)
+        // 4. Busca por Texto (Robusta)
         if (deferredSearchQuery) {
             const q = deferredSearchQuery.toLowerCase();
-            lista = lista.filter(m =>
-                m.nome.toLowerCase().includes(q) ||
-                m.especialidade.toLowerCase().includes(q) ||
-                m.localizacao.toLowerCase().includes(q)
-            );
+            lista = lista.filter(m => {
+                if (!m) return false;
+                const nome = (m.nome || '').toLowerCase();
+                const especialidade = (m.especialidade || '').toLowerCase();
+                const localizacao = (m.localizacao || '').toLowerCase();
+                return nome.includes(q) || especialidade.includes(q) || localizacao.includes(q);
+            });
         }
 
         return lista;
@@ -175,7 +179,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
                 <div className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-bold text-brand-dark">Meta Mensal (Ariani)</h3>
-                        <p className="text-xs text-slate-500">Visitas: {medicos.filter(m => (m.logVisitas?.length || 0) > 0).length} / 50</p>
+                        <p className="text-xs text-slate-500">Visitas: {(medicos || []).filter(m => (m?.logVisitas?.length || 0) > 0).length} / 50</p>
                     </div>
                     <button
                         onClick={() => openModal('dashboard')}
@@ -226,7 +230,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
                         >
                             {tab}
                             <span className={`ml-1.5 inline-flex items-center justify-center text-[10px] rounded-md h-4 min-w-[16px] px-1 font-black ${activeTab === tab ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                                {medicos.filter(m => m.status === tab).length}
+                                {(medicos || []).filter(m => m?.status === tab).length}
                             </span>
                         </button>
                     ))}

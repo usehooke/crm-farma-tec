@@ -22,10 +22,11 @@ export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }:
 
     // Helper to get initials for the avatar (First and Last name)
     const getInitials = (name: string) => {
+        if (!name) return '??';
         const parts = name.trim().split(/\s+/);
-        if (parts.length === 0) return '??';
+        if (parts.length === 0 || !parts[0]) return '??';
         if (parts.length === 1) return parts[0][0].toUpperCase();
-        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        return (parts[0][0] + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
     };
 
     const isUrgent = daysSince > 30;
@@ -101,10 +102,10 @@ export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }:
                     </div>
 
                     {/* Exibição de Tags VIPs */}
-                    {medico.tags && medico.tags.length > 0 && (
+                    {medico?.tags && medico.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                             {medico.tags.map(tagId => {
-                                const tagData = vipTags.find(t => t.id === tagId);
+                                const tagData = vipTags?.find(t => t.id === tagId);
                                 if (!tagData) return null;
                                 return (
                                     <span key={tagId} className={`text-[9px] px-1.5 py-0.5 rounded font-bold border uppercase tracking-wider ${tagData.color}`}>
