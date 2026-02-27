@@ -7,6 +7,7 @@ import { useConfig } from '../context/ConfigContext';
 import { useModal } from '../context/ModalContext';
 import { CardMedico } from './CardMedico';
 import { CardAlerta } from './CardAlerta';
+import { MetricChart } from './MetricChart';
 
 interface ViewHomeProps {
     medicos: Medico[];
@@ -87,6 +88,11 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
                 </h1>
                 <p className="text-sm text-slate-500 mt-1">Aqui está o seu painel de hoje focado em performance.</p>
             </motion.header>
+
+            {/* Camada de Analytics Neumórfica */}
+            <motion.div variants={itemVariants}>
+                <MetricChart medicos={medicos} />
+            </motion.div>
 
             {/* Inteligência de Follow-up */}
             <motion.div variants={itemVariants} className="px-1">
