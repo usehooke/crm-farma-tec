@@ -9,12 +9,9 @@ export interface AlertaFollowUp extends Medico {
 export function useFollowUp(medicos: Medico[]) {
     const hoje = new Date();
 
-    const alertas = useMemo(() => {
-        if (!Array.isArray(medicos)) return [];
-
-        const medicosAtrasados = medicos.map((medico) => {
-            if (!medico) return { ...medico, diasInativo: 999 };
-
+    const medicosAtrasados = medicos
+        .filter((m): m is Medico => !!m)
+        .map((medico) => {
             // Pega a visita mais recente ou a data de contat se array vazio
             let ultimaVisitaStr = medico.ultimoContato;
             if (medico.logVisitas && medico.logVisitas.length > 0) {
@@ -35,11 +32,11 @@ export function useFollowUp(medicos: Medico[]) {
             return { ...medico, diasInativo };
         });
 
-        // Filtra quem está há mais de 15 dias sem visita
-        return medicosAtrasados
-            .filter((m) => m && m.diasInativo >= 15)
-            .sort((a, b) => b.diasInativo - a.diasInativo); // Ordena do mais grave para o menor
-    }, [medicos]);
+    // Filtra quem está há mais de 15 dias sem visita
+    return medicosAtrasados
+        .filter((m) => m.diasInativo >= 15)
+        .sort((a, b) => b.diasInativo - a.diasInativo); // Ordena do mais grave para o menor
+}, [medicos]);
 
-    return { alertas, total: (alertas || []).length };
+return { alertas, total: (alertas || []).length };
 }
