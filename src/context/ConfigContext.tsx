@@ -17,6 +17,8 @@ export const DEFAULT_TAGS: VipTag[] = [
 interface ConfigContextData {
     nomeUsuario: string;
     setNomeUsuario: (nome: string) => void;
+    telefoneUsuario: string;
+    setTelefoneUsuario: (telefone: string) => void;
     vipTags: VipTag[];
     salvarVipTags: (tags: VipTag[]) => void;
     googleConectado: boolean;
@@ -39,11 +41,13 @@ const ConfigContext = createContext<ConfigContextData>({} as ConfigContextData);
 export const STORAGE_KEY_MEDICOS = '@FarmaClinIQ:medicos';
 export const STORAGE_KEY_USER = '@FarmaClinIQ:user_nome';
 export const STORAGE_KEY_TAGS = '@FarmaClinIQ:vip_tags';
+export const STORAGE_KEY_PHONE = '@FarmaClinIQ:user_phone';
 export const STORAGE_KEY_GOOGLE = '@farmaTec:google_api_key';
 const LEGACY_KEY_MEDICOS = '@FarmaTec:medicos';
 
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [nomeUsuario, setNomeUsuarioState] = useState('');
+    const [telefoneUsuario, setTelefoneUsuarioState] = useState('');
     const [vipTags, setVipTagsState] = useState<VipTag[]>([]);
     const [googleConectado, setGoogleConectadoState] = useState(false);
     const [isDarkMode, setIsDarkModeState] = useState(false);
@@ -66,10 +70,12 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         // 2. Carga Inicial de Dados de Configuração
         const user = localStorage.getItem(STORAGE_KEY_USER);
+        const userPhone = localStorage.getItem(STORAGE_KEY_PHONE);
         const tagsSalvas = localStorage.getItem(STORAGE_KEY_TAGS);
         const googleToken = localStorage.getItem(STORAGE_KEY_GOOGLE);
 
         if (user) setNomeUsuarioState(user);
+        if (userPhone) setTelefoneUsuarioState(userPhone);
         if (tagsSalvas) {
             setVipTagsState(JSON.parse(tagsSalvas));
         } else {
@@ -119,6 +125,11 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         localStorage.setItem(STORAGE_KEY_USER, novoNome);
     };
 
+    const setTelefoneUsuario = (novoTelefone: string) => {
+        setTelefoneUsuarioState(novoTelefone);
+        localStorage.setItem(STORAGE_KEY_PHONE, novoTelefone);
+    };
+
     const salvarVipTags = (novasTags: VipTag[]) => {
         setVipTagsState(novasTags);
         localStorage.setItem(STORAGE_KEY_TAGS, JSON.stringify(novasTags));
@@ -145,6 +156,8 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         <ConfigContext.Provider value={{
             nomeUsuario,
             setNomeUsuario,
+            telefoneUsuario,
+            setTelefoneUsuario,
             vipTags,
             salvarVipTags,
             googleConectado,

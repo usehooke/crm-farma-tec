@@ -11,6 +11,8 @@ export const Configuracoes = () => {
     const {
         nomeUsuario,
         setNomeUsuario,
+        telefoneUsuario,
+        setTelefoneUsuario,
         vipTags,
         salvarVipTags,
         googleConectado,
@@ -165,15 +167,28 @@ export const Configuracoes = () => {
                         <User size={18} className="text-primary" />
                         <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide">Perfil Profissional</h2>
                     </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-slate-500 mb-2">NOME DE EXIBIÇÃO</label>
-                        <input
-                            type="text"
-                            value={nomeUsuario}
-                            onChange={handleSalvarPerfil}
-                            placeholder="Ex: Ariani"
-                            className="w-full bg-transparent border-b border-slate-300 pb-2 text-brand-dark font-medium outline-none focus:border-primary transition-colors"
-                        />
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-2">NOME DE EXIBIÇÃO</label>
+                            <input
+                                type="text"
+                                value={nomeUsuario}
+                                onChange={handleSalvarPerfil}
+                                placeholder="Ex: Ariani"
+                                className="w-full bg-transparent border-b border-slate-300 pb-2 text-brand-dark font-medium outline-none focus:border-primary transition-colors"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase">Telefone de Contato (WhatsApp)</label>
+                            <input
+                                type="text"
+                                value={telefoneUsuario}
+                                onChange={(e) => setTelefoneUsuario(e.target.value)}
+                                placeholder="Ex: 11999999999"
+                                className="w-full bg-transparent border-b border-slate-300 pb-2 text-brand-dark font-medium outline-none focus:border-primary transition-colors"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-1 italic">* Usado para gerar seu QR Code de Cartão Digital.</p>
+                        </div>
                     </div>
                 </section>
 

@@ -18,7 +18,7 @@ interface ViewHomeProps {
 }
 
 export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHomeProps) {
-    const { nomeUsuario } = useConfig();
+    const { nomeUsuario, telefoneUsuario } = useConfig();
     const { openModal } = useModal();
     const [activeTab, setActiveTab] = useState<Medico['status']>('Prospecção');
     const [searchQuery, setSearchQuery] = useState('');
@@ -234,7 +234,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
             <QRCodeModal
                 isOpen={isQRModalOpen}
                 onClose={() => setIsQRModalOpen(false)}
-                whatsappLink={`https://wa.me/5511999999999?text=${encodeURIComponent('Olá Ariani, salvei seu contato aqui da Elmeco/Hooke!')}`}
+                whatsappLink={`https://wa.me/${telefoneUsuario.replace(/\D/g, '') || '5511999999999'}?text=${encodeURIComponent('Olá Ariani, salvei seu contato aqui da Elmeco/Hooke!')}`}
             />
         </motion.main>
     );
