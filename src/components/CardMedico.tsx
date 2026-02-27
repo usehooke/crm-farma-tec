@@ -20,14 +20,12 @@ export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }:
         ? differenceInDays(new Date(), parseISO(medico.ultimoContato))
         : 999;
 
-    // Helper to get initials for the avatar
+    // Helper to get initials for the avatar (First and Last name)
     const getInitials = (name: string) => {
-        return name
-            .split(' ')
-            .map(n => n[0])
-            .slice(0, 2)
-            .join('')
-            .toUpperCase();
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 0) return '??';
+        if (parts.length === 1) return parts[0][0].toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     };
 
     const isUrgent = daysSince > 30;
@@ -64,9 +62,10 @@ export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }:
         >
             <div className="flex gap-3">
                 {/* Avatar */}
-                <div className="w-10 h-10 shrink-0 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 font-bold text-sm border border-slate-200 shadow-sm relative">
+                <div
+                    className="w-10 h-10 shrink-0 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 font-bold text-sm border border-slate-200 shadow-sm relative pointer-events-none"
+                >
                     {getInitials(medico.nome)}
-                    {/* Indicador de Status Simples (bolinha) associado ao avatar? Ou mantemos no seletor? Manteremos o seletor. */}
                 </div>
 
                 <div className="flex-1 min-w-0">
