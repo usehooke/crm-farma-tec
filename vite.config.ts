@@ -10,8 +10,9 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-excel': ['xlsx'],
-          'vendor-charts': ['recharts'],
-          'vendor-framework': ['framer-motion', 'lucide-react', 'firebase/app', 'firebase/firestore']
+          'vendor-charts': ['recharts', 'recharts/lib/cartesian/Bar'],
+          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+          'vendor-ui': ['framer-motion', 'lucide-react']
         }
       }
     },
