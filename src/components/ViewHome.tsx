@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useDeferredValue, useEffect, useRef } from 'react';
 import { differenceInDays, parseISO } from 'date-fns';
 import { Search, Filter, Users, TrendingUp, QrCode } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,9 +22,14 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
     const { openModal } = useModal();
     const [activeTab, setActiveTab] = useState<Medico['status']>('Prospecção');
     const [searchQuery, setSearchQuery] = useState('');
+    const deferredSearchQuery = useDeferredValue(searchQuery);
     const [showUrgentOnly, setShowUrgentOnly] = useState(false);
     const [rankingLimit, setRankingLimit] = useState<number | null>(null);
     const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+
+    // Virtualization / Progressive Rendering
+    const [visibleCount, setVisibleCount] = useState(10);
+    const loadMoreRef = useRef<HTMLDivElement>(null);
 
     // --- Lógica de Filtros e Busca ---
     const medicosFiltrados = useMemo(() => {
@@ -48,9 +53,9 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
             });
         }
 
-        // 4. Busca por Texto
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
+        // 4. Busca por Texto (Usando o valor de baixa prioridade)
+        if (deferredSearchQuery) {
+            const q = deferredSearchQuery.toLowerCase();
             lista = lista.filter(m =>
                 m.nome.toLowerCase().includes(q) ||
                 m.especialidade.toLowerCase().includes(q) ||
@@ -59,7 +64,30 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
         }
 
         return lista;
-    }, [medicos, activeTab, searchQuery, showUrgentOnly, rankingLimit]);
+    }, [medicos, activeTab, deferredSearchQuery, showUrgentOnly, rankingLimit]);
+
+    // Lógica de "Windowing" Simplificada (Infinite Scroll renderizando apenas o necessário)
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    setVisibleCount((prev) => Math.min(prev + 6, medicosFiltrados.length));
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (loadMoreRef.current) {
+            observer.observe(loadMoreRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [medicosFiltrados.length]);
+
+    // Resetar contagem ao mudar de aba ou busca
+    useEffect(() => {
+        setVisibleCount(10);
+    }, [activeTab, deferredSearchQuery]);
 
     // Animação de entrada em cascata
     const containerVariants = {
@@ -207,7 +235,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
                 {/* Cards Area */}
                 <div className="pb-10">
                     <AnimatePresence mode="popLayout">
-                        {medicosFiltrados.map(medico => (
+                        {medicosFiltrados.slice(0, visibleCount).map(medico => (
                             <CardMedico
                                 key={medico.id}
                                 medico={medico}
@@ -216,6 +244,13 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
                             />
                         ))}
                     </AnimatePresence>
+
+                    {/* Sentinel para Progressive Rendering (Windowing) */}
+                    {visibleCount < medicosFiltrados.length && (
+                        <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
+                            <div className="w-5 h-5 border-2 border-brand-teal/20 border-t-brand-teal rounded-full animate-spin" />
+                        </div>
+                    )}
 
                     {medicosFiltrados.length === 0 && (
                         <motion.div
