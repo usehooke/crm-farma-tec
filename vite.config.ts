@@ -9,12 +9,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
+          // Separa o que é pesado do que é o app
           'vendor-excel': ['xlsx'],
           'vendor-charts': ['recharts'],
-          'vendor-framework': ['framer-motion', 'lucide-react', 'firebase/app', 'firebase/firestore']
+          'vendor-core': ['framer-motion', 'lucide-react', 'firebase/app', 'firebase/firestore']
         }
       }
     },
-    chunkSizeWarningLimit: 600
+    chunkSizeWarningLimit: 800
   }
 });
