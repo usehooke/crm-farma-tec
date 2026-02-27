@@ -1,5 +1,5 @@
 import { differenceInDays, parseISO } from 'date-fns';
-import { Phone, Clock, FileText, Smartphone } from 'lucide-react';
+import { Phone, Clock, FileText, Smartphone, Calendar, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Medico } from '../hooks/useMedicos';
 import { useConfig } from '../context/ConfigContext';
@@ -12,6 +12,9 @@ interface CardMedicoProps {
 
 export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedicoProps) {
     const { vipTags } = useConfig();
+    const today = new Date().toISOString().split('T')[0];
+    const isTodayContact = medico.dataRetorno === today;
+
     const daysSince = medico.ultimoContato
         ? differenceInDays(new Date(), parseISO(medico.ultimoContato))
         : 999;
@@ -114,6 +117,18 @@ export function CardMedico({ medico, onUpdateStatus, onViewHistory }: CardMedico
             </div>
 
             {/* Alertas Visuais */}
+            {isTodayContact && (
+                <div className="mt-3 text-[11px] font-black text-amber-700 bg-amber-50 border border-amber-300 px-3 py-2 rounded-lg flex items-center shadow-[inset_0_1px_2px_rgba(252,211,77,0.3)] animate-pulse-slow">
+                    <Star size={14} className="mr-1.5 shrink-0 fill-amber-400 text-amber-400" /> 📅 VISITA AGENDADA PARA HOJE (VIP)
+                </div>
+            )}
+
+            {medico.dataRetorno && !isTodayContact && (
+                <div className="mt-3 text-[11px] font-medium text-slate-500 bg-slate-50/50 px-3 py-1.5 rounded-lg border border-slate-100 flex items-center italic">
+                    <Calendar size={13} className="mr-1.5 shrink-0 opacity-50" /> Re-contato: {new Date(medico.dataRetorno).toLocaleDateString('pt-BR')}
+                </div>
+            )}
+
             {isUrgent && (
                 <div className="mt-3 text-[11px] font-bold text-red-600 bg-red-50/80 px-3 py-2 rounded-lg border border-red-100 flex items-center shadow-sm">
                     <Clock size={14} className="mr-1.5 shrink-0" /> Contato atrasado há muito tempo (&gt;30d)

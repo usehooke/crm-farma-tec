@@ -19,6 +19,7 @@ export interface Medico {
     localizacao: string;
     tags?: string[];
     proximaVisita?: string;
+    dataRetorno?: string; // ISO Date string for scheduled follow-up
     logVisitas: LogVisita[];
     consultor?: string;
     // Legacy prop for migration:

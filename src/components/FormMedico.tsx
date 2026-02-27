@@ -22,6 +22,7 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
         telefone: '',
         status: 'Prospecção',
         ultimoContato: new Date().toISOString(),
+        dataRetorno: '',
         tags: []
     });
     const { vipTags } = useConfig();
@@ -118,17 +119,25 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
                             </select>
                         </div>
                         <div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Data de Cadastro</label>
-                                <input
-                                    type="date"
-                                    value={formData.ultimoContato ? new Date(formData.ultimoContato).toISOString().split('T')[0] : ''}
-                                    readOnly
-                                    className="w-full border border-slate-200 bg-slate-50 text-slate-500 rounded-xl px-4 py-2.5 outline-none cursor-not-allowed"
-                                    title="A data do cadastro e última alteração é gerida automaticamente"
-                                />
-                            </div>
+                            <label className="block text-sm font-semibold text-primary mb-1.5">Agendar Retorno 📅</label>
+                            <input
+                                type="date"
+                                value={formData.dataRetorno || ''}
+                                onChange={e => setFormData({ ...formData, dataRetorno: e.target.value })}
+                                className="w-full border border-primary/30 rounded-xl px-4 py-2.5 text-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-primary/5 shadow-inner"
+                            />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Data de Cadastro</label>
+                        <input
+                            type="date"
+                            value={formData.ultimoContato ? new Date(formData.ultimoContato).toISOString().split('T')[0] : ''}
+                            readOnly
+                            className="w-full border border-slate-200 bg-slate-50 text-slate-500 rounded-xl px-4 py-2.5 outline-none cursor-not-allowed"
+                            title="A data do cadastro e última alteração é gerida automaticamente"
+                        />
                     </div>
 
                     <div>

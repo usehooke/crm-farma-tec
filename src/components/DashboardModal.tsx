@@ -1,4 +1,4 @@
-import { X, Download, TrendingUp, Users, FileText } from 'lucide-react';
+import { X, Download, TrendingUp, Users, FileText, Star, Smartphone, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
@@ -26,6 +26,8 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
     const dashboardRef = useRef<HTMLDivElement>(null);
     const stats = calcularStatsMensais(medicos);
     const totalMedicos = medicos.length;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const medicosHoje = medicos.filter(m => m.dataRetorno === todayStr);
 
     const chartData = tabs.map(tab => ({
         name: tab,
@@ -193,6 +195,46 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
                                     <div className="absolute top-0 right-0 p-4 opacity-10">
                                         <TrendingUp size={120} />
                                     </div>
+                                </div>
+
+                                {/* Motor de Retenção - Agenda Diária */}
+                                <div className="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-3xl border border-amber-200 dark:border-amber-800 shadow-sm">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center text-white shadow-sm">
+                                                <Star size={16} className="fill-current" />
+                                            </div>
+                                            <h4 className="text-[10px] font-black text-amber-800 dark:text-amber-400 uppercase tracking-widest">Agenda de Hoje</h4>
+                                        </div>
+                                        <div className="px-3 py-1 bg-amber-200 dark:bg-amber-800 rounded-full text-[9px] font-bold text-amber-800 dark:text-amber-200">
+                                            {medicosHoje.length} PENDENTES
+                                        </div>
+                                    </div>
+
+                                    {medicosHoje.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {medicosHoje.map(m => (
+                                                <div key={m.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-amber-100">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs font-bold text-slate-800 dark:text-white">{m.nome}</span>
+                                                        <span className="text-[9px] text-slate-500 uppercase">{m.especialidade}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <a href={`tel:${m.telefone.replace(/\D/g, '')}`} className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
+                                                            <Smartphone size={14} />
+                                                        </a>
+                                                        <a href={`https://wa.me/${m.telefone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg text-primary hover:bg-primary/20 transition-all">
+                                                            <Phone size={14} />
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="py-8 text-center bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-amber-200">
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase italic tracking-widest">Nenhuma visita agendada para hoje</p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
