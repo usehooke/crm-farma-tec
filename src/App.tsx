@@ -1,3 +1,4 @@
+console.log('App Iniciado');
 import { useState, useEffect } from 'react';
 import { useMedicos } from './hooks/useMedicos';
 import { Plus } from 'lucide-react';

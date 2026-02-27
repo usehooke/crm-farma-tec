@@ -1,4 +1,5 @@
 import { useConfig } from '../context/ConfigContext';
+import { generateUUID } from '../utils/utils';
 
 export interface LogVisita {
     id: string;
@@ -28,7 +29,7 @@ export function useMedicos() {
     const { medicos, setMedicos } = useConfig();
 
     const adicionarMedico = (novo: Omit<Medico, 'id'>) => {
-        const medicoComId = { ...novo, id: crypto.randomUUID() };
+        const medicoComId = { ...novo, id: generateUUID() };
         setMedicos([...medicos, medicoComId]);
     };
 
@@ -40,7 +41,7 @@ export function useMedicos() {
         setMedicos(medicos.map(m => {
             if (m.id === idMedico) {
                 const novoLog: LogVisita = {
-                    id: crypto.randomUUID(),
+                    id: generateUUID(),
                     data: new Date().toISOString(),
                     nota,
                     tipo

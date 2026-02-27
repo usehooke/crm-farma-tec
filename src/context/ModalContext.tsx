@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { generateUUID } from '../utils/utils';
 import { AnimatePresence } from 'framer-motion';
 import type { Medico } from '../hooks/useMedicos';
 import { FormMedico } from '../components/FormMedico';
@@ -64,7 +65,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                             adicionarLog(id, nota);
                             setModalData((prev: Medico) => ({
                                 ...prev,
-                                logVisitas: [{ id: crypto.randomUUID(), nota, data: new Date().toISOString() }, ...prev.logVisitas],
+                                logVisitas: [{ id: generateUUID(), nota, data: new Date().toISOString() }, ...prev.logVisitas],
                                 ultimoContato: new Date().toISOString()
                             }));
                         }}

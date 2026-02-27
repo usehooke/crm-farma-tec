@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { generateUUID } from '../utils/utils';
 
 export const importarPlanilhaMedicos = async (
     ficheiro: File,
@@ -47,7 +48,7 @@ export const importarPlanilhaMedicos = async (
                 const localizacao = [cidade, bairro].filter(Boolean).join(' - ') || 'N/A';
 
                 return {
-                    id: crypto.randomUUID(),
+                    id: generateUUID(),
                     nome: nome,
                     especialidade: linha.Especialidade || linha.ESPECIALIDADE || 'Geral',
                     telefone: telFinal,
