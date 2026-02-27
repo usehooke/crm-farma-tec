@@ -45,35 +45,32 @@ const AppContent = () => {
   useEffect(() => {
     if (!hasValidConfig) return;
 
-    const constSubscribe = onAuthStateChanged(auth, (user) => {
+    const constSubscribe = onAuthStateChanged(auth, async (user) => {
+      // 1. Atualiza o estado global IMEDIATAMENTE antes de qualquer ação
       setUser(user);
-      setCloudSyncError(null); // Limpa erros antigos ao mudar estado de auth
+      setUsuarioLogado(user);
+      setCloudSyncError(null);
 
       if (user) {
+        // 2. Só dispara o sync se tivermos o UID garantido
         setSyncInProgress(true);
-        fazerPullDaNuvem(user.uid)
-          .then(async (medicosNuvem) => {
-            // Se a nuvem estiver vazia e o usuário for a Ariani (ou o perfil inicial)
-            // Disparamos o "Seed" automático agora que as permissões estão OK
-            if (medicosNuvem.length === 0) {
+        try {
+          const medicosNuvem = await fazerPullDaNuvem(user.uid);
 
-              const result = await importarCarteiraTop50(user.uid);
-              if (result.success) {
-                // Após o seed, fazemos um novo pull para atualizar o estado local
-                await fazerPullDaNuvem(user.uid);
-              }
+          if (medicosNuvem.length === 0) {
+            const result = await importarCarteiraTop50(user.uid);
+            if (result.success) {
+              await fazerPullDaNuvem(user.uid);
             }
-          })
-          .catch((e) => {
-            console.error("Erro no handshake de sincronização:", e);
-            setCloudSyncError(e.message);
-          })
-          .finally(() => {
-            setSyncInProgress(false);
-          });
+          }
+        } catch (e: any) {
+          console.error("Erro no handshake de sincronização:", e);
+          setCloudSyncError(e.message);
+        } finally {
+          setSyncInProgress(false);
+        }
       }
 
-      setUsuarioLogado(user);
       setIsAuthLoading(false);
     });
 

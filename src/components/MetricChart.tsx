@@ -15,7 +15,7 @@ export function MetricChart({ medicos }: MetricChartProps) {
         const counts = {
             'Prospecção': 0,
             'Apresentada': 0,
-            'Parceiro': 0,
+            'Parceiro Ativo': 0,
             'Monitoramento': 0
         };
 
@@ -26,10 +26,10 @@ export function MetricChart({ medicos }: MetricChartProps) {
         });
 
         return [
-            { name: 'Prospec.', total: counts['Prospecção'], color: '#94a3b8' },
+            { name: 'Prospe.', total: counts['Prospecção'], color: '#94a3b8' },
             { name: 'Apres.', total: counts['Apresentada'], color: '#2dd4bf' },
-            { name: 'Parceiro', total: counts['Parceiro'], color: '#0d9488' },
-            { name: 'Monit.', total: counts['Monitoramento'], color: '#0f172a' },
+            { name: 'Monitor.', total: counts['Monitoramento'], color: '#0f172a' },
+            { name: 'Parceiro', total: counts['Parceiro Ativo'], color: '#0d9488' },
         ];
     }, [medicos]);
 
