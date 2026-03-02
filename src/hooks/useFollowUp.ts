@@ -29,6 +29,9 @@ export function useFollowUp(medicos: Medico[]) {
                 // Se não houver NENHUM contato registrado, não geramos alerta de "atraso"
                 if (!ultimaVisitaStr) return null;
 
+                // Ignora "atrasos" de quem nunca foi contatado (eles ganham o status 'Novo na Carteira')
+                if (!medico.logVisitas || medico.logVisitas.length === 0) return null;
+
                 const ultimaVisita = parseISO(ultimaVisitaStr);
                 const diasInativo = differenceInDays(hoje, ultimaVisita);
 

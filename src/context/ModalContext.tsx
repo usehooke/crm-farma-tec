@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, Suspense, lazy } from 'react';
 import { generateUUID } from '../utils/utils';
 import { AnimatePresence } from 'framer-motion';
 import type { Medico } from '../hooks/useMedicos';
@@ -7,15 +7,17 @@ import { HistoricoModal } from '../components/HistoricoModal';
 import { DashboardModal } from '../components/DashboardModal';
 import { useMedicos } from '../hooks/useMedicos';
 
+const GuiaAjuda = lazy(() => import('../components/GuiaAjuda'));
+
 interface ModalContextData {
-    openModal: (type: 'form' | 'historico' | 'dashboard', data?: any) => void;
+    openModal: (type: 'form' | 'historico' | 'dashboard' | 'guia', data?: any) => void;
     closeModal: () => void;
 }
 
 const ModalContext = createContext<ModalContextData>({} as ModalContextData);
 
 export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [activeModal, setActiveModal] = useState<'form' | 'historico' | 'dashboard' | null>(null);
+    const [activeModal, setActiveModal] = useState<'form' | 'historico' | 'dashboard' | 'guia' | null>(null);
     const [modalData, setModalData] = useState<any>(null);
 
     // Como os modais precisam de acesso às funções de médico para salvar, vamos provê-las aqui
@@ -23,7 +25,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const tabs: Medico['status'][] = ['Prospecção', 'Apresentada', 'Parceiro Ativo', 'Monitoramento'];
 
-    const openModal = (type: 'form' | 'historico' | 'dashboard', data?: any) => {
+    const openModal = (type: 'form' | 'historico' | 'dashboard' | 'guia', data?: any) => {
         setModalData(data);
         setActiveModal(type);
     };
@@ -79,6 +81,12 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         medicos={medicos}
                         tabs={tabs}
                     />
+                )}
+
+                {activeModal === 'guia' && (
+                    <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center text-white font-bold">Carregando Guia...</div>}>
+                        <GuiaAjuda onClose={closeModal} />
+                    </Suspense>
                 )}
             </AnimatePresence>
         </ModalContext.Provider>

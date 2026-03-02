@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Calendar, Database, ShieldCheck, LogOut, Tag, Plus, X } from 'lucide-react';
+import { User, Calendar, Database, ShieldCheck, LogOut, Tag, Plus, X, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { auth } from '../services/firebaseConfig';
 import { fazerPushParaNuvem, importarCarteiraTop50 } from '../services/syncService';
 import { signOut } from 'firebase/auth';
 import { useConfig, STORAGE_KEY_MEDICOS } from '../context/ConfigContext';
 import { useMedicos } from '../hooks/useMedicos';
+import { useModal } from '../context/ModalContext';
 
 export const Configuracoes = () => {
     const {
@@ -27,6 +28,7 @@ export const Configuracoes = () => {
     const [novaTagNome, setNovaTagNome] = useState('');
 
     const { limparBaseDuplicada } = useMedicos();
+    const { openModal } = useModal();
 
     const handleSalvarPerfil = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNomeUsuario(e.target.value);
@@ -191,6 +193,22 @@ export const Configuracoes = () => {
             </header>
 
             <div className="space-y-6">
+                {/* Bloco 0: Central de Ajuda */}
+                <section
+                    onClick={() => openModal('guia')}
+                    className="p-5 rounded-2xl bg-gradient-to-r from-brand-teal text-white to-primary shadow-lg shadow-brand-teal/30 cursor-pointer active:scale-95 transition-all flex items-center justify-between"
+                >
+                    <div className="flex gap-4 items-center">
+                        <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                            <HelpCircle size={24} className="text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-black tracking-wide">Central de Ajuda</h2>
+                            <p className="text-xs text-white/80 font-medium mt-0.5">O Guia Definitivo da Ariani</p>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Bloco 1: Perfil do Usuário */}
                 <section className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800">
                     <div className="flex items-center gap-2 mb-4">

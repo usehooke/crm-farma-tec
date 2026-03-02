@@ -24,6 +24,7 @@ export interface Medico {
     dataRetorno?: string; // ISO Date string for scheduled follow-up
     logVisitas: LogVisita[];
     consultor?: string;
+    dataCriacao?: string; // ISO date for grace period
     // Legacy prop for migration:
     observacoes?: string;
 }
@@ -32,7 +33,7 @@ export function useMedicos() {
     const { medicos, setMedicos } = useConfig();
 
     const adicionarMedico = (novo: Omit<Medico, 'id'>) => {
-        const medicoComId = { ...novo, id: generateUUID() };
+        const medicoComId = { ...novo, id: generateUUID(), dataCriacao: new Date().toISOString() };
         setMedicos([...medicos, medicoComId]);
     };
 
@@ -110,10 +111,12 @@ export function useMedicos() {
             // Update local state temporarily
             setMedicos(mergedMedicos);
 
-            // Delete from Firebase
+            // Delete from Firebase using Promise chunks
             if (uid && toDelete.length > 0) {
-                for (const id of toDelete) {
-                    await apagarMedicoNuvem(uid, id);
+                const CHUNK_SIZE = 10;
+                for (let i = 0; i < toDelete.length; i += CHUNK_SIZE) {
+                    const chunk = toDelete.slice(i, i + CHUNK_SIZE);
+                    await Promise.all(chunk.map(id => apagarMedicoNuvem(uid, id)));
                 }
             }
 

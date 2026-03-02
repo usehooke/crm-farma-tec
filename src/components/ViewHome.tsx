@@ -50,8 +50,9 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
             lista = lista.filter(m => {
                 if (!m) return false;
                 const daysSince = m.ultimoContato ? differenceInDays(new Date(), parseISO(m.ultimoContato)) : 999;
-                const isUrgent = daysSince > 30;
-                const isWarning = m.status === 'Apresentada' && daysSince > 7 && !isUrgent;
+                const zeroLogs = !m.logVisitas || m.logVisitas.length === 0;
+                const isUrgent = !zeroLogs && daysSince > 30;
+                const isWarning = !zeroLogs && m.status === 'Apresentada' && daysSince > 7 && !isUrgent;
                 return isUrgent || isWarning;
             });
         }

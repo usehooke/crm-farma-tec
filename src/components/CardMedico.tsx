@@ -29,8 +29,15 @@ export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }:
         return (parts[0][0] + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
     };
 
-    const isUrgent = daysSince > 30;
-    const isWarning = medico.status === 'Apresentada' && daysSince > 7 && !isUrgent;
+    const zeroLogs = !medico.logVisitas || medico.logVisitas.length === 0;
+    const dataCriacaoISO = medico.dataCriacao || medico.ultimoContato;
+    const diasDesdeCriacao = dataCriacaoISO ? differenceInDays(new Date(), parseISO(dataCriacaoISO)) : 999;
+    const inGracePeriod = diasDesdeCriacao <= 15;
+
+    // Smart Logic: vermelho apenas se teve a primeira visita
+    const isUrgent = !zeroLogs && daysSince > 30;
+    const isWarning = !zeroLogs && medico.status === 'Apresentada' && daysSince > 7 && !isUrgent;
+    const isNewBadge = zeroLogs;
 
     const zapLink = `https://wa.me/${medico.telefone.replace(/\D/g, '')}?text=${encodeURIComponent(
         `Olá, Dr(a). ${medico.nome}! Tudo bem? Gostaria de saber como estão os protocolos FarmaClinQI.`
@@ -137,6 +144,12 @@ export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }:
                 </div>
             )}
 
+            {isNewBadge && (
+                <div className="mt-3 text-[11px] font-bold text-brand-teal bg-brand-light/30 px-3 py-2 rounded-lg border border-brand-teal/20 flex items-center shadow-sm">
+                    <Star size={14} className="mr-1.5 shrink-0" /> {inGracePeriod ? 'Novo na Carteira (Em Carência)' : 'Novo na Carteira (Sem Visitas)'}
+                </div>
+            )}
+
             {isWarning && (
                 <div className="mt-3 text-[11px] font-bold text-yellow-700 bg-yellow-50/80 px-3 py-2 rounded-lg border border-yellow-200 flex items-center shadow-sm animate-pulse-slow">
                     <FileText size={14} className="mr-1.5 shrink-0" /> Cutucar com dúvida técnica (Apresentado há {daysSince}d)
@@ -147,9 +160,10 @@ export const CardMedico = React.memo(({ medico, onUpdateStatus, onViewHistory }:
             <div className="mt-3 flex items-center justify-between">
                 <div className="flex items-center text-xs font-medium text-slate-500 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
                     <Clock size={12} className="mr-1" />
-                    {daysSince === 0 ? 'Contatado hoje' :
-                        daysSince === 1 ? 'Ontem' :
-                            daysSince > 900 ? 'Nunca contatado' : `Há ${daysSince} dias`}
+                    {zeroLogs ? 'Nunca contatado' :
+                        daysSince === 0 ? 'Contatado hoje' :
+                            daysSince === 1 ? 'Ontem' :
+                                `Há ${daysSince} dias`}
                 </div>
 
                 <div className="text-[10px] text-slate-400 font-medium">

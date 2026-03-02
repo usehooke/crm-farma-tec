@@ -65,7 +65,8 @@ export function useExcelActions(
                             status: 'Prospecção',
                             logVisitas: [],
                             tags: [],
-                            ultimoContato: new Date().toISOString()
+                            ultimoContato: new Date().toISOString(),
+                            dataCriacao: new Date().toISOString()
                         });
                         createdCount++;
                     }
