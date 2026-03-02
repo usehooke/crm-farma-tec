@@ -81,8 +81,8 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
         });
 
         const tableBody: any[] = [];
-        const todosLogs = medicos.flatMap(m =>
-            m.logVisitas.map(log => ({
+        const todosLogs = (medicos || []).flatMap(m =>
+            (m.logVisitas || []).map(log => ({
                 medicoNome: m.nome,
                 data: parseISO(log.data),
                 dataStr: new Date(log.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
@@ -159,7 +159,7 @@ export function DashboardModal({ isOpen, onClose, medicos, tabs }: DashboardModa
                                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Meta Mensal</span>
                                         </div>
                                         <p className="text-3xl font-black text-brand-dark dark:text-white">
-                                            {medicos.filter(m => m.logVisitas.length > 0).length}<span className="text-slate-300 text-lg font-normal">/50</span>
+                                            {(medicos || []).filter(m => (m.logVisitas || []).length > 0).length}<span className="text-slate-300 text-lg font-normal">/50</span>
                                         </p>
                                         <p className="text-[10px] text-slate-500 mt-1">Visitas vs Meta Ariani</p>
                                     </div>

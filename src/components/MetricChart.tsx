@@ -72,8 +72,8 @@ export function MetricChart({ medicos }: MetricChartProps) {
                             transition={{ duration: 0.4, ease: "circOut" }}
                             className="overflow-hidden px-4 pb-6"
                         >
-                            <div className="h-full w-full">
-                                <ResponsiveContainer width="100%" height="100%">
+                            <div className="h-full w-full min-h-[200px]">
+                                <ResponsiveContainer width="100%" height={200}>
                                     <BarChart data={data} margin={{ top: 20, right: 10, left: -25, bottom: 0 }}>
                                         <XAxis
                                             dataKey="name"

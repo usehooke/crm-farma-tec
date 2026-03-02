@@ -20,9 +20,9 @@ export function DashboardBI() {
             };
         });
 
-        medicos.forEach(medico => {
+        (medicos || []).forEach(medico => {
             if (medico.logVisitas) {
-                medico.logVisitas.forEach((log: any) => {
+                (medico.logVisitas || []).forEach((log: any) => {
                     const logDate = parseISO(log.data);
                     // Match the Date
                     const daySlot = last7Days.find(d =>
@@ -43,8 +43,8 @@ export function DashboardBI() {
     const statsData = useMemo(() => {
         let totalLogs = 0;
         let activeDoctors = 0;
-        medicos.forEach(m => {
-            if (m.logVisitas && m.logVisitas.length > 0) {
+        (medicos || []).forEach(m => {
+            if (m.logVisitas && (m.logVisitas || []).length > 0) {
                 totalLogs += m.logVisitas.length;
                 activeDoctors += 1;
             }
@@ -84,8 +84,9 @@ export function DashboardBI() {
                 {/* Gráfico de Barras - Recharts */}
                 <div className="bg-surface rounded-3xl p-5 shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 overflow-hidden relative">
                     <h3 className="text-sm font-bold text-brand-dark mb-6">Visitas nos Últimos 7 Dias</h3>
-                    <div className="h-48 w-full -ml-4">
-                        <ResponsiveContainer width="100%" height="100%">
+                    {/* Fixed Height to avoid Recharts negative height Error */}
+                    <div className="h-48 min-h-[192px] w-full -ml-4">
+                        <ResponsiveContainer width="100%" height={192}>
                             <BarChart data={visitsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                                 <XAxis

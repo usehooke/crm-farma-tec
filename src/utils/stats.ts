@@ -19,7 +19,7 @@ export const calcularStatsMensais = (medicos: Medico[]): CRMStats => {
     const contagemProtocolos: Record<string, number> = {};
 
     medicos.forEach(m => {
-        m.logVisitas.forEach(log => {
+        (m.logVisitas || []).forEach(log => {
             const dataLog = new Date(log.data);
             if (isWithinInterval(dataLog, { start: inicioMes, end: fimMes })) {
                 if (log.nota.includes('📄')) {
@@ -37,7 +37,7 @@ export const calcularStatsMensais = (medicos: Medico[]): CRMStats => {
         .sort((a, b) => b[1] - a[1])[0]?.[0] || 'Nenhum';
 
     const medicosEngajados = medicos.filter(m =>
-        m.logVisitas.some(log => log.nota.includes('📄'))
+        (m.logVisitas || []).some(log => log.nota.includes('📄'))
     ).length;
 
     const taxaEngajamento = medicos.length > 0 ? (medicosEngajados / medicos.length) * 100 : 0;
