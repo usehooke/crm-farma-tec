@@ -3,7 +3,7 @@ import { AlertTriangle } from 'lucide-react';
 export const ConfigErrorScreen = () => {
     return (
         <div className="min-h-screen bg-brand-white flex flex-col justify-center items-center px-8 text-center">
-            <div className="w-20 h-20 rounded-3xl bg-surface shadow-[8px_8px_16px_#e5e5e5,-8px_-8px_16px_#ffffff] flex items-center justify-center mb-6">
+            <div className="w-20 h-20 rounded-3xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex items-center justify-center mb-6">
                 <AlertTriangle size={36} className="text-red-500" />
             </div>
             <h1 className="text-2xl font-black text-brand-dark tracking-tight mb-3">

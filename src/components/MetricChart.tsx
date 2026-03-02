@@ -39,7 +39,7 @@ export function MetricChart({ medicos }: MetricChartProps) {
 
     return (
         <div className="px-5 mb-8">
-            <div className="bg-surface rounded-[32px] p-1 shadow-[10px_10px_20px_#e5e5e5,-10px_-10px_20px_#ffffff] border border-white/50">
+            <div className="bg-surface rounded-[32px] p-1 shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 border border-white/50">
                 {/* Header do Gráfico */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}

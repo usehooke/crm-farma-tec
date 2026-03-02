@@ -9,6 +9,7 @@ import { CardMedico } from './CardMedico';
 import { CardAlerta } from './CardAlerta';
 import { MetricChart } from './MetricChart';
 import { QRCodeModal } from './QRCodeModal';
+import { SmartWidget } from './SmartWidget';
 
 interface ViewHomeProps {
     medicos: Medico[];
@@ -126,12 +127,17 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
 
                 <button
                     onClick={() => setIsQRModalOpen(true)}
-                    className="p-4 bg-white rounded-3xl shadow-[6px_6px_15px_#e5e5e5,-6px_-6px_15px_#ffffff] text-primary active:scale-90 transition-all border border-slate-50"
+                    className="p-4 bg-white rounded-3xl shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 text-primary active:scale-90 transition-all border border-slate-50"
                     title="Seu Cartão de Visitas Digital"
                 >
                     <QrCode size={24} />
                 </button>
             </motion.header>
+
+            {/* Smart Widget (Post-its e Tarefas) */}
+            <motion.div variants={itemVariants}>
+                <SmartWidget />
+            </motion.div>
 
             {/* Camada de Analytics Neumórfica */}
             <motion.div variants={itemVariants}>
@@ -150,7 +156,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
                 <div className="grid grid-cols-3 gap-3">
                     <button
                         onClick={() => setRankingLimit(rankingLimit === 10 ? null : 10)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 10 ? 'bg-brand-teal text-white shadow-lg' : 'bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]'}`}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 10 ? 'bg-brand-teal text-white shadow-lg' : 'bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800'}`}
                     >
                         <span className="text-xs font-black uppercase tracking-tighter">Top 10</span>
                         <span className={`text-[10px] ${rankingLimit === 10 ? 'text-white/60' : 'text-slate-400'}`}>Elite</span>
@@ -158,7 +164,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
 
                     <button
                         onClick={() => setRankingLimit(rankingLimit === 20 ? null : 20)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 20 ? 'bg-primary text-white shadow-lg' : 'bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]'}`}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 20 ? 'bg-primary text-white shadow-lg' : 'bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800'}`}
                     >
                         <span className="text-xs font-black uppercase tracking-tighter">Top 20</span>
                         <span className={`text-[10px] ${rankingLimit === 20 ? 'text-white/60' : 'text-slate-400'}`}>Foco</span>
@@ -166,7 +172,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
 
                     <button
                         onClick={() => setRankingLimit(rankingLimit === 50 ? null : 50)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 50 ? 'bg-slate-800 text-white shadow-lg' : 'bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]'}`}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 50 ? 'bg-slate-800 text-white shadow-lg' : 'bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800'}`}
                     >
                         <span className="text-xs font-black uppercase tracking-tighter">Top 50</span>
                         <span className={`text-[10px] ${rankingLimit === 50 ? 'text-white/60' : 'text-slate-400'}`}>Carteira</span>
@@ -176,7 +182,7 @@ export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHo
 
             {/* Card Largo: Resumo de Performance */}
             <motion.div variants={itemVariants} className="px-5 mt-6 mb-8">
-                <div className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] flex items-center justify-between">
+                <div className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-bold text-brand-dark">Meta Mensal (Ariani)</h3>
                         <p className="text-xs text-slate-500">Visitas: {(medicos || []).filter(m => (m?.logVisitas?.length || 0) > 0).length} / 50</p>

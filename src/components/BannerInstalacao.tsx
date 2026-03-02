@@ -18,7 +18,7 @@ export const BannerInstalacao = () => {
                 initial={{ opacity: 0, y: -50 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -50 }}
-                className="fixed top-4 left-4 right-4 z-[60] p-4 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] flex items-center justify-between border border-white/50"
+                className="fixed top-4 left-4 right-4 z-[60] p-4 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex items-center justify-between border border-white/50"
             >
                 <div className="flex items-center gap-3">
                     {/* Mini logo da cruz */}

@@ -6,6 +6,7 @@ import { auth } from '../services/firebaseConfig';
 import { fazerPushParaNuvem, importarCarteiraTop50 } from '../services/syncService';
 import { signOut } from 'firebase/auth';
 import { useConfig, STORAGE_KEY_MEDICOS } from '../context/ConfigContext';
+import { useMedicos } from '../hooks/useMedicos';
 
 export const Configuracoes = () => {
     const {
@@ -22,7 +23,10 @@ export const Configuracoes = () => {
     } = useConfig();
 
     const [isSyncing, setIsSyncing] = useState(false);
+    const [isMerging, setIsMerging] = useState(false);
     const [novaTagNome, setNovaTagNome] = useState('');
+
+    const { limparBaseDuplicada } = useMedicos();
 
     const handleSalvarPerfil = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNomeUsuario(e.target.value);
@@ -69,10 +73,10 @@ export const Configuracoes = () => {
 
     const handleGoogleLogin = () => {
         // Implementação do Google Identity Services
-        const clientId = 'YOUR_GOOGLE_CLIENT_ID'; // Requer Client ID real para produção, mas usaremos um mockup aqui para manter o fluxo
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''; // Seguro em variáveis de ambiente
 
-        if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID') {
-            toast.error('Client ID do Google não configurado no código.');
+        if (!clientId) {
+            toast.error('Client ID do Google não configurado (.env).');
             // Para efeitos de demonstração no ambiente local, forçaremos a conexão:
             localStorage.setItem('@FarmaClinQI:google_api_key', 'mock_token_for_demo');
             setGoogleConectado(true);
@@ -140,12 +144,38 @@ export const Configuracoes = () => {
         }
     };
 
+    const handleHigienizarBase = async () => {
+        if (!window.confirm("Aviso: Esta ação irá unir os históricos duplicados e remover os registros excedentes de sua base. Tem certeza que deseja continuar?")) {
+            return;
+        }
+
+        setIsMerging(true);
+        const toastId = toast.loading('Buscando e mesclando duplicidades...');
+        try {
+            const relatorio = await limparBaseDuplicada();
+
+            if (relatorio.mergedCount > 0) {
+                toast.success(`Higienização Concluída: ${relatorio.mergedCount} médicos mesclados com sucesso. Base atualizada para ${relatorio.totalFinal} médicos reais.`, {
+                    id: toastId,
+                    duration: 6000
+                });
+            } else {
+                toast.success(`Base Verificada! Não foram encontradas duplicidades entre seus ${relatorio.totalFinal} médicos reais.`, { id: toastId });
+            }
+        } catch (e) {
+            console.error(e);
+            toast.error('Ocorreu um erro ao limpar a base de dados.', { id: toastId });
+        } finally {
+            setIsMerging(false);
+        }
+    };
+
     const handleLogoutApp = () => {
         signOut(auth).then(() => {
-            localStorage.removeItem('@FarmaClinQI:google_api_key');
-            localStorage.removeItem('@FarmaClinIQ:user_nome');
-            localStorage.removeItem('@FarmaClinQI:profile');
-            // A redireção para Auth.tsx ocorrerá automaticamente via onAuthStateChanged no App.tsx
+            // [PRE-FLIGHT CHECK]: Clear absolutely all local storage variables to prevent Data Leak
+            localStorage.clear();
+            // Trigger a hard reload to purge React states that might linger
+            window.location.href = '/';
         });
     };
 
@@ -162,7 +192,7 @@ export const Configuracoes = () => {
 
             <div className="space-y-6">
                 {/* Bloco 1: Perfil do Usuário */}
-                <section className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
+                <section className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800">
                     <div className="flex items-center gap-2 mb-4">
                         <User size={18} className="text-primary" />
                         <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide">Perfil Profissional</h2>
@@ -193,7 +223,7 @@ export const Configuracoes = () => {
                 </section>
 
                 {/* Bloco 2: Integrações (Google Calendar) */}
-                <section className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
+                <section className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800">
                     <div className="flex items-center gap-2 mb-4">
                         <Calendar size={18} className="text-primary" />
                         <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide">Integrações</h2>
@@ -214,7 +244,7 @@ export const Configuracoes = () => {
                                     setGoogleConectado(false);
                                     toast.info('Conta desconectada.');
                                 }}
-                                className="flex items-center gap-1 text-xs font-bold text-slate-400 bg-surface px-3 py-1.5 rounded-lg active:scale-95 transition-transform shadow-[2px_2px_5px_#e5e5e5,-2px_-2px_5px_#ffffff]"
+                                className="flex items-center gap-1 text-xs font-bold text-slate-400 bg-surface px-3 py-1.5 rounded-lg active:scale-95 transition-transform shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800"
                             >
                                 <LogOut size={12} /> Desconectar
                             </button>
@@ -230,7 +260,7 @@ export const Configuracoes = () => {
                 </section>
 
                 {/* Bloco 2.2: Personalização (Tema) */}
-                <section className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
+                <section className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <ShieldCheck size={18} className="text-primary" />
@@ -257,7 +287,7 @@ export const Configuracoes = () => {
                 </section>
 
                 {/* Bloco 2.5: Etiquetas Customizadas */}
-                <section className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
+                <section className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800">
                     <div className="flex items-center gap-2 mb-4">
                         <Tag size={18} className="text-primary" />
                         <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide">Etiquetas VIP</h2>
@@ -295,7 +325,7 @@ export const Configuracoes = () => {
                         <button
                             onClick={handleAdicionarTag}
                             disabled={!novaTagNome.trim()}
-                            className="p-2 bg-surface rounded-xl text-primary shadow-[2px_2px_5px_#e5e5e5,-2px_-2px_5px_#ffffff] active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all shrink-0"
+                            className="p-2 bg-surface rounded-xl text-primary shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all shrink-0"
                         >
                             <Plus size={18} />
                         </button>
@@ -303,7 +333,7 @@ export const Configuracoes = () => {
                 </section>
 
                 {/* Bloco 3: Nuvem e Dados */}
-                <section className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
+                <section className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800">
                     <div className="flex items-center gap-2 mb-4">
                         <Database size={18} className="text-primary" />
                         <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide">Backup em Nuvem</h2>
@@ -330,18 +360,29 @@ export const Configuracoes = () => {
                     {(auth.currentUser?.email === 'ariani@elmeco.com.br' || auth.currentUser?.email === 'nando@FarmaClinQI.com.br' || auth.currentUser?.uid === 'MnXg91W7xwNGqAKDE3DzC6dIitg1') && (
                         <div className="mt-8 pt-6 border-t border-slate-200">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Acesso Administrativo</p>
-                            <button
-                                onClick={handleImportarVip}
-                                className="w-full py-4 bg-brand-white text-brand-teal border-2 border-brand-teal/20 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm hover:bg-brand-teal/5 transition-all flex items-center justify-center gap-2"
-                            >
-                                <ShieldCheck size={16} /> Importar Planilha SP (Vip)
-                            </button>
+
+                            <div className="space-y-3">
+                                <button
+                                    onClick={handleImportarVip}
+                                    className="w-full py-4 bg-brand-white text-brand-teal border-2 border-brand-teal/20 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm hover:bg-brand-teal/5 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <ShieldCheck size={16} /> Importar Planilha SP (Vip)
+                                </button>
+
+                                <button
+                                    onClick={handleHigienizarBase}
+                                    disabled={isMerging}
+                                    className={`w-full py-4 bg-red-50 text-red-600 border-2 border-red-200 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm hover:bg-red-100 transition-all flex items-center justify-center gap-2 ${isMerging ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <ShieldCheck size={16} /> {isMerging ? 'Processando Mesclagem...' : 'Forçar Higienização de Base'}
+                                </button>
+                            </div>
                         </div>
                     )}
                 </section>
 
                 {/* Bloco 4: Segurança */}
-                <section className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
+                <section className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800">
                     <div className="flex items-center gap-2 mb-4">
                         <ShieldCheck size={18} className="text-primary" />
                         <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide">Conta e Acessos</h2>
@@ -349,7 +390,7 @@ export const Configuracoes = () => {
 
                     <button
                         onClick={handleLogoutApp}
-                        className="w-full mt-2 flex justify-center items-center gap-2 text-sm font-bold text-red-500 bg-surface py-3 rounded-xl shadow-[inset_4px_4px_8px_#e5e5e5,inset_-4px_-4px_8px_#ffffff] active:scale-95 transition-transform"
+                        className="w-full mt-2 flex justify-center items-center gap-2 text-sm font-bold text-red-500 bg-surface py-3 rounded-xl shadow-inner shadow-slate-200/60 dark:shadow-none active:scale-95 transition-transform"
                     >
                         <LogOut size={16} /> Sair da Conta
                     </button>

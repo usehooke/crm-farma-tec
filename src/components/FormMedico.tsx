@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { Medico } from '../hooks/useMedicos';
 import { useConfig } from '../context/ConfigContext';
-import { X } from 'lucide-react';
+import { useModal } from '../context/ModalContext';
+import { X, AlertCircle } from 'lucide-react';
 
 interface FormMedicoProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ const STATUS_OPCIONAL = ['Prospecção', 'Apresentada', 'Parceiro Ativo', 'Monit
 export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedicoProps) {
     const [formData, setFormData] = useState<Omit<Medico, 'id' | 'logVisitas'>>({
         nome: '',
+        crm: '',
         especialidade: '',
         localizacao: '',
         telefone: '',
@@ -25,7 +27,9 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
         dataRetorno: '',
         tags: []
     });
-    const { vipTags } = useConfig();
+    const { vipTags, medicos } = useConfig();
+    const { openModal } = useModal();
+    const [duplicataDetectada, setDuplicataDetectada] = useState<Medico | null>(null);
 
     const toggleTag = (tagId: string) => {
         setFormData(prev => {
@@ -39,8 +43,38 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Anti-Duplicidade Check (Apenas para novos cadastros)
+        if (!medicoEditando) {
+            const tempName = formData.nome.trim().toUpperCase();
+            const tempCity = formData.localizacao.trim().toUpperCase();
+            const tempCrm = formData.crm?.trim().toUpperCase();
+
+            const jaExiste = medicos.find(m => {
+                const mName = m.nome.trim().toUpperCase();
+                const mCity = m.localizacao.trim().toUpperCase();
+                const mCrm = m.crm?.trim().toUpperCase();
+
+                if (tempCrm && mCrm && tempCrm === mCrm) return true;
+                if (tempName === mName && tempCity === mCity) return true;
+                return false;
+            });
+
+            if (jaExiste) {
+                setDuplicataDetectada(jaExiste);
+                return;
+            }
+        }
+
         onSave(formData);
         onClose();
+    };
+
+    const handleAcessarPerfilDuplicado = () => {
+        if (duplicataDetectada) {
+            onClose();
+            openModal('historico', duplicataDetectada);
+        }
     };
 
     if (!isOpen) return null;
@@ -67,6 +101,17 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
                             onChange={e => setFormData({ ...formData, nome: e.target.value })}
                             className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                             placeholder="Ex: Dr. João Silva"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">CRM (Opcional)</label>
+                        <input
+                            type="text"
+                            value={formData.crm || ''}
+                            onChange={e => setFormData({ ...formData, crm: e.target.value })}
+                            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                            placeholder="Ex: 123456-SP"
                         />
                     </div>
 
@@ -177,6 +222,33 @@ export function FormMedico({ isOpen, onClose, onSave, medicoEditando }: FormMedi
                         </button>
                     </div>
                 </form>
+
+                {/* Modal Sobreposto para Duplicidade */}
+                {duplicataDetectada && (
+                    <div className="absolute inset-0 bg-white/95 backdrop-blur-sm z-20 flex flex-col justify-center items-center p-6 text-center animate-in fade-in zoom-in-95 duration-200 sm:rounded-2xl rounded-t-2xl">
+                        <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4 shadow-inner">
+                            <AlertCircle size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-2">Médico já Cadastrado!</h3>
+                        <p className="text-sm text-slate-600 mb-6">
+                            Encontramos um registro existente para <strong className="text-brand-dark">{duplicataDetectada.nome}</strong> na clínica <strong className="text-brand-dark">{duplicataDetectada.localizacao}</strong>. Deseja abrir o perfil?
+                        </p>
+                        <div className="flex gap-3 w-full">
+                            <button
+                                onClick={() => setDuplicataDetectada(null)}
+                                className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors"
+                            >
+                                Voltar
+                            </button>
+                            <button
+                                onClick={handleAcessarPerfilDuplicado}
+                                className="flex-1 py-3 bg-brand-teal text-white rounded-xl font-bold shadow-md hover:bg-brand-teal/90 transition-all"
+                            >
+                                Acessar Perfil
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

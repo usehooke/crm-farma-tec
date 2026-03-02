@@ -7,6 +7,7 @@ import { MainLayout } from './components/MainLayout';
 import { ViewHome } from './components/ViewHome';
 import { Agendamento } from './components/Agendamento';
 import { SplashScreen } from './components/SplashScreen';
+import { PostItContainer } from './components/PostIt/PostItContainer';
 import type { ViewName } from './components/MainLayout';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -18,7 +19,7 @@ import { fazerPullDaNuvem, importarCarteiraTop50 } from './services/syncService'
 import { ConfigErrorScreen } from './components/ConfigErrorScreen';
 
 // Lazy Loaded Views for Performance
-const Documentos = lazy(() => import('./components/Documentos').then(m => ({ default: m.Documentos })));
+const DashboardBI = lazy(() => import('./components/DashboardBI').then(m => ({ default: m.DashboardBI })));
 const Protocolos = lazy(() => import('./components/Protocolos').then(m => ({ default: m.Protocolos })));
 const Configuracoes = lazy(() => import('./components/Configuracoes').then(m => ({ default: m.Configuracoes })));
 
@@ -31,7 +32,9 @@ const AppContent = () => {
     setUser,
     setCloudSyncError,
     setSyncInProgress,
-    setMedicos
+    setMedicos,
+    setEventos,
+    setNotas
   } = useConfig();
   const { openModal } = useModal();
   const { medicos, atualizarMedico, adicionarLog } = useMedicos();
@@ -56,22 +59,32 @@ const AppContent = () => {
         // 2. Só dispara o sync se tivermos o UID garantido
         setSyncInProgress(true);
         try {
-          let medicosNuvem = await fazerPullDaNuvem(user.uid);
+          let dadosNuvem = await fazerPullDaNuvem(user.uid);
 
-          if (medicosNuvem.length === 0) {
+          if (dadosNuvem.medicos.length === 0) {
             const result = await importarCarteiraTop50(user.uid);
             if (result.success) {
-              medicosNuvem = await fazerPullDaNuvem(user.uid);
+              dadosNuvem = await fazerPullDaNuvem(user.uid);
             }
           }
 
           // FIX: Commit the synced data to the global React state so the UI updates
-          if (medicosNuvem.length > 0) {
-            setMedicos(medicosNuvem);
+          if (dadosNuvem.medicos.length > 0) {
+            setMedicos(dadosNuvem.medicos);
           }
-        } catch (e: any) {
+          if (dadosNuvem.eventos && dadosNuvem.eventos.length > 0) {
+            setEventos(dadosNuvem.eventos);
+          }
+          if (dadosNuvem.notas && dadosNuvem.notas.length > 0) {
+            setNotas(dadosNuvem.notas);
+          }
+        } catch (e: unknown) {
           console.error("Erro no handshake de sincronização:", e);
-          setCloudSyncError(e.message);
+          if (e instanceof Error) {
+            setCloudSyncError(e.message);
+          } else {
+            setCloudSyncError('Erro desconhecido');
+          }
         } finally {
           setSyncInProgress(false);
         }
@@ -101,7 +114,7 @@ const AppContent = () => {
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="w-24 h-24 rounded-[32px] bg-surface shadow-[10px_10px_20px_#e5e5e5,-10px_-10px_20px_#ffffff] flex items-center justify-center relative overflow-hidden"
+          className="w-24 h-24 rounded-[32px] bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex items-center justify-center relative overflow-hidden"
         >
           <motion.div
             animate={{
@@ -156,7 +169,8 @@ const AppContent = () => {
             <ViewHome medicos={medicos} atualizarMedico={atualizarMedico} openHistory={(m) => openModal('historico', m)} tabs={tabs} />
           )}
           {currentView === 'agenda' && <Agendamento medicos={medicos} adicionarLog={adicionarLog} />}
-          {currentView === 'documentos' && <Documentos />}
+          {currentView === 'notas' && <PostItContainer />}
+          {currentView === 'documentos' && <DashboardBI />}
           {currentView === 'protocolos' && <Protocolos />}
           {currentView === 'configuracoes' && <Configuracoes />}
         </Suspense>

@@ -129,7 +129,7 @@ export function HistoricoModal({ isOpen, onClose, medico, onAddLog }: HistoricoM
                                                 </div>
 
                                                 <div className={`p-4 rounded-2xl transition-all ${isProtocolo
-                                                    ? 'bg-brand-white dark:bg-slate-900 shadow-[inset_4px_4px_8px_#e5e5e5,inset_-4px_-4px_8px_#ffffff] dark:shadow-none border-l-4 border-brand-teal'
+                                                    ? 'bg-brand-white dark:bg-slate-900 shadow-inner shadow-slate-200/60 dark:shadow-none dark:shadow-none border-l-4 border-brand-teal'
                                                     : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm'
                                                     }`}>
                                                     <div className="flex justify-between items-center mb-2">

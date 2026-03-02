@@ -14,6 +14,26 @@ export const DEFAULT_TAGS: VipTag[] = [
     { id: '3', name: 'KOL', color: 'bg-purple-500' }
 ];
 
+export interface EventoAgenda {
+    id: string;
+    titulo: string;
+    tipo: 'Congresso' | 'Feira' | 'Workshop' | 'Outros';
+    data: string;
+    hora: string;
+    observacoes: string;
+}
+
+export interface NotaLivre {
+    id: string;
+    titulo: string;
+    conteudo: string;
+    data: string;
+    fixada?: boolean;
+    cor?: string; // e.g., 'bg-yellow-100'
+    checklist?: { id: string; texto: string; concluido: boolean }[];
+}
+
+
 interface ConfigContextData {
     nomeUsuario: string;
     setNomeUsuario: (nome: string) => void;
@@ -27,6 +47,10 @@ interface ConfigContextData {
     setIsDarkMode: (isDark: boolean) => void;
     medicos: any[];
     setMedicos: (lista: any[]) => void;
+    eventos: EventoAgenda[];
+    setEventos: (lista: EventoAgenda[]) => void;
+    notas: NotaLivre[];
+    setNotas: (lista: NotaLivre[]) => void;
     user: User | null;
     setUser: (user: User | null) => void;
     loadingConfig: boolean;
@@ -52,12 +76,17 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [googleConectado, setGoogleConectadoState] = useState(false);
     const [isDarkMode, setIsDarkModeState] = useState(false);
     const [medicos, setMedicosState] = useState<any[]>([]);
+    const [eventos, setEventosState] = useState<EventoAgenda[]>([]);
+    const [notas, setNotasState] = useState<NotaLivre[]>([]);
     const [user, setUser] = useState<User | null>(null);
     const [loadingConfig, setLoadingConfig] = useState(true);
     const [cloudSyncError, setCloudSyncError] = useState<string | null>(null);
     const [syncInProgress, setSyncInProgress] = useState(false);
 
     const getStorageKey = (uid: string | undefined) => uid ? `@FarmaClinIQ:${uid}:medicos` : null;
+    const getEventosStorageKey = (uid: string | undefined) => uid ? `@FarmaClinIQ:${uid}:eventos` : null;
+    const getNotasStorageKey = (uid: string | undefined) => uid ? `@FarmaClinIQ:${uid}:notas` : null;
+
 
     useEffect(() => {
         // 1. Script de Migração Automática (Segurança de Dados)
@@ -93,20 +122,29 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setLoadingConfig(false);
     }, []);
 
-    // 3. Carga de Médicos reativa ao Usuário
+    // 3. Carga de Dados reativa ao Usuário
     useEffect(() => {
         if (user) {
-            const key = getStorageKey(user.uid);
-            if (key) {
-                const medicosSalvos = localStorage.getItem(key);
-                if (medicosSalvos) {
-                    setMedicosState(JSON.parse(medicosSalvos));
-                } else {
-                    setMedicosState([]); // Limpa se for um novo usuário sem dados locais
-                }
+            const keyMedicos = getStorageKey(user.uid);
+            const keyEventos = getEventosStorageKey(user.uid);
+            const keyNotas = getNotasStorageKey(user.uid);
+
+            if (keyMedicos) {
+                const medicosSalvos = localStorage.getItem(keyMedicos);
+                setMedicosState(medicosSalvos ? JSON.parse(medicosSalvos) : []);
+            }
+            if (keyEventos) {
+                const eventosSalvos = localStorage.getItem(keyEventos);
+                setEventosState(eventosSalvos ? JSON.parse(eventosSalvos) : []);
+            }
+            if (keyNotas) {
+                const notasSalvas = localStorage.getItem(keyNotas);
+                setNotasState(notasSalvas ? JSON.parse(notasSalvas) : []);
             }
         } else {
-            setMedicosState([]); // Bloqueia acesso se deslogado
+            setMedicosState([]);
+            setEventosState([]);
+            setNotasState([]);
         }
     }, [user]);
 
@@ -119,6 +157,24 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             }
         }
     }, [medicos, loadingConfig, user]);
+
+    useEffect(() => {
+        if (!loadingConfig && user) {
+            const key = getEventosStorageKey(user.uid);
+            if (key) {
+                localStorage.setItem(key, JSON.stringify(eventos));
+            }
+        }
+    }, [eventos, loadingConfig, user]);
+
+    useEffect(() => {
+        if (!loadingConfig && user) {
+            const key = getNotasStorageKey(user.uid);
+            if (key) {
+                localStorage.setItem(key, JSON.stringify(notas));
+            }
+        }
+    }, [notas, loadingConfig, user]);
 
     const setNomeUsuario = (novoNome: string) => {
         setNomeUsuarioState(novoNome);
@@ -166,6 +222,10 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setIsDarkMode,
             medicos,
             setMedicos: setMedicosState,
+            eventos,
+            setEventos: setEventosState,
+            notas,
+            setNotas: setNotasState,
             user,
             setUser,
             loadingConfig,

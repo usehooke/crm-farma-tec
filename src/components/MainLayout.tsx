@@ -1,9 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Calendar, BarChart2, Settings, BookOpen } from 'lucide-react';
+import { Home, Calendar, BarChart2, Settings, BookOpen, StickyNote } from 'lucide-react';
 import { BannerInstalacao } from './BannerInstalacao';
+import { PostItContainer } from './PostIt/PostItContainer';
 
-export type ViewName = 'home' | 'agenda' | 'documentos' | 'protocolos' | 'configuracoes';
+export type ViewName = 'home' | 'agenda' | 'notas' | 'documentos' | 'protocolos' | 'configuracoes';
 
 // Interfaces para tipagem do componente
 interface MainLayoutProps {
@@ -17,19 +18,20 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
     const navItems = [
         { id: 'home', label: 'Início', icon: Home },
         { id: 'agenda', label: 'Agenda', icon: Calendar },
-        { id: 'documentos', label: 'Docs', icon: BarChart2 },
+        { id: 'notas', label: 'Notas', icon: StickyNote },
+        { id: 'documentos', label: 'Estatísticas', icon: BarChart2 },
         { id: 'protocolos', label: 'Biblioteca', icon: BookOpen },
         { id: 'configuracoes', label: 'Ajustes', icon: Settings },
     ] as const;
 
     return (
-        <div className="min-h-screen bg-brand-white relative overflow-hidden flex justify-center">
+        <div className="min-h-screen bg-brand-white relative overflow-hidden flex justify-center lg:bg-slate-50">
 
             {/* Banner de Instalação PWA Global */}
             <BannerInstalacao />
 
             {/* Área de Conteúdo principal (As telas são injetadas aqui) */}
-            <main className="w-full max-w-[600px] h-screen pb-24 overflow-x-hidden relative shadow-xl">
+            <main className="w-full max-w-[600px] h-screen pb-24 overflow-x-hidden relative bg-brand-white shadow-2xl lg:shadow-[20px_0_30px_rgba(0,0,0,0.05)] z-20">
                 {/* Header Fixo do App */}
                 <header className="sticky top-0 z-40 bg-brand-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
                     <h1 className="text-2xl tracking-tighter">
@@ -52,8 +54,15 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
                 </AnimatePresence>
             </main>
 
+            {/* Sidebar Desktop - PostIt Container */}
+            {activeTab !== 'notas' && (
+                <aside className="hidden lg:block w-[320px] xl:w-[400px] h-screen bg-surface shadow-inner border-l border-slate-200 overflow-y-auto no-scrollbar relative z-10">
+                    <PostItContainer isSidebar={true} />
+                </aside>
+            )}
+
             {/* Bottom Navigation Bar (Neumórfica) */}
-            <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-4 pb-6 pt-3 bg-surface rounded-t-3xl shadow-[0_-8px_20px_rgba(229,229,229,0.5)] z-50">
+            <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-4 pb-6 pt-3 bg-surface rounded-t-3xl shadow-[0_-8px_20px_rgba(229,229,229,0.5)] z-50 lg:max-w-[calc(600px)] lg:left-[calc(50%-160px)] xl:left-[calc(50%-200px)]">
                 <ul className="flex justify-between items-center px-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;

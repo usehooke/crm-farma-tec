@@ -84,7 +84,7 @@ export const Documentos = () => {
                 <FunilChart />
 
                 {/* Bloco 1: Importação de Planilha (Excel) */}
-                <div className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] flex flex-col items-center text-center relative overflow-hidden">
+                <div className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex flex-col items-center text-center relative overflow-hidden">
                     <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                         <UploadCloud size={28} className="text-primary" />
                     </div>
@@ -110,7 +110,7 @@ export const Documentos = () => {
                 </div>
 
                 {/* Bloco 2: Geração de Relatório (PDF) */}
-                <div className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] flex flex-col items-center text-center">
+                <div className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex flex-col items-center text-center">
                     <div className="w-14 h-14 rounded-full bg-brand-teal/10 flex items-center justify-center mb-4">
                         <FileDown size={28} className="text-brand-teal" />
                     </div>

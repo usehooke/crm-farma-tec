@@ -149,7 +149,7 @@ export const Protocolos = () => {
                         layout
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="p-4 rounded-3xl bg-surface dark:bg-slate-900 shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] dark:shadow-none border border-white/40 dark:border-slate-800 flex gap-4 transition-colors relative group"
+                        className="p-4 rounded-3xl bg-surface dark:bg-slate-900 shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 dark:shadow-none border border-white/40 dark:border-slate-800 flex gap-4 transition-colors relative group"
                     >
                         <img src={p.capaUrl} className="w-24 h-24 rounded-2xl object-cover shadow-sm" alt={p.titulo} />
 

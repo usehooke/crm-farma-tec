@@ -36,7 +36,7 @@ export const FunilChart = () => {
 
     if (dadosGrafico.length === 0) {
         return (
-            <div className="p-5 text-center text-sm text-slate-500 bg-surface rounded-2xl shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff]">
+            <div className="p-5 text-center text-sm text-slate-500 bg-surface rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800">
                 Cadastre médicos para visualizar o funil.
             </div>
         );
@@ -46,7 +46,7 @@ export const FunilChart = () => {
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-5 rounded-2xl bg-surface shadow-[6px_6px_12px_#e5e5e5,-6px_-6px_12px_#ffffff] flex flex-col items-center"
+            className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex flex-col items-center"
         >
             <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide w-full text-left mb-4">
                 Visão do Funil (Status)

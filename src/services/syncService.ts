@@ -1,39 +1,71 @@
-﻿import { doc, getDocs, writeBatch, collection } from 'firebase/firestore';
+﻿import { doc, getDocs, writeBatch, collection, deleteDoc } from 'firebase/firestore';
 import { generateUUID } from '../utils/utils';
 import { db } from './firebaseConfig';
 import medicosData from '../data/carteira_medicos_top50.json';
 
-export const fazerPushParaNuvem = async (uid: string, medicos: any[]) => {
+export const fazerPushParaNuvem = async (uid: string, medicos: any[], eventos: any[] = [], notas: any[] = []) => {
     if (!uid) throw new Error("Usuário não autenticado");
     if (!medicos || medicos.length === 0) return;
 
-    try {
-        const batch = writeBatch(db);
-        const userRef = doc(db, 'usuarios', uid);
+    const MAX_RETRIES = 3;
 
-        // Atualiza timestamp de sincronização no perfil do usuário
-        batch.set(userRef, {
-            lastSync: new Date().toISOString(),
-            uid // Garante que o documento do usuário exista
-        }, { merge: true });
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const batch = writeBatch(db);
+            const userRef = doc(db, 'usuarios', uid);
 
-        // Filtra médicos válidos (devem ter um ID)
-        const medicosValidos = medicos.filter(m => m && m.id);
+            // Atualiza timestamp de sincronização no perfil do usuário
+            batch.set(userRef, {
+                lastSync: new Date().toISOString(),
+                uid // Garante que o documento do usuário exista
+            }, { merge: true });
 
-        // Firestore Batch tem limite de 500 operações. 
-        // Se houver mais de 500, precisamos dividir, mas para 50-100 está ok.
-        medicosValidos.forEach(medico => {
-            const medicoRef = doc(collection(userRef, 'medicos'), medico.id);
-            // Remove campos undefined para evitar erro no Firestore
-            const cleanMedico = JSON.parse(JSON.stringify({ ...medico, ownerId: uid }));
-            batch.set(medicoRef, cleanMedico, { merge: true });
-        });
+            // Filtra médicos válidos (devem ter um ID)
+            const medicosValidos = medicos.filter(m => m && m.id);
+            const eventosValidos = eventos.filter(e => e && e.id);
+            const notasValidas = notas.filter(n => n && n.id);
 
-        await batch.commit();
+            medicosValidos.forEach(medico => {
+                const medicoRef = doc(collection(userRef, 'medicos'), medico.id);
+                // Normalização: trim() e toUpperCase()
+                const medicoNormalizado = {
+                    ...medico,
+                    nome: medico.nome.trim().toUpperCase(),
+                    localizacao: medico.localizacao.trim().toUpperCase(),
+                    crm: medico.crm ? medico.crm.trim().toUpperCase() : '',
+                    ownerId: uid
+                };
+                const cleanMedico = JSON.parse(JSON.stringify(medicoNormalizado));
+                batch.set(medicoRef, cleanMedico, { merge: true });
+            });
 
-    } catch (error: any) {
-        console.error("Firebase Sync Error Details:", error);
-        throw new Error(`Erro no Firestore: ${error.message || 'Erro desconhecido'}`);
+            eventosValidos.forEach(evento => {
+                const eventoRef = doc(collection(userRef, 'eventos'), evento.id);
+                const cleanEvento = JSON.parse(JSON.stringify({ ...evento, ownerId: uid }));
+                batch.set(eventoRef, cleanEvento, { merge: true });
+            });
+
+            notasValidas.forEach(nota => {
+                const notaRef = doc(collection(userRef, 'notas'), nota.id);
+                const cleanNota = JSON.parse(JSON.stringify({ ...nota, ownerId: uid }));
+                batch.set(notaRef, cleanNota, { merge: true });
+            });
+
+            await batch.commit();
+            return; // Succeeded, exit loop
+        } catch (error: unknown) {
+            console.error(`Firebase Sync Error (Tentativa ${attempt}/${MAX_RETRIES}):`, error);
+
+            if (attempt === MAX_RETRIES) {
+                if (error instanceof Error) {
+                    throw new Error(`Falha no Firestore após ${MAX_RETRIES} tentativas: ${error.message}`);
+                }
+                throw new Error(`Falha no Firestore após ${MAX_RETRIES} tentativas: Erro desconhecido`);
+            }
+
+            // Exponential Backoff (500ms, 1000ms, etc)
+            await new Promise(resolve => setTimeout(resolve, attempt * 500));
+        }
     }
 };
 
@@ -41,14 +73,25 @@ export const fazerPullDaNuvem = async (uid: string) => {
     if (!uid) throw new Error("Usuário não autenticado");
 
     const medicosRef = collection(db, 'usuarios', uid, 'medicos');
-    const querySnapshot = await getDocs(medicosRef);
+    const eventosRef = collection(db, 'usuarios', uid, 'eventos');
+    const notasRef = collection(db, 'usuarios', uid, 'notas');
+
+    const [queryMedicos, queryEventos, queryNotas] = await Promise.all([
+        getDocs(medicosRef),
+        getDocs(eventosRef),
+        getDocs(notasRef)
+    ]);
 
     const medicos: any[] = [];
-    querySnapshot.forEach((doc) => {
-        medicos.push(doc.data());
-    });
+    queryMedicos.forEach((doc) => medicos.push(doc.data()));
 
-    return medicos;
+    const eventos: any[] = [];
+    queryEventos.forEach((doc) => eventos.push(doc.data()));
+
+    const notas: any[] = [];
+    queryNotas.forEach((doc) => notas.push(doc.data()));
+
+    return { medicos, eventos, notas };
 };
 
 export const importarCarteiraTop50 = async (uid: string) => {
@@ -76,6 +119,16 @@ export const importarCarteiraTop50 = async (uid: string) => {
     } catch (error) {
         console.error("Erro na carga de dados:", error);
         return { success: false, error };
+    }
+};
+
+export const apagarMedicoNuvem = async (uid: string, medicoId: string) => {
+    if (!uid || !medicoId) return;
+    try {
+        const medicoRef = doc(db, 'usuarios', uid, 'medicos', medicoId);
+        await deleteDoc(medicoRef);
+    } catch (error) {
+        console.error("Erro ao deletar médico na nuvem:", error);
     }
 };
 

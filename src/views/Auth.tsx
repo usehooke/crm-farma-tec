@@ -29,7 +29,8 @@ export const Auth = () => {
                 // Guarda também no LocalStorage para manter a lógica offline-first sincronizada
                 localStorage.setItem('@FarmaClinIQ:user_nome', nome);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
+            console.error("Auth error:", err);
             setErro('Falha na autenticação. Verifique os dados e a ligação.');
         }
     };
@@ -43,7 +44,7 @@ export const Auth = () => {
             >
                 {/* Logo/Icon Neumórfico */}
                 <div className="flex justify-center mb-8">
-                    <div className="w-20 h-20 rounded-3xl bg-surface shadow-[8px_8px_16px_#e5e5e5,-8px_-8px_16px_#ffffff] flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-3xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex items-center justify-center">
                         <div className="w-12 h-12 rounded-2xl bg-brand-teal flex items-center justify-center text-white font-black text-2xl shadow-inner">
                             IQ
                         </div>
