@@ -42,10 +42,10 @@ export const Auth = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-sm mx-auto"
             >
-                {/* Logo/Icon Neumórfico */}
+                {/* Logo/Icon Neumórfico v2 */}
                 <div className="flex justify-center mb-8">
-                    <div className="w-20 h-20 rounded-3xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-2xl bg-brand-teal flex items-center justify-center text-white font-black text-2xl shadow-inner">
+                    <div className="w-24 h-24 rounded-[var(--radius-corp)] bg-surface shadow-soft-out border border-white flex items-center justify-center">
+                        <div className="w-14 h-14 rounded-2xl bg-brand-teal flex items-center justify-center text-white font-black text-2xl shadow-lg">
                             IQ
                         </div>
                     </div>
@@ -78,7 +78,7 @@ export const Auth = () => {
                                 value={nome}
                                 onChange={(e) => setNome(e.target.value)}
                                 required={!isLogin}
-                                className="w-full pl-10 pr-4 py-3 bg-surface rounded-xl border-none outline-none focus:ring-2 focus:ring-primary shadow-inner text-sm font-medium text-brand-dark placeholder-slate-400 transition-all"
+                                className="neo-input !pl-10"
                             />
                         </div>
                     )}
@@ -93,7 +93,7 @@ export const Auth = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full pl-10 pr-4 py-3 bg-surface rounded-xl border-none outline-none focus:ring-2 focus:ring-primary shadow-inner text-sm font-medium text-brand-dark placeholder-slate-400 transition-all"
+                            className="neo-input !pl-10"
                         />
                     </div>
 
@@ -107,16 +107,16 @@ export const Auth = () => {
                             value={senha}
                             onChange={(e) => setSenha(e.target.value)}
                             required
-                            className="w-full pl-10 pr-4 py-3 bg-surface rounded-xl border-none outline-none focus:ring-2 focus:ring-primary shadow-inner text-sm font-medium text-brand-dark placeholder-slate-400 transition-all"
+                            className="neo-input !pl-10"
                         />
                     </div>
 
                     <button
                         type="submit"
-                        className="w-full mt-6 py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-[4px_4px_10px_rgba(30,95,175,0.4),-4px_-4px_10px_rgba(255,255,255,0.8)] flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                        className="w-full mt-6 h-14 neo-button-primary !rounded-2xl"
                     >
                         {isLogin ? 'Entrar no Hub' : 'Criar Conta Grátis'}
-                        <ArrowRight size={16} />
+                        <ArrowRight size={18} />
                     </button>
                 </form>
 

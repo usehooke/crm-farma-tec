@@ -1,4 +1,3 @@
-﻿
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useMedicos } from './hooks/useMedicos';
 import { Plus } from 'lucide-react';
@@ -11,11 +10,9 @@ import { PostItContainer } from './components/PostIt/PostItContainer';
 import type { ViewName } from './components/MainLayout';
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { onAuthStateChanged } from 'firebase/auth';
-import type { User } from 'firebase/auth';
-import { auth, hasValidConfig } from './services/firebaseConfig';
+import { hasValidConfig } from './services/firebaseConfig';
 import { Auth } from './views/Auth';
-import { fazerPullDaNuvem, importarCarteiraTop50 } from './services/syncService';
+import { useSyncManager } from './hooks/useSyncManager';
 import { ConfigErrorScreen } from './components/ConfigErrorScreen';
 
 // Lazy Loaded Views for Performance
@@ -29,74 +26,17 @@ import { ModalProvider, useModal } from './context/ModalContext';
 const AppContent = () => {
   const {
     loadingConfig,
-    setUser,
-    setCloudSyncError,
-    setSyncInProgress,
-    setMedicos,
-    setEventos,
-    setNotas
   } = useConfig();
   const { openModal } = useModal();
-  const { medicos, atualizarMedico, adicionarLog } = useMedicos();
+  const { medicos, adicionarLog } = useMedicos();
 
   const [currentView, setCurrentView] = useState<ViewName>('home');
   const [showSplash, setShowSplash] = useState(true);
 
-  // Authentication State
-  const [usuarioLogado, setUsuarioLogado] = useState<User | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  // Authentication & Sync State (Gerenciado pelo useSyncManager)
+  const { usuarioLogado, isAuthLoading } = useSyncManager();
 
-  useEffect(() => {
-    if (!hasValidConfig) return;
 
-    const constSubscribe = onAuthStateChanged(auth, async (user) => {
-      // 1. Atualiza o estado global IMEDIATAMENTE antes de qualquer ação
-      setUser(user);
-      setUsuarioLogado(user);
-      setCloudSyncError(null);
-
-      if (user) {
-        // 2. Só dispara o sync se tivermos o UID garantido
-        setSyncInProgress(true);
-        try {
-          let dadosNuvem = await fazerPullDaNuvem(user.uid);
-
-          if (dadosNuvem.medicos.length === 0) {
-            const result = await importarCarteiraTop50(user.uid);
-            if (result.success) {
-              dadosNuvem = await fazerPullDaNuvem(user.uid);
-            }
-          }
-
-          // FIX: Commit the synced data to the global React state so the UI updates
-          if (dadosNuvem.medicos.length > 0) {
-            setMedicos(dadosNuvem.medicos);
-          }
-          if (dadosNuvem.eventos && dadosNuvem.eventos.length > 0) {
-            setEventos(dadosNuvem.eventos);
-          }
-          if (dadosNuvem.notas && dadosNuvem.notas.length > 0) {
-            setNotas(dadosNuvem.notas);
-          }
-        } catch (e: unknown) {
-          console.error("Erro no handshake de sincronização:", e);
-          if (e instanceof Error) {
-            setCloudSyncError(e.message);
-          } else {
-            setCloudSyncError('Erro desconhecido');
-          }
-        } finally {
-          setSyncInProgress(false);
-        }
-      }
-
-      setIsAuthLoading(false);
-    });
-
-    return () => constSubscribe();
-  }, []);
-
-  const tabs: typeof medicos[0]['status'][] = ['Prospecção', 'Apresentada', 'Parceiro Ativo', 'Monitoramento'];
 
   useEffect(() => {
     // Splash screen timer
@@ -166,7 +106,7 @@ const AppContent = () => {
           </div>
         }>
           {currentView === 'home' && (
-            <ViewHome medicos={medicos} atualizarMedico={atualizarMedico} openHistory={(m) => openModal('historico', m)} tabs={tabs} />
+            <ViewHome medicos={medicos} adicionarLog={adicionarLog} />
           )}
           {currentView === 'agenda' && <Agendamento medicos={medicos} adicionarLog={adicionarLog} />}
           {currentView === 'notas' && <PostItContainer />}

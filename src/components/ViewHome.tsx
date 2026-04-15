@@ -1,287 +1,116 @@
-import { useState, useMemo, useDeferredValue, useEffect, useRef } from 'react';
-import { differenceInDays, parseISO } from 'date-fns';
-import { Search, Filter, Users, TrendingUp, QrCode } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Medico } from '../hooks/useMedicos';
-import { useConfig } from '../context/ConfigContext';
-import { useModal } from '../context/ModalContext';
-import { CardMedico } from './CardMedico';
-import { CardAlerta } from './CardAlerta';
-import { MetricChart } from './MetricChart';
-import { QRCodeModal } from './QRCodeModal';
-import { SmartWidget } from './SmartWidget';
+import { SidebarFiltros } from './Navigation/SidebarFiltros';
+import { DoctorCard } from './Doctors/DoctorCard';
+import { CockpitDetalhes } from './Doctors/CockpitDetalhes';
 
 interface ViewHomeProps {
     medicos: Medico[];
     atualizarMedico: (id: string, updates: Partial<Medico>) => void;
-    openHistory: (medico: Medico) => void;
-    tabs: Medico['status'][];
+    adicionarLog: (idMedico: string, nota: string) => void;
 }
 
-export function ViewHome({ medicos, atualizarMedico, openHistory, tabs }: ViewHomeProps) {
-    const { nomeUsuario, telefoneUsuario } = useConfig();
-    const { openModal } = useModal();
-    const [activeTab, setActiveTab] = useState<Medico['status']>('Prospecção');
-    const [searchQuery, setSearchQuery] = useState('');
-    const deferredSearchQuery = useDeferredValue(searchQuery);
-    const [showUrgentOnly, setShowUrgentOnly] = useState(false);
-    const [rankingLimit, setRankingLimit] = useState<number | null>(null);
-    const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+/**
+ * ViewHome: Triple Pane Layout (@Agent-GridMaster & @Agent-StateSync)
+ * Implementa a visão 3-colunas: Filtros | Lista | Detalhes (Cockpit)
+ */
+export function ViewHome({ medicos, atualizarMedico, adicionarLog }: ViewHomeProps) {
+    const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedMedicoId, setSelectedMedicoId] = useState<string | null>(null);
 
-    // Virtualization / Progressive Rendering
-    const [visibleCount, setVisibleCount] = useState(10);
-    const loadMoreRef = useRef<HTMLDivElement>(null);
-
-    // --- Lógica de Filtros e Busca ---
+    // 1. Filtragem de Alta Performance (@Agent-DataModeller)
     const medicosFiltrados = useMemo(() => {
         if (!Array.isArray(medicos)) return [];
-        let lista = [...medicos];
+        return medicos.filter(m => {
+            const matchesSpec = selectedSpecialty === 'Todos' || m.especialidade === selectedSpecialty;
+            const matchesSearch = m.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                 m.crm?.includes(searchTerm) ||
+                                 m.localizacao.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesSpec && matchesSearch;
+        });
+    }, [medicos, selectedSpecialty, searchTerm]);
 
-        // 1. Filtro da Aba
-        lista = lista.filter(m => m && m.status === activeTab);
-
-        // 2. Filtro de Ranking
-        if (rankingLimit) {
-            lista = lista.slice(0, rankingLimit);
-        }
-
-        // 3. Filtro de Urgência
-        if (showUrgentOnly) {
-            lista = lista.filter(m => {
-                if (!m) return false;
-                const daysSince = m.ultimoContato ? differenceInDays(new Date(), parseISO(m.ultimoContato)) : 999;
-                const zeroLogs = !m.logVisitas || m.logVisitas.length === 0;
-                const isUrgent = !zeroLogs && daysSince > 30;
-                const isWarning = !zeroLogs && m.status === 'Apresentada' && daysSince > 7 && !isUrgent;
-                return isUrgent || isWarning;
-            });
-        }
-
-        // 4. Busca por Texto (Robusta)
-        if (deferredSearchQuery) {
-            const q = deferredSearchQuery.toLowerCase();
-            lista = lista.filter(m => {
-                if (!m) return false;
-                const nome = (m.nome || '').toLowerCase();
-                const especialidade = (m.especialidade || '').toLowerCase();
-                const localizacao = (m.localizacao || '').toLowerCase();
-                return nome.includes(q) || especialidade.includes(q) || localizacao.includes(q);
-            });
-        }
-
-        return lista;
-    }, [medicos, activeTab, deferredSearchQuery, showUrgentOnly, rankingLimit]);
-
-    // Lógica de "Windowing" Simplificada (Infinite Scroll renderizando apenas o necessário)
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting) {
-                    setVisibleCount((prev) => Math.min(prev + 6, medicosFiltrados.length));
-                }
-            },
-            { threshold: 0.1 }
-        );
-
-        if (loadMoreRef.current) {
-            observer.observe(loadMoreRef.current);
-        }
-
-        return () => observer.disconnect();
-    }, [medicosFiltrados.length]);
-
-    // Resetar contagem ao mudar de aba ou busca
-    useEffect(() => {
-        setVisibleCount(10);
-    }, [activeTab, deferredSearchQuery]);
-
-    // Animação de entrada em cascata
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 15 },
-        visible: { opacity: 1, y: 0 }
-    };
+    // 2. Médico Selecionado (Ponte de Estado - @Agent-StateSync)
+    const selectedMedico = useMemo(() => 
+        medicos.find(m => m.id === selectedMedicoId) || null,
+        [medicos, selectedMedicoId]
+    );
 
     return (
-        <motion.main
-            className="flex-1 flex flex-col pt-2 bg-brand-white pb-24"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-        >
-            {/* Cabeçalho de Saudação (Substituindo o original simplório do App.tsx) */}
-            <motion.header variants={itemVariants} className="px-5 mb-6 mt-4 flex justify-between items-start">
-                <div>
-                    <h1 className="text-3xl font-bold text-brand-dark tracking-tight">
-                        Bom dia,<br />
-                        <span className="text-brand-teal">{nomeUsuario || 'Ariani'}!</span>
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">Aqui está o seu painel de hoje focado em performance.</p>
-                </div>
+        <div className="flex h-screen w-full overflow-hidden bg-white">
+            
+            {/* PAINEL 1: Sidebar de Filtros (Desktop/Tablet) */}
+            <aside className="hidden lg:flex w-64 xl:w-72 h-full shrink-0">
+                <SidebarFiltros 
+                    selectedSpecialty={selectedSpecialty}
+                    onSelectSpecialty={setSelectedSpecialty}
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                />
+            </aside>
 
-                <button
-                    onClick={() => setIsQRModalOpen(true)}
-                    className="p-4 bg-white rounded-3xl shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 text-primary active:scale-90 transition-all border border-slate-50"
-                    title="Seu Cartão de Visitas Digital"
-                >
-                    <QrCode size={24} />
-                </button>
-            </motion.header>
-
-            {/* Smart Widget (Post-its e Tarefas) */}
-            <motion.div variants={itemVariants}>
-                <SmartWidget />
-            </motion.div>
-
-            {/* Camada de Analytics Neumórfica */}
-            <motion.div variants={itemVariants}>
-                <MetricChart medicos={medicos} />
-            </motion.div>
-
-            {/* Inteligência de Follow-up */}
-            <motion.div variants={itemVariants} className="px-1">
-                <CardAlerta medicos={medicos} />
-            </motion.div>
-
-            {/* Grid de Acesso Rápido Neumórfico */}
-            <motion.div variants={itemVariants} className="px-5 mt-6">
-                <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide mb-4">Ranking de Performance</h2>
-
-                <div className="grid grid-cols-3 gap-3">
-                    <button
-                        onClick={() => setRankingLimit(rankingLimit === 10 ? null : 10)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 10 ? 'bg-brand-teal text-white shadow-lg' : 'bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800'}`}
-                    >
-                        <span className="text-xs font-black uppercase tracking-tighter">Top 10</span>
-                        <span className={`text-[10px] ${rankingLimit === 10 ? 'text-white/60' : 'text-slate-400'}`}>Elite</span>
-                    </button>
-
-                    <button
-                        onClick={() => setRankingLimit(rankingLimit === 20 ? null : 20)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 20 ? 'bg-primary text-white shadow-lg' : 'bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800'}`}
-                    >
-                        <span className="text-xs font-black uppercase tracking-tighter">Top 20</span>
-                        <span className={`text-[10px] ${rankingLimit === 20 ? 'text-white/60' : 'text-slate-400'}`}>Foco</span>
-                    </button>
-
-                    <button
-                        onClick={() => setRankingLimit(rankingLimit === 50 ? null : 50)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${rankingLimit === 50 ? 'bg-slate-800 text-white shadow-lg' : 'bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800'}`}
-                    >
-                        <span className="text-xs font-black uppercase tracking-tighter">Top 50</span>
-                        <span className={`text-[10px] ${rankingLimit === 50 ? 'text-white/60' : 'text-slate-400'}`}>Carteira</span>
-                    </button>
-                </div>
-            </motion.div>
-
-            {/* Card Largo: Resumo de Performance */}
-            <motion.div variants={itemVariants} className="px-5 mt-6 mb-8">
-                <div className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex items-center justify-between">
-                    <div>
-                        <h3 className="text-sm font-bold text-brand-dark">Meta Mensal (Ariani)</h3>
-                        <p className="text-xs text-slate-500">Visitas: {(medicos || []).filter(m => (m?.logVisitas?.length || 0) > 0).length} / 50</p>
+            {/* PAINEL 2: Lista Central de Médicos */}
+            <section className="flex-1 lg:max-w-md xl:max-w-xl h-full flex flex-col bg-brand-white border-r border-slate-100">
+                <header className="p-6 border-b border-slate-50">
+                    <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-xl font-black text-brand-dark tracking-tight">Médicos</h2>
+                        <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-1 rounded-lg uppercase tracking-wider">
+                            {medicosFiltrados.length} Registros
+                        </span>
                     </div>
-                    <button
-                        onClick={() => openModal('dashboard')}
-                        className="w-10 h-10 rounded-full bg-brand-white flex items-center justify-center shadow-sm text-primary active:scale-95 transition-transform"
-                    >
-                        <TrendingUp size={18} />
-                    </button>
-                </div>
-            </motion.div>
+                    <p className="text-xs text-slate-400 font-medium">Selecione um profissional para ver o cockpit</p>
+                </header>
 
-            {/* Divisor Visual */}
-            <motion.div variants={itemVariants} className="w-full h-px bg-slate-100 mb-6"></motion.div>
-
-            <motion.div variants={itemVariants} id="lista-medicos" className="px-4">
-                <h2 className="text-lg font-bold text-brand-dark mb-4 px-1">Seus Contatos</h2>
-
-                {/* Search Bar & Primary Filters */}
-                <div className="flex gap-2 relative mb-4">
-                    <div className="relative flex-1">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Buscar contato..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-brand-white border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none transition-shadow shadow-sm text-brand-dark"
-                        />
-                    </div>
-                    <button
-                        onClick={() => setShowUrgentOnly(!showUrgentOnly)}
-                        className={`px-3 py-2 rounded-xl border flex items-center text-xs font-bold transition-all shadow-sm ${showUrgentOnly ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-brand-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                    >
-                        <Filter size={13} className="mr-1.5" />
-                        Atrasados
-                    </button>
-                </div>
-
-                {/* Menu de Abas */}
-                <div className="flex overflow-x-auto hide-scrollbar mb-4 gap-2 pb-2 snap-x">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`whitespace-nowrap px-4 py-2 flex-shrink-0 rounded-xl font-bold text-[13px] transition-all flex items-center shadow-sm snap-start ${activeTab === tab
-                                ? 'bg-primary text-white shadow-[2px_2px_8px_rgba(30,95,175,0.4)]'
-                                : 'bg-brand-white text-slate-500 border border-slate-200 hover:bg-slate-50'
-                                }`}
-                        >
-                            {tab}
-                            <span className={`ml-1.5 inline-flex items-center justify-center text-[10px] rounded-md h-4 min-w-[16px] px-1 font-black ${activeTab === tab ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                                {(medicos || []).filter(m => m?.status === tab).length}
-                            </span>
-                        </button>
-                    ))}
-                </div>
-
-                {/* Cards Area */}
-                <div className="pb-10">
+                <div className="flex-1 overflow-y-auto p-4 no-scrollbar bg-slate-50/30">
                     <AnimatePresence mode="popLayout">
-                        {medicosFiltrados.slice(0, visibleCount).map(medico => (
-                            <CardMedico
+                        {medicosFiltrados.map((medico) => (
+                            <DoctorCard 
                                 key={medico.id}
                                 medico={medico}
-                                onUpdateStatus={(id, status) => atualizarMedico(id, { status })}
-                                onViewHistory={openHistory}
+                                isSelected={selectedMedicoId === medico.id}
+                                onClick={() => setSelectedMedicoId(medico.id)}
                             />
                         ))}
                     </AnimatePresence>
 
-                    {/* Sentinel para Progressive Rendering (Windowing) */}
-                    {visibleCount < medicosFiltrados.length && (
-                        <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
-                            <div className="w-5 h-5 border-2 border-brand-teal/20 border-t-brand-teal rounded-full animate-spin" />
+                    {medicosFiltrados.length === 0 && (
+                        <div className="py-20 text-center">
+                            <p className="text-sm text-slate-400 italic">Nenhum médico encontrado com estes filtros.</p>
                         </div>
                     )}
-
-                    {medicosFiltrados.length === 0 && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="py-12 mt-4 text-center text-slate-400 bg-surface border border-dashed border-slate-300 rounded-2xl shadow-inner"
-                        >
-                            <Users size={40} className="mx-auto mb-3 opacity-20" />
-                            <p className="text-sm font-semibold text-slate-500">Nenhum contato encontrado.</p>
-                            {(searchQuery || showUrgentOnly) && <p className="text-xs mt-1">Tente remover os filtros da busca.</p>}
-                        </motion.div>
-                    )}
                 </div>
-            </motion.div>
+            </section>
 
-            <QRCodeModal
-                isOpen={isQRModalOpen}
-                onClose={() => setIsQRModalOpen(false)}
-                whatsappLink={`https://wa.me/${telefoneUsuario.replace(/\D/g, '') || '5511999999999'}?text=${encodeURIComponent('Olá Ariani, salvei seu contato aqui do FarmaClinIQ!')}`}
-            />
-        </motion.main>
+            {/* PAINEL 3: Cockpit de Detalhes (Visível em lg+) */}
+            <main className="hidden lg:flex flex-1 h-full">
+                <CockpitDetalhes 
+                    medico={selectedMedico}
+                    onAdicionarLog={adicionarLog}
+                    onFechar={() => setSelectedMedicoId(null)}
+                />
+            </main>
+
+            {/* Mobile View: Cockpit flutuante ou Modal (Melhoria futura do @Agent-UIArchitect) */}
+            <AnimatePresence>
+                {selectedMedicoId && (
+                    <motion.div 
+                        initial={{ x: '100%' }}
+                        animate={{ x: 0 }}
+                        exit={{ x: '100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        className="fixed inset-0 z-[60] lg:hidden bg-white"
+                    >
+                        <CockpitDetalhes 
+                            medico={selectedMedico}
+                            onAdicionarLog={adicionarLog}
+                            onFechar={() => setSelectedMedicoId(null)}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+        </div>
     );
 }

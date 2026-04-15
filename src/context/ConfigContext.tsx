@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 
 import type { User } from 'firebase/auth';
 
@@ -58,6 +58,7 @@ interface ConfigContextData {
     setCloudSyncError: (error: string | null) => void;
     syncInProgress: boolean;
     setSyncInProgress: (syncing: boolean) => void;
+    isHydrated: boolean; // Novo: Indica se os dados locais já foram carregados
 }
 
 const ConfigContext = createContext<ConfigContextData>({} as ConfigContextData);
@@ -82,6 +83,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [loadingConfig, setLoadingConfig] = useState(true);
     const [cloudSyncError, setCloudSyncError] = useState<string | null>(null);
     const [syncInProgress, setSyncInProgress] = useState(false);
+    const [isHydrated, setIsHydrated] = useState(false);
 
     const getStorageKey = (uid: string | undefined) => uid ? `@FarmaClinIQ:${uid}:medicos` : null;
     const getEventosStorageKey = (uid: string | undefined) => uid ? `@FarmaClinIQ:${uid}:eventos` : null;
@@ -122,7 +124,6 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setLoadingConfig(false);
     }, []);
 
-    // 3. Carga de Dados reativa ao Usuário
     useEffect(() => {
         if (user) {
             const keyMedicos = getStorageKey(user.uid);
@@ -131,20 +132,22 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
             if (keyMedicos) {
                 const medicosSalvos = localStorage.getItem(keyMedicos);
-                setMedicosState(medicosSalvos ? JSON.parse(medicosSalvos) : []);
+                if (medicosSalvos) setMedicosState(JSON.parse(medicosSalvos));
             }
             if (keyEventos) {
                 const eventosSalvos = localStorage.getItem(keyEventos);
-                setEventosState(eventosSalvos ? JSON.parse(eventosSalvos) : []);
+                if (eventosSalvos) setEventosState(JSON.parse(eventosSalvos));
             }
             if (keyNotas) {
                 const notasSalvas = localStorage.getItem(keyNotas);
-                setNotasState(notasSalvas ? JSON.parse(notasSalvas) : []);
+                if (notasSalvas) setNotasState(JSON.parse(notasSalvas));
             }
+            setIsHydrated(true); // Hidratação local concluída para este usuário
         } else {
             setMedicosState([]);
             setEventosState([]);
             setNotasState([]);
+            setIsHydrated(false);
         }
     }, [user]);
 
@@ -176,29 +179,29 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }, [notas, loadingConfig, user]);
 
-    const setNomeUsuario = (novoNome: string) => {
+    const setNomeUsuario = useCallback((novoNome: string) => {
         setNomeUsuarioState(novoNome);
         localStorage.setItem(STORAGE_KEY_USER, novoNome);
-    };
+    }, []);
 
-    const setTelefoneUsuario = (novoTelefone: string) => {
+    const setTelefoneUsuario = useCallback((novoTelefone: string) => {
         setTelefoneUsuarioState(novoTelefone);
         localStorage.setItem(STORAGE_KEY_PHONE, novoTelefone);
-    };
+    }, []);
 
-    const salvarVipTags = (novasTags: VipTag[]) => {
+    const salvarVipTags = useCallback((novasTags: VipTag[]) => {
         setVipTagsState(novasTags);
         localStorage.setItem(STORAGE_KEY_TAGS, JSON.stringify(novasTags));
-    };
+    }, []);
 
-    const setGoogleConectado = (conectado: boolean) => {
+    const setGoogleConectado = useCallback((conectado: boolean) => {
         setGoogleConectadoState(conectado);
         if (!conectado) {
             localStorage.removeItem(STORAGE_KEY_GOOGLE);
         }
-    };
+    }, []);
 
-    const setIsDarkMode = (isDark: boolean) => {
+    const setIsDarkMode = useCallback((isDark: boolean) => {
         setIsDarkModeState(isDark);
         localStorage.setItem('@FarmaClinIQ:dark_mode', String(isDark));
         if (isDark) {
@@ -206,34 +209,41 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         } else {
             document.documentElement.classList.remove('dark');
         }
-    };
+    }, []);
+
+    const contextValue = useMemo(() => ({
+        nomeUsuario,
+        setNomeUsuario,
+        telefoneUsuario,
+        setTelefoneUsuario,
+        vipTags,
+        salvarVipTags,
+        googleConectado,
+        setGoogleConectado,
+        isDarkMode,
+        setIsDarkMode,
+        medicos,
+        setMedicos: setMedicosState,
+        eventos,
+        setEventos: setEventosState,
+        notas,
+        setNotas: setNotasState,
+        user,
+        setUser,
+        loadingConfig,
+        cloudSyncError,
+        setCloudSyncError,
+        syncInProgress,
+        setSyncInProgress,
+        isHydrated
+    }), [
+        nomeUsuario, telefoneUsuario, vipTags, googleConectado, isDarkMode, 
+        medicos, eventos, notas, user, loadingConfig, cloudSyncError, 
+        syncInProgress, isHydrated
+    ]);
 
     return (
-        <ConfigContext.Provider value={{
-            nomeUsuario,
-            setNomeUsuario,
-            telefoneUsuario,
-            setTelefoneUsuario,
-            vipTags,
-            salvarVipTags,
-            googleConectado,
-            setGoogleConectado,
-            isDarkMode,
-            setIsDarkMode,
-            medicos,
-            setMedicos: setMedicosState,
-            eventos,
-            setEventos: setEventosState,
-            notas,
-            setNotas: setNotasState,
-            user,
-            setUser,
-            loadingConfig,
-            cloudSyncError,
-            setCloudSyncError,
-            syncInProgress,
-            setSyncInProgress
-        }}>
+        <ConfigContext.Provider value={contextValue}>
             {children}
         </ConfigContext.Provider>
     );
