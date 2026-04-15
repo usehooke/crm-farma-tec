@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, Phone, MapPin, 
   MessageSquare, Plus, X, Tag,
-  Stethoscope, ShieldCheck, ChevronRight
+  Stethoscope, ShieldCheck, ChevronRight,
+  ClipboardList, CheckCircle2, RotateCcw
 } from 'lucide-react';
 import type { Medico } from '../../hooks/useMedicos';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useDebounce } from '../../hooks/useDebounce';
 
 interface CockpitDetalhesProps {
   medico: Medico | null;
+  onAtualizarMedico: (id: string, updates: Partial<Medico>) => void;
   onAdicionarLog: (idMedico: string, nota: string) => void;
   onFechar: () => void;
 }
@@ -18,14 +21,41 @@ interface CockpitDetalhesProps {
 /**
  * Cockpit de Detalhes do Médico (@Agent-ActionPanel)
  * Focado em densidade de informações, Neumorfismo Premium e ações rápidas.
+ * Inclui agora o Bloco de Notas Estratégicas com Auto-save.
  */
 export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
   medico,
+  onAtualizarMedico,
   onAdicionarLog,
   onFechar
 }) => {
   const [novaNota, setNovaNota] = useState('');
   const [isRegistrando, setIsRegistrando] = useState(false);
+  
+  // Estado local para o Bloco de Notas Estratégicas
+  const [notaCrm, setNotaCrm] = useState(medico?.notasCrm || '');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const debouncedNotaCrm = useDebounce(notaCrm, 1000);
+
+  // Sincroniza o estado local quando o médico troca
+  useEffect(() => {
+    if (medico) {
+      setNotaCrm(medico.notasCrm || '');
+      setIsSyncing(false);
+    }
+  }, [medico?.id]);
+
+  // Efeito de Auto-save (Debounce)
+  useEffect(() => {
+    if (medico && debouncedNotaCrm !== (medico.notasCrm || '')) {
+      setIsSyncing(true);
+      onAtualizarMedico(medico.id, { notasCrm: debouncedNotaCrm });
+      
+      // Simula feedback visual de conclusão de sincronia
+      const timer = setTimeout(() => setIsSyncing(false), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [debouncedNotaCrm, medico?.id]);
 
   if (!medico) {
     return (
@@ -121,14 +151,64 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
       <div className="flex-1 overflow-y-auto px-8 pb-32 no-scrollbar">
         <div className="flex flex-col gap-8">
             
+            {/* NOVO: Bloco de Notas Estratégicas (Sticky Note Style) */}
+            <section className="relative group">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em] flex items-center gap-2">
+                        <ClipboardList size={12} className="text-brand-teal" />
+                        Notas Estratégicas
+                    </h3>
+                    
+                    <div className="flex items-center gap-2">
+                      <AnimatePresence>
+                        {isSyncing ? (
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex items-center gap-1.5"
+                          >
+                            <RotateCcw size={10} className="text-brand-teal animate-spin" />
+                            <span className="text-[8px] font-black text-brand-teal uppercase tracking-tighter">Sincronizando</span>
+                          </motion.div>
+                        ) : (
+                          <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.4 }}
+                            className="flex items-center gap-1.5"
+                          >
+                            <CheckCircle2 size={10} className="text-slate-400" />
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Salvo na Nuvem</span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                </div>
+
+                <div className="relative">
+                    <textarea 
+                        value={notaCrm}
+                        onChange={(e) => {
+                          setNotaCrm(e.target.value);
+                          setIsSyncing(true); // Feedback imediato de que está editando
+                        }}
+                        placeholder="Anote aqui informações fixas relevantes: hobbies do médico, preferências de produtos, dias que ele costuma operar..."
+                        className="w-full neo-input min-h-[160px] p-6 text-sm font-semibold text-slate-600 bg-brand-white/50 border border-white/40 leading-relaxed placeholder:text-slate-300 placeholder:italic transition-all focus:bg-white"
+                    />
+                    <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none opacity-10 group-focus-within:opacity-30 transition-opacity">
+                         <div className="w-full h-full bg-gradient-to-bl from-brand-teal to-transparent rounded-tr-3xl" />
+                    </div>
+                </div>
+            </section>
+
             {/* Contact Details Section */}
-            <section className="nm-card p-6 bg-white border border-slate-50">
+            <section className="bg-white rounded-3xl p-6 border border-slate-50 shadow-sm">
                 <h3 className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                     <Tag size={12} className="text-brand-teal" />
                     Detalhes de Contato
                 </h3>
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors group cursor-pointer active:scale-[0.99]">
+                    <div className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors group cursor-pointer active:scale-[0.99]" onClick={() => window.open(`tel:${medico.telefone}`, '_self')}>
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm">
                                 <Phone size={18} />

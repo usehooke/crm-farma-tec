@@ -27,6 +27,7 @@ export interface Medico {
     dataCriacao?: string; // ISO date for grace period
     // Legacy prop for migration:
     observacoes?: string;
+    notasCrm?: string; // Campo para o Bloco de Notas Estratégicas
 }
 
 export function useMedicos() {

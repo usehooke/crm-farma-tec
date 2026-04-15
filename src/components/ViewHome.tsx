@@ -7,6 +7,7 @@ import { CockpitDetalhes } from './Doctors/CockpitDetalhes';
 
 interface ViewHomeProps {
     medicos: Medico[];
+    atualizarMedico: (id: string, updates: Partial<Medico>) => void;
     adicionarLog: (idMedico: string, nota: string) => void;
 }
 
@@ -14,7 +15,7 @@ interface ViewHomeProps {
  * ViewHome: Triple Pane Layout (@Agent-GridMaster & @Agent-StateSync)
  * Implementa a visão 3-colunas: Filtros | Lista | Detalhes (Cockpit)
  */
-export function ViewHome({ medicos, adicionarLog }: ViewHomeProps) {
+export function ViewHome({ medicos, atualizarMedico, adicionarLog }: ViewHomeProps) {
     const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedMedicoId, setSelectedMedicoId] = useState<string | null>(null);
@@ -86,6 +87,7 @@ export function ViewHome({ medicos, adicionarLog }: ViewHomeProps) {
             <main className="hidden lg:flex flex-1 h-full">
                 <CockpitDetalhes 
                     medico={selectedMedico}
+                    onAtualizarMedico={atualizarMedico}
                     onAdicionarLog={adicionarLog}
                     onFechar={() => setSelectedMedicoId(null)}
                 />
@@ -103,6 +105,7 @@ export function ViewHome({ medicos, adicionarLog }: ViewHomeProps) {
                     >
                         <CockpitDetalhes 
                             medico={selectedMedico}
+                            onAtualizarMedico={atualizarMedico}
                             onAdicionarLog={adicionarLog}
                             onFechar={() => setSelectedMedicoId(null)}
                         />

@@ -28,7 +28,7 @@ const AppContent = () => {
     loadingConfig,
   } = useConfig();
   const { openModal } = useModal();
-  const { medicos, adicionarLog } = useMedicos();
+  const { medicos, atualizarMedico, adicionarLog } = useMedicos();
 
   const [currentView, setCurrentView] = useState<ViewName>('home');
   const [showSplash, setShowSplash] = useState(true);
@@ -106,7 +106,7 @@ const AppContent = () => {
           </div>
         }>
           {currentView === 'home' && (
-            <ViewHome medicos={medicos} adicionarLog={adicionarLog} />
+            <ViewHome medicos={medicos} atualizarMedico={atualizarMedico} adicionarLog={adicionarLog} />
           )}
           {currentView === 'agenda' && <Agendamento medicos={medicos} adicionarLog={adicionarLog} />}
           {currentView === 'notas' && <PostItContainer />}
