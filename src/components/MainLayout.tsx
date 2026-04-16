@@ -25,7 +25,7 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
     ] as const;
 
     return (
-        <div className="min-h-screen bg-brand-white relative overflow-hidden flex lg:bg-slate-50">
+        <div className="min-h-screen bg-brand-white relative overflow-hidden flex lg:bg-brand-white transition-colors duration-300">
 
             {/* Sidebar Desktop (Slim/Exclusiva) */}
             <nav className="hidden lg:flex w-20 flex-col items-center py-8 bg-brand-dark border-r border-slate-800 shrink-0 z-50">
@@ -57,9 +57,9 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
             {/* Área de Conteúdo principal (As telas são injetadas aqui) */}
             <main className="w-full lg:max-w-none max-w-[600px] h-screen pb-24 lg:pb-0 overflow-x-hidden relative bg-brand-white shadow-2xl lg:shadow-none z-20">
                 {/* Header Fixo do App */}
-                <header className="sticky top-0 z-40 bg-brand-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+                <header className="sticky top-0 z-40 bg-brand-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-transparent dark:border-slate-800/50">
                     <h1 className="text-2xl tracking-tighter">
-                        <span className="text-brand-dark font-bold">FarmaClin</span>
+                        <span className="text-brand-dark dark:text-white font-black">FarmaClin</span>
                         <span className="text-brand-teal font-black">QI</span>
                     </h1>
                 </header>
@@ -80,13 +80,13 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
 
             {/* Sidebar Desktop - PostIt Container (Opcional ou Ajustado para o novo layout) */}
             {activeTab !== 'notas' && activeTab !== 'home' && (
-                <aside className="hidden lg:block w-[320px] xl:w-[400px] h-screen bg-surface border-l border-slate-200 overflow-y-auto no-scrollbar relative z-10">
+                <aside className="hidden lg:block w-[320px] xl:w-[400px] h-screen bg-surface dark:bg-slate-900/50 border-l border-slate-200 dark:border-slate-800 overflow-y-auto no-scrollbar relative z-10">
                     <PostItContainer isSidebar={true} />
                 </aside>
             )}
 
             {/* Bottom Navigation Bar (Neumórfica v2) */}
-            <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-4 pb-6 pt-3 bg-surface rounded-t-3xl shadow-[0_-8px_20px_rgba(0,0,0,0.03)] z-50 lg:hidden">
+            <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-4 pb-6 pt-3 bg-surface dark:bg-slate-900/80 dark:backdrop-blur-xl rounded-t-3xl shadow-[0_-8px_20px_rgba(0,0,0,0.03)] z-50 lg:hidden border-t border-white/5 dark:border-white/10">
                 <ul className="flex justify-between items-center px-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;

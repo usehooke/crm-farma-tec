@@ -6,51 +6,57 @@
   --color-surface: #f1f5f9;
   --color-brand-dark: #1e293b;
   --color-brand-teal: #2dd4bf;
+  --color-primary: #2dd4bf; /* [FIX]: Mapeando Primary para Teal */
   --color-corp-blue: #0ea5e9;
   --color-corp-green: #10b981;
 
-  /* Tokens de Neumorfismo Suave */
+  /* Neumorfismo Dinâmico (Luz) */
   --shadow-soft-out: 8px 8px 16px #e2e8f0, -8px -8px 16px #ffffff;
   --shadow-soft-in: inset 6px 6px 12px #e2e8f0, inset -6px -6px 12px #ffffff;
   --shadow-soft-hover: 10px 10px 20px #e2e8f0, -10px -10px 20px #ffffff;
-  
-  /* Arredondamento Padrão FarmaClinQI */
+
+  /* Arredondamento Padrão */
   --radius-corp: 24px;
+}
+
+/* [DARK MODE]: Sobrescrita de Variáveis para Tema Noturno */
+@variant dark (&:where(.dark, .dark *));
+
+.dark {
+  --color-brand-white: #0f172a; /* Deep Slate */
+  --color-surface: #1e293b;
+  --color-brand-dark: #f1f5f9;
+  --color-brand-teal: #2dd4bf;
+  --color-primary: #2dd4bf;
+  
+  --shadow-soft-out: 8px 8px 16px #020617, -4px -4px 10px #1e293b;
+  --shadow-soft-in: inset 4px 4px 8px #020617, inset -4px -4px 8px #1e293b;
 }
 
 @layer base {
   body {
-    @apply bg-brand-white text-brand-dark antialiased;
-    /* Evita o pull-to-refresh nativo que quebra a imersão de app */
+    @apply bg-brand-white text-brand-dark antialiased transition-colors duration-300;
     overscroll-behavior-y: none; 
   }
 
-  /* Oculta scrollbars mantendo a funcionalidade (Estilo Limpo) */
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
 @layer components {
-  /* Classes Utilitárias de Engenharia UI */
-  
   .neo-card {
-    @apply bg-surface rounded-[var(--radius-corp)] shadow-soft-out transition-shadow duration-300;
+    @apply bg-surface rounded-[var(--radius-corp)] shadow-soft-out transition-all duration-300 border border-white/5 dark:border-white/10;
   }
   
   .neo-card-pressed {
-    @apply bg-surface rounded-[var(--radius-corp)] shadow-soft-in transition-shadow duration-300;
+    @apply bg-surface rounded-[var(--radius-corp)] shadow-soft-in transition-all duration-300 border border-slate-200/50 dark:border-black/20;
   }
 
   .neo-button-primary {
-    @apply bg-brand-teal text-white font-bold rounded-xl shadow-[0_8px_20px_rgba(45,212,191,0.4)] active:scale-95 transition-transform duration-200 flex justify-center items-center gap-2;
+    @apply bg-brand-teal text-white font-bold rounded-xl shadow-[0_8px_20px_rgba(45,212,191,0.4)] active:scale-95 transition-all duration-200 flex justify-center items-center gap-2;
   }
 
   .neo-input {
-    @apply w-full bg-surface shadow-soft-in rounded-xl px-4 py-3 text-sm font-medium text-brand-dark outline-none border border-transparent focus:border-brand-teal/30 transition-all placeholder:text-slate-400;
+    @apply w-full bg-surface shadow-soft-in rounded-xl px-4 py-3 text-sm font-medium text-brand-dark outline-none border border-transparent focus:border-brand-teal/30 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500;
   }
 }

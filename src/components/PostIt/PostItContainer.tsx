@@ -88,14 +88,14 @@ export const PostItContainer = ({ isSidebar = false }: { isSidebar?: boolean }) 
 
     return (
         <motion.div
-            className={`flex-1 min-h-screen relative p-5 ${isSidebar ? 'bg-transparent pb-6' : 'bg-brand-white pt-8 pb-32'}`}
+            className={`flex-1 min-h-screen relative p-5 ${isSidebar ? 'bg-transparent pb-6' : 'bg-brand-white dark:bg-slate-900 pt-8 pb-32'}`}
             variants={pageVariants}
             initial="initial"
             animate="animate"
         >
-            <header className="mb-6 sticky top-0 bg-surface/80 backdrop-blur-md pt-2 z-10 -mx-5 px-5 pb-2">
-                <h1 className={`${isSidebar ? 'text-2xl' : 'text-3xl'} font-bold text-brand-dark tracking-tight`}>Post-its</h1>
-                {!isSidebar && <p className="text-sm text-slate-500 mt-1">Sua parede virtual de notas coloridas.</p>}
+            <header className="mb-6 sticky top-0 bg-surface/80 dark:bg-slate-900/80 backdrop-blur-md pt-2 z-10 -mx-5 px-5 pb-2">
+                <h1 className={`${isSidebar ? 'text-2xl' : 'text-3xl'} font-black text-brand-dark dark:text-white tracking-tight`}>Notas Criativas</h1>
+                {!isSidebar && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Seus lembretes e post-its.</p>}
             </header>
 
             {!isEditing ? (
@@ -109,21 +109,23 @@ export const PostItContainer = ({ isSidebar = false }: { isSidebar?: boolean }) 
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Buscar ideias, dicas..."
-                            className="w-full bg-surface py-3 pl-11 pr-4 rounded-full text-sm font-medium text-brand-dark shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 outline-none border border-transparent focus:border-brand-teal/30 focus:shadow-none transition-all"
+                            placeholder="Buscar notas..."
+                            className="w-full bg-surface dark:bg-slate-800 py-4 pl-11 pr-4 rounded-2xl text-sm font-bold text-brand-dark dark:text-white shadow-sm border border-slate-100 dark:border-slate-700 outline-none focus:border-brand-teal transition-all"
                         />
                     </div>
 
-                    <div className={`grid gap-4 ${isSidebar ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+                    <div className={`grid gap-6 ${isSidebar ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                         <AnimatePresence>
                             {notasFiltradas.length === 0 ? (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="col-span-full text-center py-10"
+                                    className="col-span-full text-center py-20"
                                 >
-                                    <p className="text-slate-400 font-medium">Nenhum post-it encontrado.</p>
-                                    <p className="text-sm text-slate-400 mt-2">Clique no botão abaixo para criar.</p>
+                                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Plus className="text-slate-300" />
+                                    </div>
+                                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhuma nota encontrada</p>
                                 </motion.div>
                             ) : (
                                 (notasFiltradas || []).map(nota => (
@@ -140,85 +142,87 @@ export const PostItContainer = ({ isSidebar = false }: { isSidebar?: boolean }) 
                         </AnimatePresence>
                     </div>
 
+                    {/* [FIX]: FAB Center/Bottom for Mobile Accessibility */}
                     <button
                         onClick={() => handleOpenForm()}
-                        className={`fixed ${isSidebar ? 'bottom-6 right-6' : 'bottom-24 right-6'} bg-brand-teal hover:bg-opacity-90 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(45,212,191,0.4)] transition-all active:scale-95 z-40`}
+                        className={`fixed ${isSidebar ? 'bottom-6 right-6' : 'bottom-28 left-1/2 -translate-x-1/2'} bg-brand-teal text-white w-16 h-16 rounded-full flex items-center justify-center shadow-xl shadow-brand-teal/30 transition-all active:scale-90 z-[100]`}
                         title="Novo Post-it"
                     >
-                        <Plus size={28} />
+                        <Plus size={32} />
                     </button>
                 </>
             ) : (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="space-y-6"
+                    className="max-w-2xl mx-auto space-y-6"
                 >
-                    <div className={`p-6 rounded-[24px] shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 transition-colors duration-300 ${cor}`}>
+                    <div className={`p-8 rounded-[32px] shadow-2xl transition-all duration-300 ${cor} border border-black/5`}>
                         <input
                             type="text"
                             value={titulo}
                             onChange={e => setTitulo(e.target.value)}
-                            placeholder="Título do Post-it..."
-                            className="w-full bg-transparent text-xl font-bold text-brand-dark outline-none placeholder:text-brand-dark/40 mb-4"
+                            placeholder="Título da nota..."
+                            className="w-full bg-transparent text-2xl font-black text-brand-dark outline-none placeholder:text-brand-dark/20 mb-6"
                         />
-                        <div className="w-full h-[1px] bg-brand-dark/10 mb-4"></div>
                         <textarea
-                            rows={4}
+                            rows={6}
                             value={conteudo}
                             onChange={e => setConteudo(e.target.value)}
-                            placeholder="Escreva sua nota livre aqui (opcional se usar checklist)..."
-                            className="w-full bg-transparent text-sm font-medium text-brand-dark/80 outline-none resize-none placeholder:text-brand-dark/40 leading-relaxed mb-4"
+                            placeholder="O que você está pensando?"
+                            className="w-full bg-transparent text-base font-bold text-brand-dark/80 outline-none resize-none placeholder:text-brand-dark/20 leading-relaxed mb-6"
                         ></textarea>
 
-                        <div className="mb-4">
-                            <label className="text-xs font-bold text-brand-dark/70 uppercase tracking-wider mb-2 block">Checklist</label>
-                            <div className="space-y-2 mb-3">
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black text-brand-dark/60 uppercase tracking-widest block">Lista de Tarefas</label>
+                            <div className="space-y-3">
                                 <AnimatePresence>
                                     {(checklist || []).map((item) => (
                                         <motion.div
                                             key={item.id}
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            exit={{ opacity: 0, height: 0 }}
-                                            className="flex items-center gap-2"
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 10 }}
+                                            className="flex items-center gap-3 bg-black/5 p-3 rounded-xl"
                                         >
-                                            <div className={`w-4 h-4 rounded-full border border-brand-dark/30 flex items-center justify-center ${item.concluido ? 'bg-brand-dark/20' : ''}`} />
-                                            <span className={`flex-1 text-sm font-medium ${item.concluido ? 'line-through text-brand-dark/50' : 'text-brand-dark/80'}`}>{item.texto}</span>
-                                            <button onClick={() => handleRemoveChecklistItem(item.id)} className="text-brand-dark/40 hover:text-red-500/80 p-1">
-                                                <X size={14} />
+                                            <div className={`w-5 h-5 rounded-md border-2 border-brand-dark/30 flex items-center justify-center ${item.concluido ? 'bg-brand-dark' : ''}`}>
+                                                {item.concluido && <Check size={12} className="text-white" />}
+                                            </div>
+                                            <span className={`flex-1 text-sm font-bold ${item.concluido ? 'line-through text-brand-dark/40' : 'text-brand-dark'}`}>{item.texto}</span>
+                                            <button onClick={() => handleRemoveChecklistItem(item.id)} className="text-brand-dark/20 hover:text-red-500 transition-colors">
+                                                <X size={16} />
                                             </button>
                                         </motion.div>
                                     ))}
                                 </AnimatePresence>
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className="flex gap-3">
                                 <input
                                     type="text"
                                     value={novoItem}
                                     onChange={e => setNovoItem(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && handleAddChecklistItem()}
-                                    placeholder="Novo item da lista..."
-                                    className="flex-1 bg-white/40 px-3 py-2 rounded-xl text-sm outline-none placeholder:text-brand-dark/40 font-medium border border-transparent focus:border-brand-dark/20"
+                                    placeholder="Adicionar item..."
+                                    className="flex-1 bg-white/40 px-4 py-3 rounded-xl text-sm outline-none placeholder:text-brand-dark/30 font-bold border border-transparent focus:border-brand-dark/10"
                                 />
                                 <button
                                     onClick={handleAddChecklistItem}
-                                    className="bg-brand-dark/10 hover:bg-brand-dark/20 text-brand-dark p-2 rounded-xl transition-colors"
+                                    className="bg-brand-dark text-white p-3 rounded-xl shadow-lg"
                                 >
-                                    <ListPlus size={18} />
+                                    <Plus size={20} />
                                 </button>
                             </div>
                         </div>
 
-                        <div className="w-full h-[1px] bg-brand-dark/10 my-4"></div>
+                        <div className="h-[2px] bg-brand-dark/5 my-8"></div>
 
-                        <div className="flex gap-2 mb-2 overflow-x-auto pb-2 hide-scrollbar">
+                        <div className="flex gap-3 overflow-x-auto pb-4 hide-scrollbar">
                             {PASTEL_COLORS.map(c => (
                                 <button
                                     key={c}
                                     onClick={() => setCor(c)}
-                                    className={`w-8 h-8 rounded-full ${c} shadow-sm border-2 transition-all ${cor === c ? 'border-brand-dark/50 scale-110' : 'border-black/5 hover:scale-110'}`}
+                                    className={`w-10 h-10 shrink-0 rounded-2xl ${c} border-4 transition-all ${cor === c ? 'border-brand-dark ring-4 ring-brand-dark/10' : 'border-white/20'}`}
                                 />
                             ))}
                         </div>
@@ -227,15 +231,15 @@ export const PostItContainer = ({ isSidebar = false }: { isSidebar?: boolean }) 
                     <div className="flex gap-4">
                         <button
                             onClick={() => setIsEditing(false)}
-                            className="flex-1 py-4 rounded-2xl bg-surface text-brand-dark font-bold shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 active:scale-95 transition-transform flex justify-center items-center gap-2"
+                            className="flex-1 py-5 rounded-2xl bg-white dark:bg-slate-800 text-slate-400 font-black text-[10px] uppercase tracking-widest shadow-xl transition-all"
                         >
-                            <X size={20} /> Cancelar
+                            CANCELAR
                         </button>
                         <button
                             onClick={handleSave}
-                            className="flex-1 py-4 rounded-2xl bg-brand-teal text-white font-bold shadow-[0_8px_20px_rgba(45,212,191,0.4)] active:scale-95 transition-transform flex justify-center items-center gap-2"
+                            className="flex-[2] py-5 rounded-2xl bg-brand-teal text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-brand-teal/20 transition-all active:scale-95"
                         >
-                            <Check size={20} /> Salvar
+                            GUARDAR NOTA IQ
                         </button>
                     </div>
                 </motion.div>

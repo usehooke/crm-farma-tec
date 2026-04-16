@@ -34,8 +34,7 @@ export const KanbanBoard = ({ medicos, onAtualizarMedico, onSelectMedico }: Kanb
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                // [FIX]: Long Press (250ms) para mobile. 
-                // Permite o scroll nativo ao deslizar e o drag apenas ao segurar.
+                // Mantemos o delay de 250ms para diferenciar clique/scroll de arraste (Drag)
                 delay: 250,
                 tolerance: 5,
             },
@@ -78,7 +77,8 @@ export const KanbanBoard = ({ medicos, onAtualizarMedico, onSelectMedico }: Kanb
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-6 h-full p-4 overflow-x-auto no-scrollbar lg:justify-start touch-pan-y">
+            {/* [FIX MOBILE SCROLL]: Removido 'touch-pan-y' que bloqueava o scroll horizontal do Kanban */}
+            <div className="flex gap-6 h-full p-4 overflow-x-auto no-scrollbar lg:justify-start touch-auto bg-slate-50 dark:bg-slate-900/40">
                 {COLUMNS.map((col) => (
                     <KanbanColumn 
                         key={col.id} 
