@@ -105,26 +105,30 @@ export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive 
                             <li key={item.id} className="flex-1">
                                 <button
                                     onClick={() => setActiveTab(item.id as ViewName)}
-                                    className="w-full flex flex-col items-center justify-center gap-1 py-2 active:scale-95 transition-transform"
+                                    className="w-full h-12 flex flex-col items-center justify-center gap-0.5 relative active:scale-90 transition-transform"
+                                    aria-label={item.label}
                                 >
-                                    {/* Container do Ícone com animação de seleção */}
-                                    <div className={`relative p-2 rounded-xl transition-colors duration-300 ${isActive ? 'bg-primary/10' : 'bg-transparent'}`}>
+                                    {/* Link de toque invisível expandido para 48px */}
+                                    <div className="absolute inset-0 z-0 bg-transparent" />
+                                    
+                                    {/* Container do Ícone com animação de seleção Elite */}
+                                    <div className={`relative z-10 p-2 rounded-2xl transition-all duration-300 ${isActive ? 'bg-primary/10 scale-110 shadow-[0_0_15px_rgba(30,95,175,0.1)]' : 'bg-transparent'}`}>
                                         <Icon
-                                            size={24}
-                                            strokeWidth={isActive ? 2.5 : 2}
+                                            size={22}
+                                            strokeWidth={isActive ? 3 : 2}
                                             className={`transition-colors duration-300 ${isActive ? 'text-primary' : 'text-slate-400'}`}
                                         />
-                                        {/* Bolinha indicadora abaixo do ícone */}
+                                        
+                                        {/* Indicador de Status Elite */}
                                         {isActive && (
                                             <motion.div
                                                 layoutId="activeIndicator"
-                                                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full"
+                                                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"
                                             />
                                         )}
                                     </div>
 
-                                    {/* Texto do Menu */}
-                                    <span className={`text-[10px] font-bold tracking-wide transition-colors duration-300 ${isActive ? 'text-primary' : 'text-slate-400'}`}>
+                                    <span className={`text-[9px] font-black uppercase tracking-widest transition-colors duration-300 z-10 ${isActive ? 'text-primary' : 'text-slate-400'}`}>
                                         {item.label}
                                     </span>
                                 </button>

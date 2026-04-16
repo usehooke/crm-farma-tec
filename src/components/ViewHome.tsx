@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Medico } from '../hooks/useMedicos';
+import { useMedicos } from '../hooks/useMedicos';
 import { SidebarFiltros } from './Navigation/SidebarFiltros';
 import { DoctorCard } from './Doctors/DoctorCard';
 import { CockpitDetalhes } from './Doctors/CockpitDetalhes';
@@ -8,15 +8,17 @@ import { KanbanBoard } from './Kanban/KanbanBoard';
 import { LayoutGrid, List, Search as SearchIcon } from 'lucide-react';
 
 interface ViewHomeProps {
-    medicos: Medico[];
-    atualizarMedico: (id: string, updates: Partial<Medico>) => void;
-    adicionarLog: (idMedico: string, nota: string) => void;
-    limparBaseDuplicada: () => void;
     selectedMedicoId: string | null;
     setSelectedMedicoId: (id: string | null) => void;
 }
 
-export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDuplicada, selectedMedicoId, setSelectedMedicoId }: ViewHomeProps) {
+/**
+ * ViewHome Elite v3.0 (@Agent-UX)
+ * Agora consome seu próprio estado, isolando renderizações do MainLayout.
+ */
+export const ViewHome = memo(({ selectedMedicoId, setSelectedMedicoId }: ViewHomeProps) => {
+    const { medicos, atualizarMedico, adicionarLog, limparBaseDuplicada } = useMedicos();
+    
     const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy] = useState<'nome' | 'visita'>('nome');
@@ -27,16 +29,14 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
         limparBaseDuplicada();
     }, [limparBaseDuplicada]);
 
-    // 1. Algoritmo de Busca e Filtro de Alta Performance
+    // Algoritmo de Busca e Filtro de Alta Performance
     const medicosFiltrados = useMemo(() => {
         if (!Array.isArray(medicos)) return [];
-        
         const term = searchTerm.trim().toLowerCase();
         
         return medicos.filter(m => {
             const matchesSpec = selectedSpecialty === 'Todos' || m.especialidade === selectedSpecialty;
             if (!matchesSpec) return false;
-            
             if (!term) return true;
             
             return (
@@ -77,15 +77,14 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
                 <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl p-4 lg:p-6 border-b border-slate-100 shadow-sm w-full">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex flex-col flex-1 min-w-0">
-                            <h2 className="text-lg lg:text-xl font-black text-brand-dark truncate">
+                            <h2 className="text-lg lg:text-xl font-black text-brand-dark truncate tracking-tight">
                                 {viewMode === 'list' ? 'Médicos' : 'Quadro Estratégico'}
                             </h2>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5">
                                 {medicosFiltrados.length} Profissionais
                             </p>
                         </div>
                         
-                        {/* Toggle de Visualização (Sempre Visível) */}
                         <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
                             <button 
                                 onClick={() => setViewMode('list')}
@@ -102,7 +101,6 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
                         </div>
                     </div>
                     
-                    {/* Barra de Busca Mobile com Lupa High-Visibility */}
                     <div className="mt-4 relative lg:hidden">
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-teal z-10">
                             <SearchIcon size={16} strokeWidth={3} />
@@ -180,4 +178,4 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
             </AnimatePresence>
         </div>
     );
-}
+});
