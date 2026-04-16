@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  User, X, MessageSquare, ClipboardList, Stethoscope, ChevronDown, Save
+  User, X, MessageSquare, ClipboardList, ChevronDown, Save
 } from 'lucide-react';
 import type { Medico, LogVisita } from '../../hooks/useMedicos';
 import { format, isValid } from 'date-fns';

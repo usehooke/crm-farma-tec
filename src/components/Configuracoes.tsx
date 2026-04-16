@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Calendar, Database, ShieldCheck, LogOut, Tag, Plus, X, HelpCircle, Phone } from 'lucide-react';
+import { User, Database, ShieldCheck, LogOut, Tag, Plus, X, HelpCircle, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { auth } from '../services/firebaseConfig';
 import { fazerPushParaNuvem, importarCarteiraTop50 } from '../services/syncService';
@@ -21,8 +21,6 @@ export const Configuracoes = () => {
         setTelefoneUsuario,
         vipTags,
         salvarVipTags,
-        googleConectado,
-        setGoogleConectado,
         isDarkMode,
         setIsDarkMode
     } = useConfig();

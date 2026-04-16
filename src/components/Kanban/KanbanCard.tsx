@@ -1,7 +1,6 @@
-import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { User, Calendar, MapPin, Map } from 'lucide-react';
+import { User, Calendar, Map } from 'lucide-react';
 import type { Medico } from '../../hooks/useMedicos';
 import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

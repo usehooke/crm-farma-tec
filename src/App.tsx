@@ -1,6 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useMedicos } from './hooks/useMedicos';
-import { Plus } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { MainLayout } from './components/MainLayout';
 import { ViewHome } from './components/ViewHome';
@@ -22,13 +21,12 @@ const Protocolos = lazy(() => import('./components/Protocolos').then(m => ({ def
 const Configuracoes = lazy(() => import('./components/Configuracoes').then(m => ({ default: m.Configuracoes })));
 
 import { ConfigProvider, useConfig } from './context/ConfigContext';
-import { ModalProvider, useModal } from './context/ModalContext';
+import { ModalProvider } from './context/ModalContext';
 
 const AppContent = () => {
   const {
     loadingConfig,
   } = useConfig();
-  const { openModal } = useModal();
   const { medicos, atualizarMedico, adicionarLog, limparBaseDuplicada } = useMedicos();
 
   const [currentView, setCurrentView] = useState<ViewName>('home');
