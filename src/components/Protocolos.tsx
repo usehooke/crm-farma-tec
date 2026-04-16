@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Send, BookOpen, X, Plus, Trash2, PlayCircle, FileText, Globe } from 'lucide-react';
+import { Search, Send, BookOpen, Plus, Trash2, PlayCircle, FileText, Globe } from 'lucide-react';
 import { LISTA_PROTOCOLOS, type Protocolo } from '../data/protocolos';
 import { useMedicos } from '../hooks/useMedicos';
 import { useConfig } from '../context/ConfigContext';
