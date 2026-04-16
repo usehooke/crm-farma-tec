@@ -71,7 +71,7 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3 }}
-                        className="min-h-full"
+                        className="flex-1 flex flex-col w-full mx-auto overflow-hidden"
                     >
                         {children}
                     </motion.div>

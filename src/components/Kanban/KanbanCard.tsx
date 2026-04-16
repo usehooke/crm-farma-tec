@@ -9,9 +9,10 @@ import type { Medico } from '../../hooks/useMedicos';
 interface KanbanCardProps {
     medico: Medico;
     onClick?: () => void;
+    isDraggingOverlay?: boolean;
 }
 
-export const KanbanCard = ({ medico, onClick }: KanbanCardProps) => {
+export const KanbanCard = ({ medico, onClick, isDraggingOverlay }: KanbanCardProps) => {
     const {
         attributes,
         listeners,
@@ -37,7 +38,7 @@ export const KanbanCard = ({ medico, onClick }: KanbanCardProps) => {
         transform: CSS.Transform.toString(transform),
         transition,
         zIndex: isDragging ? 50 : 0,
-        opacity: isDragging ? 0.3 : 1,
+        opacity: isDragging && !isDraggingOverlay ? 0.3 : 1,
     };
 
     return (
@@ -47,35 +48,48 @@ export const KanbanCard = ({ medico, onClick }: KanbanCardProps) => {
             {...attributes} 
             {...listeners}
             onClick={(e) => {
-                // Previne abrir se estiver arrastando
                 if (isDragging) return;
                 onClick?.();
             }}
-            className="group touch-none mb-3 cursor-pointer"
+            className={`group touch-none mb-3 cursor-pointer ${isDraggingOverlay ? 'z-50' : ''}`}
         >
             <motion.div 
                 whileHover={{ y: -2 }}
-                className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:border-brand-teal/30 hover:shadow-md transition-all active:scale-[0.98]"
+                className={`p-4 rounded-2xl shadow-sm border transition-all ${
+                    isDraggingOverlay 
+                    ? 'bg-brand-teal text-white border-brand-teal shadow-[0_20px_40px_rgba(45,212,191,0.4)]' 
+                    : 'bg-white border-slate-100 hover:border-brand-teal/30 hover:shadow-md'
+                }`}
             >
                 <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        isDraggingOverlay ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'
+                    }`}>
                         <User size={14} />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h4 className="text-[11px] font-black text-brand-dark truncate">{medico.nome}</h4>
-                        <p className="text-[9px] font-bold text-brand-teal uppercase tracking-wider">{medico.especialidade} {medico.crm ? `| ${medico.crm}` : ''}</p>
+                        <h4 className={`text-[11px] font-black truncate ${
+                            isDraggingOverlay ? 'text-white' : 'text-brand-dark'
+                        }`}>{medico.nome}</h4>
+                        <p className={`text-[9px] font-bold uppercase tracking-wider ${
+                            isDraggingOverlay ? 'text-white/80' : 'text-brand-teal'
+                        }`}>{medico.especialidade}</p>
                     </div>
                 </div>
 
                 <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-slate-400">
+                    <div className={`flex items-center gap-1.5 ${
+                        isDraggingOverlay ? 'text-white/70' : 'text-slate-400'
+                    }`}>
                         <MapPin size={10} />
                         <span className="text-[9px] font-semibold truncate leading-none">{medico.localizacao}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
+                    <div className={`flex items-center gap-1.5 ${
+                        isDraggingOverlay ? 'text-white/60' : 'text-slate-300'
+                    }`}>
                         <Calendar size={10} />
                         <span className="text-[8px] font-bold uppercase tracking-tighter">
-                            Último: {safeFormat(medico.ultimoContato, "dd MMM", "Nunca")}
+                            {safeFormat(medico.ultimoContato, "dd MMM", "Nunca")}
                         </span>
                     </div>
                 </div>

@@ -1,65 +1,66 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Medico } from '../hooks/useMedicos';
 import { SidebarFiltros } from './Navigation/SidebarFiltros';
 import { DoctorCard } from './Doctors/DoctorCard';
 import { CockpitDetalhes } from './Doctors/CockpitDetalhes';
 import { KanbanBoard } from './Kanban/KanbanBoard';
-import { LayoutGrid, List } from 'lucide-react';
+import { LayoutGrid, List, Search as SearchIcon } from 'lucide-react';
 
 interface ViewHomeProps {
     medicos: Medico[];
     atualizarMedico: (id: string, updates: Partial<Medico>) => void;
     adicionarLog: (idMedico: string, nota: string) => void;
+    limparBaseDuplicada: () => void;
 }
 
-/**
- * ViewHome: Triple Pane Layout (@Agent-GridMaster & @Agent-StateSync)
- * Implementa a visão 3-colunas: Filtros | Lista | Detalhes (Cockpit)
- */
-export function ViewHome({ medicos, atualizarMedico, adicionarLog }: ViewHomeProps) {
+export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDuplicada }: ViewHomeProps) {
     const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedMedicoId, setSelectedMedicoId] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<'nome' | 'visita'>('nome');
     const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
-    // 1. Filtragem e Ordenação de Alta Performance (@Agent-DataModeller)
+    // Remove duplicatas ao carregar (Segurança máxima para o Kanban)
+    useEffect(() => {
+        limparBaseDuplicada();
+    }, []);
+
+    // 1. Algoritmo de Busca e Filtro de Alta Performance
     const medicosFiltrados = useMemo(() => {
         if (!Array.isArray(medicos)) return [];
-        let result = medicos.filter(m => {
-            const matchesSpec = selectedSpecialty === 'Todos' || m.especialidade === selectedSpecialty;
-            const matchesSearch = m.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                 m.crm?.includes(searchTerm) ||
-                                 m.localizacao.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesSpec && matchesSearch;
-        });
-
-        // Ordenação
-        if (sortBy === 'nome') {
-            result.sort((a, b) => a.nome.localeCompare(b.nome));
-        } else if (sortBy === 'visita') {
-            result.sort((a, b) => {
-                const dateA = a.ultimoContato ? new Date(a.ultimoContato).getTime() : 0;
-                const dateB = b.ultimoContato ? new Date(b.ultimoContato).getTime() : 0;
-                return dateA - dateB; // Mais longe/nunca visitados primeiro (para incentivar visita)
-            });
-        }
         
-        return result;
+        const term = searchTerm.trim().toLowerCase();
+        
+        return medicos.filter(m => {
+            const matchesSpec = selectedSpecialty === 'Todos' || m.especialidade === selectedSpecialty;
+            if (!matchesSpec) return false;
+            
+            if (!term) return true;
+            
+            return (
+                m.nome.toLowerCase().includes(term) || 
+                (m.crm && m.crm.toLowerCase().includes(term)) ||
+                (m.localizacao && m.localizacao.toLowerCase().includes(term))
+            );
+        }).sort((a, b) => {
+            if (sortBy === 'nome') return a.nome.localeCompare(b.nome);
+            const dateA = new Date(a.ultimoContato || 0).getTime();
+            const dateB = new Date(b.ultimoContato || 0).getTime();
+            return dateA - dateB;
+        });
     }, [medicos, selectedSpecialty, searchTerm, sortBy]);
 
-    // 2. Médico Selecionado (Ponte de Estado - @Agent-StateSync)
     const selectedMedico = useMemo(() => 
         medicos.find(m => m.id === selectedMedicoId) || null,
         [medicos, selectedMedicoId]
     );
 
     return (
-        <div className="flex h-screen w-full overflow-hidden bg-white">
+        <div className="flex h-screen w-full overflow-hidden bg-brand-white">
             
-            {/* PAINEL 1: Sidebar de Filtros (Desktop/Tablet) */}
-            <aside className="hidden lg:flex w-64 xl:w-72 h-full shrink-0">
+            {/* PAINEL 1: Sidebar desktop */}
+            <aside className="hidden lg:flex w-64 xl:w-72 h-full shrink-0 border-r border-slate-200">
                 <SidebarFiltros 
                     selectedSpecialty={selectedSpecialty}
                     onSelectSpecialty={setSelectedSpecialty}
@@ -68,68 +69,57 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog }: ViewHomePro
                 />
             </aside>
 
-            {/* PAINEL 2: Lista Central ou Quadro Kanban */}
-            <section className={`flex-1 ${viewMode === 'list' ? 'lg:max-w-md xl:max-w-xl' : ''} h-full flex flex-col bg-brand-white border-r border-slate-100 transition-all duration-300`}>
-                <header className="p-6 border-b border-slate-50">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex flex-col">
-                            <h2 className="text-xl font-black text-brand-dark tracking-tight">Médicos</h2>
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                                {medicosFiltrados.length} Registros
-                            </span>
+            {/* PAINEL 2: Lista Central (FIXO) */}
+            <section className="flex-1 h-full flex flex-col bg-white relative overflow-hidden">
+                
+                {/* Sticky Header com Lupa para Mobile */}
+                <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl p-4 lg:p-6 border-b border-slate-100 shadow-sm w-full">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex flex-col flex-1 min-w-0">
+                            <h2 className="text-lg lg:text-xl font-black text-brand-dark truncate">
+                                {viewMode === 'list' ? 'Médicos' : 'Quadro Estratégico'}
+                            </h2>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                {medicosFiltrados.length} Profissionais
+                            </p>
                         </div>
                         
-                        {/* Alternador de Visualização (@Agent-UIArchitect) */}
-                        <div className="flex bg-slate-100 p-1 rounded-xl">
+                        {/* Toggle de Visualização (Sempre Visível) */}
+                        <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
                             <button 
                                 onClick={() => setViewMode('list')}
-                                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-brand-teal' : 'text-slate-400 hover:text-slate-600'}`}
-                                title="Visualização em Lista"
+                                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-brand-teal' : 'text-slate-400'}`}
                             >
                                 <List size={18} />
                             </button>
                             <button 
                                 onClick={() => setViewMode('kanban')}
-                                className={`p-2 rounded-lg transition-all ${viewMode === 'kanban' ? 'bg-white shadow-sm text-brand-teal' : 'text-slate-400 hover:text-slate-600'}`}
-                                title="Visualização em Quadro (Kanban)"
+                                className={`p-2 rounded-lg transition-all ${viewMode === 'kanban' ? 'bg-white shadow-sm text-brand-teal' : 'text-slate-400'}`}
                             >
                                 <LayoutGrid size={18} />
                             </button>
                         </div>
                     </div>
                     
-                    {/* Controles de Busca e Ordenação (@Agent-UIArchitect) */}
-                    <div className="flex flex-col gap-3 mt-4">
-                        <div className="relative lg:hidden">
-                            <input 
-                                type="text"
-                                placeholder="Buscar por nome, CRM ou cidade..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-slate-100/50 border-none rounded-2xl px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-brand-teal/20 transition-all"
-                            />
+                    {/* Barra de Busca Mobile com Lupa High-Visibility */}
+                    <div className="mt-4 relative lg:hidden">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-teal z-10">
+                            <SearchIcon size={16} strokeWidth={3} />
                         </div>
-
-                        <div className="flex items-center gap-2">
-                            <button 
-                                onClick={() => setSortBy('nome')}
-                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${sortBy === 'nome' ? 'bg-brand-teal text-white shadow-md' : 'bg-slate-100 text-slate-400'}`}
-                            >
-                                Nome (A-Z)
-                            </button>
-                            <button 
-                                onClick={() => setSortBy('visita')}
-                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${sortBy === 'visita' ? 'bg-brand-teal text-white shadow-md' : 'bg-slate-100 text-slate-400'}`}
-                            >
-                                Relevância (Visita)
-                            </button>
-                        </div>
+                        <input 
+                            type="text"
+                            placeholder="Buscar nome, CRM ou cidade..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-slate-50 border-2 border-transparent focus:border-brand-teal/20 rounded-2xl pl-12 pr-4 py-3 text-xs font-bold transition-all shadow-inner"
+                        />
                     </div>
                 </header>
 
-                {viewMode === 'list' ? (
-                    <div className="flex-1 overflow-y-auto p-4 no-scrollbar bg-slate-50/30">
-                        <AnimatePresence mode="popLayout">
+                {/* Conteúdo Renderizado */}
+                <div className="flex-1 overflow-hidden flex flex-col">
+                    {viewMode === 'list' ? (
+                        <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 no-scrollbar bg-slate-50/20">
                             {medicosFiltrados.map((medico) => (
                                 <DoctorCard 
                                     key={medico.id}
@@ -138,43 +128,40 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog }: ViewHomePro
                                     onClick={() => setSelectedMedicoId(medico.id)}
                                 />
                             ))}
-                        </AnimatePresence>
-
-                        {medicosFiltrados.length === 0 && (
-                            <div className="py-20 text-center">
-                                <p className="text-sm text-slate-400 italic">Nenhum médico encontrado com estes filtros.</p>
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <div className="flex-1 overflow-hidden">
-                        <KanbanBoard 
-                            key={`${searchTerm}-${selectedSpecialty}`}
-                            medicos={medicosFiltrados}
-                            onAtualizarMedico={atualizarMedico}
-                            onSelectMedico={setSelectedMedicoId}
-                        />
-                    </div>
-                )}
+                            {medicosFiltrados.length === 0 && (
+                                <div className="py-20 text-center text-slate-300 italic text-sm">Nenhum médico encontrado.</div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="flex-1 overflow-hidden h-full">
+                            <KanbanBoard 
+                                key={`${searchTerm}-${selectedSpecialty}-${medicosFiltrados.length}`}
+                                medicos={medicosFiltrados}
+                                onAtualizarMedico={atualizarMedico}
+                                onSelectMedico={setSelectedMedicoId}
+                            />
+                        </div>
+                    )}
+                </div>
             </section>
 
-            {/* PAINEL 3: Cockpit de Detalhes (Oculto se Kanban estiver ativo para dar espaço) */}
-            <main className={`${viewMode === 'list' ? 'hidden lg:flex' : 'hidden'} flex-1 h-full`}>
+            {/* PAINEL 3: Cockpit Detalhes (Desktop) */}
+            <aside className="hidden lg:flex w-[400px] xl:w-[480px] h-full shrink-0 border-l border-slate-100">
                 <CockpitDetalhes 
                     medico={selectedMedico}
                     onAtualizarMedico={atualizarMedico}
                     onAdicionarLog={adicionarLog}
                     onFechar={() => setSelectedMedicoId(null)}
                 />
-            </main>
+            </aside>
 
-            {/* Mobile View: Cockpit flutuante ou Modal (Melhoria futura do @Agent-UIArchitect) */}
+            {/* Cockpit Mobile (Slide-up) */}
             <AnimatePresence>
                 {selectedMedicoId && (
                     <motion.div 
-                        initial={{ x: '100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '100%' }}
+                        initial={{ y: '100%' }}
+                        animate={{ y: 0 }}
+                        exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         className="fixed inset-0 z-[60] lg:hidden bg-white"
                     >
@@ -187,7 +174,6 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog }: ViewHomePro
                     </motion.div>
                 )}
             </AnimatePresence>
-
         </div>
     );
 }

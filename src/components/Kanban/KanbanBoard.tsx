@@ -28,7 +28,7 @@ const COLUMNS = [
     { id: 'Monitoramento', title: '🔍 Monitoramento' },
 ];
 
-export const KanbanBoard = ({ medicos, onAtualizarMedico }: KanbanBoardProps) => {
+export const KanbanBoard = ({ medicos, onAtualizarMedico, onSelectMedico }: KanbanBoardProps) => {
     const [activeId, setActiveId] = useState<string | null>(null);
 
     const sensors = useSensors(
@@ -78,7 +78,7 @@ export const KanbanBoard = ({ medicos, onAtualizarMedico }: KanbanBoardProps) =>
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-6 h-full p-4 overflow-x-auto no-scrollbar lg:justify-start">
+            <div className="flex gap-6 h-full p-4 overflow-x-auto no-scrollbar lg:justify-start touch-pan-y">
                 {COLUMNS.map((col) => (
                     <KanbanColumn 
                         key={col.id} 
@@ -94,12 +94,19 @@ export const KanbanBoard = ({ medicos, onAtualizarMedico }: KanbanBoardProps) =>
                 sideEffects: defaultDropAnimationSideEffects({
                     styles: {
                         active: {
-                            opacity: '0.5',
+                            opacity: '0.4',
                         },
                     },
                 }),
             }}>
-                {activeMedico ? <KanbanCard medico={activeMedico} /> : null}
+                {activeMedico ? (
+                    <div className="scale-110 rotate-2 cursor-grabbing">
+                        <KanbanCard 
+                            medico={activeMedico} 
+                            isDraggingOverlay 
+                        />
+                    </div>
+                ) : null}
             </DragOverlay>
         </DndContext>
     );

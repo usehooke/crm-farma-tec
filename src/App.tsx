@@ -29,7 +29,7 @@ const AppContent = () => {
     loadingConfig,
   } = useConfig();
   const { openModal } = useModal();
-  const { medicos, atualizarMedico, adicionarLog } = useMedicos();
+  const { medicos, atualizarMedico, adicionarLog, limparBaseDuplicada } = useMedicos();
 
   const [currentView, setCurrentView] = useState<ViewName>('home');
   const [showSplash, setShowSplash] = useState(true);
@@ -114,7 +114,12 @@ const AppContent = () => {
           </div>
         }>
           {currentView === 'home' && (
-            <ViewHome medicos={medicos} atualizarMedico={atualizarMedico} adicionarLog={adicionarLog} />
+            <ViewHome 
+                medicos={medicos} 
+                atualizarMedico={atualizarMedico} 
+                adicionarLog={adicionarLog} 
+                limparBaseDuplicada={limparBaseDuplicada}
+            />
           )}
           {currentView === 'agenda' && <Agendamento medicos={medicos} adicionarLog={adicionarLog} />}
           {currentView === 'notas' && <PostItContainer />}
@@ -128,10 +133,10 @@ const AppContent = () => {
       {currentView === 'home' && (
         <button
           onClick={() => openModal('form')}
-          className="fixed bottom-28 right-6 bg-primary hover:bg-opacity-90 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 z-[60]"
-          title="Novo Registro"
+          className="fixed bottom-28 right-6 bg-brand-teal text-white w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(45,212,191,0.5)] active:scale-90 z-[60] border-4 border-white"
+          title="Novo Cadastro"
         >
-          <Plus size={28} />
+          <Plus size={32} strokeWidth={3} />
         </button>
       )}
     </div>
