@@ -20,8 +20,6 @@ interface CockpitDetalhesProps {
 
 /**
  * Cockpit de Detalhes do Médico (@Agent-ActionPanel)
- * Focado em densidade de informações, Neumorfismo Premium e ações rápidas.
- * Inclui agora o Bloco de Notas Estratégicas com Auto-save.
  */
 export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
   medico,
@@ -29,13 +27,17 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
   onAdicionarLog,
   onFechar
 }) => {
+  // [FIX]: Todos os Hooks devem ser declarados no início, antes de qualquer retorno condicional.
   const [novaNota, setNovaNota] = useState('');
   const [isRegistrando, setIsRegistrando] = useState(false);
+  const [tipoVisita, setTipoVisita] = useState<'presencial' | 'tecnico'>('presencial');
+  const [amostras, setAmostras] = useState<string[]>([]);
+  const [brindes, setBrindes] = useState<string[]>([]);
   
   // Estado local para o Bloco de Notas Estratégicas
   const [notaCrm, setNotaCrm] = useState(medico?.notasCrm || '');
   const [isSyncing, setIsSyncing] = useState(false);
-  const debouncedNotaCrm = useDebounce(notaCrm, 400); // Debounce reduzido para agilizar no campo
+  const debouncedNotaCrm = useDebounce(notaCrm, 400);
 
   // Sincroniza o estado local quando o médico troca
   useEffect(() => {
@@ -45,18 +47,11 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
     }
   }, [medico?.id]);
 
-  // Função de persistência forçada (usada no Blur ou Troca de Médico)
-  const persistirNota = (valor: string) => {
-    if (medico && valor !== (medico.notasCrm || '')) {
-      onAtualizarMedico(medico.id, { notasCrm: valor });
-    }
-  };
-
   // Efeito de Auto-save (Debounce)
   useEffect(() => {
     if (medico && debouncedNotaCrm !== (medico.notasCrm || '')) {
       setIsSyncing(true);
-      persistirNota(debouncedNotaCrm);
+      onAtualizarMedico(medico.id, { notasCrm: debouncedNotaCrm });
       
       const timer = setTimeout(() => setIsSyncing(false), 800);
       return () => clearTimeout(timer);
@@ -77,13 +72,9 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
     );
   }
 
-  const [tipoVisita, setTipoVisita] = useState<'presencial' | 'tecnico'>('presencial');
-  const [amostras, setAmostras] = useState<string[]>([]);
-  const [brindes, setBrindes] = useState<string[]>([]);
-
   const handleSalvarVisita = () => {
     if (!novaNota.trim()) return;
-    onAdicionarLog(medico!.id, novaNota, {
+    onAdicionarLog(medico.id, novaNota, {
         tipo: tipoVisita,
         amostras,
         brindes
@@ -175,7 +166,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
       <div className="flex-1 overflow-y-auto px-8 pb-32 no-scrollbar">
         <div className="flex flex-col gap-8">
             
-            {/* NOVO: Bloco de Notas Estratégicas (Sticky Note Style) */}
+            {/* Bloco de Notas Estratégicas */}
             <section className="relative group">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em] flex items-center gap-2">
@@ -216,13 +207,10 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                           setNotaCrm(e.target.value);
                           setIsSyncing(true);
                         }}
-                        onBlur={() => persistirNota(notaCrm)} // Salva IMEDIATAMENTE ao sair do campo
-                        placeholder="Anote aqui informações fixas relevantes: hobbies do médico, preferências de produtos, dias que ele costuma operar..."
-                        className="w-full neo-input min-h-[160px] p-6 text-sm font-semibold text-slate-600 bg-brand-white/50 border border-white/40 leading-relaxed placeholder:text-slate-300 placeholder:italic transition-all focus:bg-white"
+                        onBlur={() => onAtualizarMedico(medico.id, { notasCrm: notaCrm })}
+                        placeholder="Anote aqui informações relevantes: preferências, dias de operação..."
+                        className="w-full neo-input min-h-[160px] p-6 text-sm font-semibold text-slate-600 bg-brand-white/50 border border-white/40 leading-relaxed placeholder:text-slate-300 transition-all focus:bg-white"
                     />
-                    <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none opacity-10 group-focus-within:opacity-30 transition-opacity">
-                         <div className="w-full h-full bg-gradient-to-bl from-brand-teal to-transparent rounded-tr-3xl" />
-                    </div>
                 </div>
             </section>
 
@@ -233,7 +221,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                     Detalhes de Contato
                 </h3>
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors group cursor-pointer active:scale-[0.99]" onClick={() => window.open(`tel:${medico.telefone}`, '_self')}>
+                    <div className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors group cursor-pointer" onClick={() => window.open(`tel:${medico.telefone}`, '_self')}>
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm">
                                 <Phone size={18} />
@@ -255,7 +243,6 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                         <MessageSquare size={12} className="text-brand-teal" />
                         Histórico de Visitas
                     </h3>
-                    <button className="text-[10px] font-black text-brand-teal hover:underline tracking-tight">Ver Tudo</button>
                 </div>
 
                 <div className="space-y-6">
@@ -304,7 +291,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                 <motion.button
                     layoutId="action-btn"
                     onClick={() => setIsRegistrando(true)}
-                    className="w-full h-16 neo-button-primary !rounded-[var(--radius-corp)] !text-[10px] !uppercase !tracking-[0.3em] shadow-xl shadow-brand-teal/30 hover:scale-[1.02]"
+                    className="w-full h-16 neo-button-primary !rounded-[var(--radius-corp)] !text-[10px] !uppercase !tracking-[0.3em] shadow-xl shadow-brand-teal/30 active:scale-[0.98] transition-all"
                 >
                     <Plus size={20} strokeWidth={3} />
                     Registrar Visita
@@ -335,7 +322,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                         autoFocus
                         value={novaNota}
                         onChange={(e) => setNovaNota(e.target.value)}
-                        placeholder="Relate como foi a recepção, pontos discutidos e interesse..."
+                        placeholder="Relate como foi a recepção..."
                         className="neo-input min-h-[100px] mb-4 resize-none !rounded-2xl !text-xs"
                     />
 
@@ -344,7 +331,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                         <div>
                             <p className="text-[8px] font-black text-slate-400 uppercase mb-2">Amostras</p>
                             <div className="flex flex-wrap gap-1">
-                                {['Amostra A', 'Amostra B', 'Amostra C'].map(item => (
+                                {['Hormônios', 'Suplementos', 'Peletizados'].map(item => (
                                     <button 
                                         key={item}
                                         onClick={() => toggleItem(item, amostras, setAmostras)}
@@ -356,7 +343,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                         <div>
                             <p className="text-[8px] font-black text-slate-400 uppercase mb-2">Brindes</p>
                             <div className="flex flex-wrap gap-1">
-                                {['Caneta', 'Bloco', 'Copo'].map(item => (
+                                {['Caneta IQ', 'Agenda 2026', 'Copo Térmico'].map(item => (
                                     <button 
                                         key={item}
                                         onClick={() => toggleItem(item, brindes, setBrindes)}
@@ -370,16 +357,16 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                     <div className="flex gap-4">
                         <button 
                             onClick={() => setIsRegistrando(false)}
-                            className="flex-1 px-4 py-4 rounded-2xl bg-slate-100 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-colors"
+                            className="flex-1 px-4 py-4 rounded-2xl bg-slate-100 text-slate-400 font-black text-[10px] uppercase tracking-widest"
                         >
                             Cancelar
                         </button>
                         <button 
                             onClick={handleSalvarVisita}
                             disabled={!novaNota.trim()}
-                            className={`flex-[2] !rounded-2xl !text-[10px] !uppercase !tracking-[0.2em] shadow-lg disabled:opacity-50 hover:brightness-110 active:scale-[0.98] transition-all py-4 font-black flex items-center justify-center gap-2 ${tipoVisita === 'tecnico' ? 'bg-purple-600 text-white shadow-purple-200' : 'bg-brand-teal text-white shadow-brand-teal/20'}`}
+                            className={`flex-[2] !rounded-2xl !text-[10px] !uppercase !tracking-[0.2em] shadow-lg transition-all py-4 font-black flex items-center justify-center gap-2 ${tipoVisita === 'tecnico' ? 'bg-purple-600 text-white shadow-purple-200' : 'bg-brand-teal text-white shadow-brand-teal/20'}`}
                         >
-                            {tipoVisita === 'tecnico' ? 'Salvar Inquérito Científico' : 'Salvar Visita Comercial'}
+                            Confirmar Registro
                         </button>
                     </div>
                 </motion.div>

@@ -149,6 +149,7 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog }: ViewHomePro
                 ) : (
                     <div className="flex-1 overflow-hidden">
                         <KanbanBoard 
+                            key={`${searchTerm}-${selectedSpecialty}`}
                             medicos={medicosFiltrados}
                             onAtualizarMedico={atualizarMedico}
                         />

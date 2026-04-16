@@ -33,7 +33,10 @@ export const KanbanBoard = ({ medicos, onAtualizarMedico }: KanbanBoardProps) =>
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                distance: 8, // Previne arrastar acidentalmente no mobile
+                // [FIX]: Long Press (250ms) para mobile. 
+                // Permite o scroll nativo ao deslizar e o drag apenas ao segurar.
+                delay: 250,
+                tolerance: 5,
             },
         }),
         useSensor(KeyboardSensor, {
@@ -52,10 +55,8 @@ export const KanbanBoard = ({ medicos, onAtualizarMedico }: KanbanBoardProps) =>
         const medicoId = active.id as string;
         const newStatus = over.id as string;
 
-        // Se o médico foi solto em uma coluna diferente do status atual
         const medico = medicos.find(m => m.id === medicoId);
         
-        // Verifica se soltou em uma coluna válida
         if (medico && medico.status !== newStatus && COLUMNS.some(c => c.id === newStatus)) {
             onAtualizarMedico(medicoId, { status: newStatus as any });
         }

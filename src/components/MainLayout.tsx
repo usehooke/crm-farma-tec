@@ -25,7 +25,31 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
     ] as const;
 
     return (
-        <div className="min-h-screen bg-brand-white relative overflow-hidden flex justify-center lg:bg-slate-50">
+        <div className="min-h-screen bg-brand-white relative overflow-hidden flex lg:bg-slate-50">
+
+            {/* Sidebar Desktop (Slim/Exclusiva) */}
+            <nav className="hidden lg:flex w-20 flex-col items-center py-8 bg-brand-dark border-r border-slate-800 shrink-0 z-50">
+                <div className="w-10 h-10 rounded-xl bg-brand-teal flex items-center justify-center text-white font-black text-lg mb-10 shadow-lg shadow-brand-teal/20">
+                    IQ
+                </div>
+                <ul className="flex flex-col gap-6 w-full px-2">
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
+                        return (
+                            <li key={item.id}>
+                                <button
+                                    onClick={() => setActiveTab(item.id as ViewName)}
+                                    className={`w-full flex flex-col items-center justify-center gap-1 py-3 px-1 rounded-2xl transition-all ${isActive ? 'bg-brand-teal text-white' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'}`}
+                                >
+                                    <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                                    <span className="text-[8px] font-black uppercase tracking-tight">{item.label}</span>
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </nav>
 
             {/* Banner de Instalação PWA Global */}
             <BannerInstalacao />
