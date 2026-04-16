@@ -36,7 +36,8 @@ export const Auth = () => {
                 const allowedSpecialEmails = [
                     'nando@farmacliniq.com.br', 
                     'ariani@elmeco.com.br',
-                    'ariani_vicente@yahoo.com.br'
+                    'ariani_vicente@yahoo.com.br',
+                    'teste@farmacliniq.com.br'
                 ]; // Liste suas exceções aqui
 
                 if (!allowedDomains.includes(domain) && !allowedSpecialEmails.includes(email.toLowerCase())) {

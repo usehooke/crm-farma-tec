@@ -92,7 +92,9 @@ const AppContent = () => {
   }
 
   // [Operação Blindagem]: Trava de E-mail Verificado
-  if (!usuarioLogado.emailVerified) {
+  // Exceções para facilitar o acesso inicial e testes sem depender de SMTP
+  const emailsLiberados = ['teste@farmacliniq.com.br', 'ariani_vicente@yahoo.com.br', 'nando@farmacliniq.com.br'];
+  if (!usuarioLogado.emailVerified && !emailsLiberados.includes(usuarioLogado.email || '')) {
     return <EmailVerificationPending />;
   }
 
