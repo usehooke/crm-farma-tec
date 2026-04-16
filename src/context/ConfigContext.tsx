@@ -157,7 +157,9 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (!loadingConfig && user) {
             const key = getStorageKey(user.uid);
             if (key) {
-                localStorage.setItem(key, JSON.stringify(medicos));
+                // [STABILITY]: Garantir que apenas dados únicos sejam salvos
+                const uniqueMedicos = Array.from(new Map(medicos.map(m => [m.id, m])).values());
+                localStorage.setItem(key, JSON.stringify(uniqueMedicos));
             }
         }
     }, [medicos, loadingConfig, user]);

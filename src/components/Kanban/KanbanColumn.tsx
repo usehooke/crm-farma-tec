@@ -14,7 +14,10 @@ export const KanbanColumn = ({ id, title, medicos, onSelectMedico }: KanbanColum
     const { setNodeRef, isOver } = useDroppable({ id });
 
     return (
-        <div className={`flex flex-col w-72 shrink-0 bg-slate-50/50 rounded-3xl p-4 h-full border transition-all duration-200 ${isOver ? 'border-brand-teal/40 bg-brand-teal/5 shadow-inner' : 'border-white/40'}`}>
+        <div 
+            ref={setNodeRef} 
+            className={`flex flex-col min-w-[280px] w-72 shrink-0 bg-slate-50/50 rounded-3xl p-4 h-full border transition-all duration-200 ${isOver ? 'border-brand-teal/40 bg-brand-teal/5 shadow-inner' : 'border-white/40'}`}
+        >
             <div className="flex items-center justify-between mb-6 px-2">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{title}</h3>
                 <span className="text-[10px] font-black bg-white text-brand-teal px-2 py-0.5 rounded-lg shadow-sm border border-slate-50">

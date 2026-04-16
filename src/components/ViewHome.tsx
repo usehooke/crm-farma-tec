@@ -119,7 +119,10 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
                 {/* Conteúdo Renderizado */}
                 <div className="flex-1 overflow-hidden flex flex-col">
                     {viewMode === 'list' ? (
-                        <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 no-scrollbar bg-slate-50/20">
+                        <div 
+                            key={`list-${searchTerm}-${selectedSpecialty}`}
+                            className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 no-scrollbar bg-slate-50/20"
+                        >
                             {medicosFiltrados.map((medico) => (
                                 <DoctorCard 
                                     key={medico.id}
