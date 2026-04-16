@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useMedicos } from './hooks/useMedicos';
+import { Plus } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { MainLayout } from './components/MainLayout';
 import { ViewHome } from './components/ViewHome';
@@ -21,12 +22,13 @@ const Protocolos = lazy(() => import('./components/Protocolos').then(m => ({ def
 const Configuracoes = lazy(() => import('./components/Configuracoes').then(m => ({ default: m.Configuracoes })));
 
 import { ConfigProvider, useConfig } from './context/ConfigContext';
-import { ModalProvider } from './context/ModalContext';
+import { ModalProvider, useModal } from './context/ModalContext';
 
 const AppContent = () => {
   const {
     loadingConfig,
   } = useConfig();
+  const { openModal } = useModal();
   const { medicos, atualizarMedico, adicionarLog, limparBaseDuplicada } = useMedicos();
 
   const [currentView, setCurrentView] = useState<ViewName>('home');
@@ -35,8 +37,6 @@ const AppContent = () => {
 
   // Authentication & Sync State (Gerenciado pelo useSyncManager)
   const { usuarioLogado, isAuthLoading } = useSyncManager();
-
-
 
   useEffect(() => {
     // Splash screen timer
@@ -134,7 +134,6 @@ const AppContent = () => {
         </Suspense>
       </MainLayout>
 
-      {/* FAB Oculto temporariamente, as Views devem prover seus botões de ação (Ex: Agendamento FAB) ou ViewHome */}
       {/* FAB Contextual - Excluir se selecionado pois o Cockpit já tem seu próprio FAB UX v2 */}
       {currentView === 'home' && !selectedMedicoId && (
         <div className="fixed bottom-28 left-0 right-0 flex justify-center pointer-events-none z-[60] lg:hidden">
@@ -159,4 +158,3 @@ export default function App() {
     </ConfigProvider>
   );
 }
-

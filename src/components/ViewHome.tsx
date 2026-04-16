@@ -1,13 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 import type { Medico } from '../hooks/useMedicos';
 import { SidebarFiltros } from './Navigation/SidebarFiltros';
 import { DoctorCard } from './Doctors/DoctorCard';
 import { CockpitDetalhes } from './Doctors/CockpitDetalhes';
 import { KanbanBoard } from './Kanban/KanbanBoard';
-import { LayoutGrid, List, Search as SearchIcon, Plus, ClipboardList } from 'lucide-react';
-import { useModal } from '../context/ModalContext';
+import { LayoutGrid, List, Search as SearchIcon } from 'lucide-react';
 
 interface ViewHomeProps {
     medicos: Medico[];
@@ -19,7 +17,6 @@ interface ViewHomeProps {
 }
 
 export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDuplicada, selectedMedicoId, setSelectedMedicoId }: ViewHomeProps) {
-    const { openModal } = useModal();
     const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy] = useState<'nome' | 'visita'>('nome');
@@ -28,7 +25,7 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
     // Remove duplicatas ao carregar (Segurança máxima para o Kanban)
     useEffect(() => {
         limparBaseDuplicada();
-    }, []);
+    }, [limparBaseDuplicada]);
 
     // 1. Algoritmo de Busca e Filtro de Alta Performance
     const medicosFiltrados = useMemo(() => {
@@ -181,7 +178,6 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
                     </motion.div>
                 )}
             </AnimatePresence>
-            {/* O FAB agora é controlado pelo App.tsx ou está dentro do Cockpit */}
         </div>
     );
 }
