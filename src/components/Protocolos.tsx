@@ -103,7 +103,7 @@ export const Protocolos = () => {
     };
 
     const dispararWhatsapp = (telefone: string, p: Protocolo, idMedico: string) => {
-        adicionarLog(idMedico, `📄 Enviado Protocolo: ${p.titulo} via Biblioteca IQ`, 'envio_material');
+        adicionarLog(idMedico, `📄 Enviado Protocolo: ${p.titulo} via Biblioteca IQ`, { tipo: 'envio_material' });
         toast.success('Envio registrado no CRM!');
 
         const msg = window.encodeURIComponent(

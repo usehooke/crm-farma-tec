@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     DndContext,
     DragOverlay,
@@ -7,10 +7,9 @@ import {
     PointerSensor,
     useSensor,
     useSensors,
-    DragStartEvent,
-    DragEndEvent,
     defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
+import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { KanbanColumn } from './KanbanColumn';
 import { KanbanCard } from './KanbanCard';

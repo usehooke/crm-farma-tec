@@ -164,7 +164,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     // AUTO-PUSH PARA NUVEM (FIREBASE) - @Agent-StateSync
     // Implementa Sincronização Híbrida com Debounce de 2s para evitar overload no Firestore
-    const syncTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         if (!loadingConfig && user && medicos.length > 0 && isHydrated) {
