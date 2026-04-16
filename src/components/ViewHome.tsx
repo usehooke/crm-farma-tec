@@ -152,6 +152,7 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog }: ViewHomePro
                             key={`${searchTerm}-${selectedSpecialty}`}
                             medicos={medicosFiltrados}
                             onAtualizarMedico={atualizarMedico}
+                            onSelectMedico={setSelectedMedicoId}
                         />
                     </div>
                 )}

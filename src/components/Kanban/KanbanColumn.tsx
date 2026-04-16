@@ -7,9 +7,10 @@ interface KanbanColumnProps {
     id: string;
     title: string;
     medicos: Medico[];
+    onSelectMedico?: (id: string) => void;
 }
 
-export const KanbanColumn = ({ id, title, medicos }: KanbanColumnProps) => {
+export const KanbanColumn = ({ id, title, medicos, onSelectMedico }: KanbanColumnProps) => {
     const { setNodeRef, isOver } = useDroppable({ id });
 
     return (
@@ -32,7 +33,11 @@ export const KanbanColumn = ({ id, title, medicos }: KanbanColumnProps) => {
                 >
                     <div className="flex flex-col">
                         {medicos.map((medico) => (
-                            <KanbanCard key={medico.id} medico={medico} />
+                            <KanbanCard 
+                                key={medico.id} 
+                                medico={medico} 
+                                onClick={() => onSelectMedico?.(medico.id)}
+                            />
                         ))}
                     </div>
                 </SortableContext>

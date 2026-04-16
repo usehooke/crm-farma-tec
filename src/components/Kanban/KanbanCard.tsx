@@ -2,15 +2,16 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
 import { User, MapPin, Calendar } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Medico } from '../../hooks/useMedicos';
 
 interface KanbanCardProps {
     medico: Medico;
+    onClick?: () => void;
 }
 
-export const KanbanCard = ({ medico }: KanbanCardProps) => {
+export const KanbanCard = ({ medico, onClick }: KanbanCardProps) => {
     const {
         attributes,
         listeners,
@@ -19,6 +20,18 @@ export const KanbanCard = ({ medico }: KanbanCardProps) => {
         transition,
         isDragging
     } = useSortable({ id: medico.id });
+
+    // Helper para formatação segura de data no Card
+    const safeFormat = (date: string | undefined | null, formatStr: string, fallback: string) => {
+        if (!date) return fallback;
+        try {
+            const d = new Date(date);
+            if (!isValid(d)) return fallback;
+            return format(d, formatStr, { locale: ptBR });
+        } catch {
+            return fallback;
+        }
+    };
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -33,7 +46,12 @@ export const KanbanCard = ({ medico }: KanbanCardProps) => {
             style={style} 
             {...attributes} 
             {...listeners}
-            className="group touch-none mb-3"
+            onClick={(e) => {
+                // Previne abrir se estiver arrastando
+                if (isDragging) return;
+                onClick?.();
+            }}
+            className="group touch-none mb-3 cursor-pointer"
         >
             <motion.div 
                 whileHover={{ y: -2 }}
@@ -45,7 +63,7 @@ export const KanbanCard = ({ medico }: KanbanCardProps) => {
                     </div>
                     <div className="flex-1 min-w-0">
                         <h4 className="text-[11px] font-black text-brand-dark truncate">{medico.nome}</h4>
-                        <p className="text-[9px] font-bold text-brand-teal uppercase tracking-wider">{medico.especialidade}</p>
+                        <p className="text-[9px] font-bold text-brand-teal uppercase tracking-wider">{medico.especialidade} {medico.crm ? `| ${medico.crm}` : ''}</p>
                     </div>
                 </div>
 
@@ -54,14 +72,12 @@ export const KanbanCard = ({ medico }: KanbanCardProps) => {
                         <MapPin size={10} />
                         <span className="text-[9px] font-semibold truncate leading-none">{medico.localizacao}</span>
                     </div>
-                    {medico.ultimoContato && (
-                        <div className="flex items-center gap-1.5 text-slate-300">
-                            <Calendar size={10} />
-                            <span className="text-[8px] font-bold uppercase tracking-tighter">
-                                {format(new Date(medico.ultimoContato), "dd MMM", { locale: ptBR })}
-                            </span>
-                        </div>
-                    )}
+                    <div className="flex items-center gap-1.5 text-slate-300">
+                        <Calendar size={10} />
+                        <span className="text-[8px] font-bold uppercase tracking-tighter">
+                            Último: {safeFormat(medico.ultimoContato, "dd MMM", "Nunca")}
+                        </span>
+                    </div>
                 </div>
             </motion.div>
         </div>

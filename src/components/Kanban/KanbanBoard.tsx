@@ -18,6 +18,7 @@ import type { Medico } from '../../hooks/useMedicos';
 interface KanbanBoardProps {
     medicos: Medico[];
     onAtualizarMedico: (id: string, updates: Partial<Medico>) => void;
+    onSelectMedico?: (id: string) => void;
 }
 
 const COLUMNS = [
@@ -84,6 +85,7 @@ export const KanbanBoard = ({ medicos, onAtualizarMedico }: KanbanBoardProps) =>
                         id={col.id} 
                         title={col.title} 
                         medicos={getMedicosByStatus(col.id)} 
+                        onSelectMedico={onSelectMedico}
                     />
                 ))}
             </div>
