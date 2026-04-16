@@ -130,15 +130,7 @@ const AppContent = () => {
       </MainLayout>
 
       {/* FAB Oculto temporariamente, as Views devem prover seus botões de ação (Ex: Agendamento FAB) ou ViewHome */}
-      {currentView === 'home' && (
-        <button
-          onClick={() => openModal('form')}
-          className="fixed bottom-28 right-6 bg-brand-teal text-white w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(45,212,191,0.5)] active:scale-90 z-[60] border-4 border-white"
-          title="Novo Cadastro"
-        >
-          <Plus size={32} strokeWidth={3} />
-        </button>
-      )}
+      {/* O FAB foi movido para dentro da ViewHome para ser Contextual Inteligente */}
     </div>
   );
 }

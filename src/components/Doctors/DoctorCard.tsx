@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { User, Calendar, MapPin, ChevronRight } from 'lucide-react';
 import type { Medico } from '../../hooks/useMedicos';
@@ -15,7 +15,7 @@ interface DoctorCardProps {
  * Card do Médico para a lista central (@Agent-ComponentSniper)
  * Otimizado para Mobile Android (Contraste e Thumb Zone)
  */
-export const DoctorCard: React.FC<DoctorCardProps> = ({
+const DoctorCardComponent: React.FC<DoctorCardProps> = ({
   medico,
   isSelected,
   onClick
@@ -98,3 +98,5 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
     </motion.button>
   );
 };
+
+export const DoctorCard = memo(DoctorCardComponent);

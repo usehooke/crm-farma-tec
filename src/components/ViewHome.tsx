@@ -1,11 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import type { Medico } from '../hooks/useMedicos';
 import { SidebarFiltros } from './Navigation/SidebarFiltros';
 import { DoctorCard } from './Doctors/DoctorCard';
 import { CockpitDetalhes } from './Doctors/CockpitDetalhes';
 import { KanbanBoard } from './Kanban/KanbanBoard';
-import { LayoutGrid, List, Search as SearchIcon } from 'lucide-react';
+import { LayoutGrid, List, Search as SearchIcon, Plus, ClipboardList } from 'lucide-react';
+import { useModal } from '../context/ModalContext';
 
 interface ViewHomeProps {
     medicos: Medico[];
@@ -15,6 +17,7 @@ interface ViewHomeProps {
 }
 
 export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDuplicada }: ViewHomeProps) {
+    const { openModal } = useModal();
     const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedMedicoId, setSelectedMedicoId] = useState<string | null>(null);
@@ -177,6 +180,30 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
                     </motion.div>
                 )}
             </AnimatePresence>
+            {/* Contextual FAB - Visível apenas em mobile e centrado para ergonomia Android */}
+            <div className="fixed bottom-28 left-0 right-0 flex justify-center pointer-events-none z-[60] lg:hidden">
+                <motion.button
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                        if (selectedMedicoId) {
+                            // Se já está selecionado, o Cockpit já está aberto. 
+                            // O UX v2 diz que o Cocpkit deve ter o botão de registro em destaque.
+                            // Mas podemos também forçar o scroll aqui.
+                            toast.info('Use o botão no rodapé do perfil para registrar!');
+                        } else {
+                            openModal('form');
+                        }
+                    }}
+                    className={`
+                        pointer-events-auto h-16 w-16 rounded-full flex items-center justify-center shadow-2xl transition-all border-4 border-white
+                        ${selectedMedicoId ? 'bg-brand-dark text-white' : 'bg-brand-teal text-white shadow-brand-teal/20'}
+                    `}
+                >
+                    {selectedMedicoId ? <ClipboardList size={28} /> : <Plus size={32} strokeWidth={3} />}
+                </motion.button>
+            </div>
         </div>
     );
 }
