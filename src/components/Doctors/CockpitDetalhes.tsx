@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  User, Phone, MapPin, 
-  MessageSquare, Plus, X, Tag,
-  Stethoscope, ShieldCheck, ChevronRight,
-  ClipboardList, CheckCircle2, RotateCcw
+  User, X, MessageSquare, ClipboardList, Stethoscope
 } from 'lucide-react';
-import type { Medico } from '../../hooks/useMedicos';
+import type { Medico, LogVisita } from '../../hooks/useMedicos';
 import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -14,13 +11,13 @@ import { useDebounce } from '../../hooks/useDebounce';
 interface CockpitDetalhesProps {
   medico: Medico | null;
   onAtualizarMedico: (id: string, updates: Partial<Medico>) => void;
-  onAdicionarLog: (idMedico: string, nota: string, extras?: any) => void;
+  onAdicionarLog: (idMedico: string, nota: string, extras?: Partial<LogVisita>) => void;
   onFechar: () => void;
 }
 
 /**
  * Cockpit de Detalhes do Médico (@Agent-ActionPanel)
- * Blindado contra erros de dados e estados nulos.
+ * Versão Ultra-Estável para Build de Produção
  */
 export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
   medico,
@@ -31,32 +28,26 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
   // 1. Hooks (Sempre no topo, incondicionais)
   const [novaNota, setNovaNota] = useState('');
   const [isRegistrando, setIsRegistrando] = useState(false);
-  const [tipoVisita, setTipoVisita] = useState<'presencial' | 'tecnico'>('presencial');
-  const [amostras, setAmostras] = useState<string[]>([]);
-  const [brindes, setBrindes] = useState<string[]>([]);
+  const [tipoVisita] = useState<'presencial' | 'tecnico'>('presencial');
+  const [amostras] = useState<string[]>([]);
+  const [brindes] = useState<string[]>([]);
   
   const [notaCrm, setNotaCrm] = useState('');
-  const [isSyncing, setIsSyncing] = useState(false);
   const debouncedNotaCrm = useDebounce(notaCrm, 400);
 
   // Sincroniza o estado local quando o médico troca
   useEffect(() => {
     if (medico) {
       setNotaCrm(medico.notasCrm || '');
-      setIsSyncing(false);
     }
   }, [medico?.id]);
 
-  // Auto-save Debounced (Evitando loops)
+  // Auto-save Debounced
   useEffect(() => {
     if (medico && debouncedNotaCrm !== (medico.notasCrm || '')) {
-      setIsSyncing(true);
       onAtualizarMedico(medico.id, { notasCrm: debouncedNotaCrm });
-      
-      const timer = setTimeout(() => setIsSyncing(false), 800);
-      return () => clearTimeout(timer);
     }
-  }, [debouncedNotaCrm]); // Removido medico?.id para evitar disparos duplos na troca
+  }, [debouncedNotaCrm]);
 
   // Helper de formatação segura
   const safeFormat = (date: string | undefined | null, formatStr: string, fallback: string) => {
@@ -90,21 +81,11 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
         brindes
     });
     setNovaNota('');
-    setAmostras([]);
-    setBrindes([]);
     setIsRegistrando(false);
   };
 
-  const toggleItem = (item: string, list: string[], setList: (l: string[]) => void) => {
-    if (list.includes(item)) {
-        setList(list.filter(i => i !== item));
-    } else {
-        setList([...list, item]);
-    }
-  };
-
   return (
-    <div className="flex-1 flex flex-col h-full bg-surface overflow-hidden relative border-l border-slate-200">
+    <div className="flex-1 flex flex-col h-full bg-white overflow-hidden relative border-l border-slate-200">
       <header className="p-8 pb-4">
         <div className="flex items-start justify-between mb-8">
             <div className="flex items-center gap-6">
@@ -119,7 +100,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                     </p>
                 </div>
             </div>
-            <button onClick={onFechar} className="p-2 text-slate-300 hover:text-danger active:scale-90"><X size={20} /></button>
+            <button onClick={onFechar} className="p-2 text-slate-300 hover:text-red-500 active:scale-90"><X size={20} /></button>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-6">
@@ -146,7 +127,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                 </h3>
                 <textarea 
                     value={notaCrm}
-                    onChange={(e) => { setNotaCrm(e.target.value); setIsSyncing(true); }}
+                    onChange={(e) => { setNotaCrm(e.target.value); }}
                     onBlur={() => onAtualizarMedico(medico.id, { notasCrm: notaCrm })}
                     className="w-full neo-input min-h-[140px] !text-sm !font-semibold !rounded-2xl"
                     placeholder="Informações fixas sobre o perfil do médico..."

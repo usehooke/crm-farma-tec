@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import { fazerPushParaNuvem } from '../services/syncService';
 
 import type { User } from 'firebase/auth';
+import type { Medico } from '../hooks/useMedicos';
 
 export interface VipTag {
     id: string;
@@ -46,12 +47,12 @@ interface ConfigContextData {
     setGoogleConectado: (conectado: boolean) => void;
     isDarkMode: boolean;
     setIsDarkMode: (isDark: boolean) => void;
-    medicos: any[];
-    setMedicos: (lista: any[]) => void;
+    medicos: Medico[];
+    setMedicos: React.Dispatch<React.SetStateAction<Medico[]>>;
     eventos: EventoAgenda[];
-    setEventos: (lista: EventoAgenda[]) => void;
+    setEventos: React.Dispatch<React.SetStateAction<EventoAgenda[]>>;
     notas: NotaLivre[];
-    setNotas: (lista: NotaLivre[]) => void;
+    setNotas: React.Dispatch<React.SetStateAction<NotaLivre[]>>;
     user: User | null;
     setUser: (user: User | null) => void;
     loadingConfig: boolean;
@@ -77,7 +78,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [vipTags, setVipTagsState] = useState<VipTag[]>([]);
     const [googleConectado, setGoogleConectadoState] = useState(false);
     const [isDarkMode, setIsDarkModeState] = useState(false);
-    const [medicos, setMedicosState] = useState<any[]>([]);
+    const [medicos, setMedicosState] = useState<Medico[]>([]);
     const [eventos, setEventosState] = useState<EventoAgenda[]>([]);
     const [notas, setNotasState] = useState<NotaLivre[]>([]);
     const [user, setUser] = useState<User | null>(null);

@@ -23,6 +23,9 @@ export interface Medico {
     proximaVisita?: string;
     logVisitas: LogVisita[];
     notasCrm?: string;
+    ownerId?: string; // Para compatibilidade com Firebase
+    dataRetorno?: string; // Para compatibilidade com FormMedico
+    dataCriacao?: string; // Para compatibilidade com Excel
 }
 
 export function useMedicos() {
@@ -33,17 +36,17 @@ export function useMedicos() {
         const medicoComId: Medico = { 
             ...novo, 
             id,
-            logVisitas: novo.logVisitas || []
+            logVisitas: (novo as any).logVisitas || []
         };
         setMedicos(prev => [...prev, medicoComId]);
     };
 
     const atualizarMedico = (id: string, dados: Partial<Medico>) => {
-        setMedicos(prev => prev.map(m => m.id === id ? { ...m, ...dados } : m));
+        setMedicos((prev: Medico[]) => prev.map((m: Medico) => m.id === id ? { ...m, ...dados } : m));
     };
 
     const adicionarLog = (idMedico: string, nota: string, extras: Partial<LogVisita> = {}) => {
-        setMedicos(prev => prev.map(m => {
+        setMedicos((prev: Medico[]) => prev.map((m: Medico) => {
             if (m.id === idMedico) {
                 const novoLog: LogVisita = {
                     id: generateUUID(),
@@ -64,6 +67,7 @@ export function useMedicos() {
 
     const limparBaseDuplicada = () => {
         const hash = new Map<string, Medico>();
+        const totalInicial = medicos.length;
         let alterado = false;
 
         medicos.forEach(m => {
@@ -79,13 +83,22 @@ export function useMedicos() {
             }
         });
 
+        const totalFinal = hash.size;
+        const result = {
+            totalInicial,
+            totalFinal,
+            mergedCount: totalInicial - totalFinal
+        };
+
         if (alterado) {
             setMedicos(Array.from(hash.values()));
         }
+
+        return result;
     };
 
     const removerMedico = (id: string) => {
-        setMedicos(prev => prev.filter(m => m.id !== id));
+        setMedicos((prev: Medico[]) => prev.filter((m: Medico) => m.id !== id));
     };
 
     return { 

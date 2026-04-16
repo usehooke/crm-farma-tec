@@ -47,7 +47,7 @@ export const KanbanCard = ({ medico, onClick, isDraggingOverlay }: KanbanCardPro
             style={style} 
             {...attributes} 
             {...listeners}
-            onClick={(e) => {
+            onClick={() => {
                 if (isDragging) return;
                 onClick?.();
             }}

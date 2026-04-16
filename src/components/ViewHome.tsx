@@ -18,7 +18,7 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
     const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedMedicoId, setSelectedMedicoId] = useState<string | null>(null);
-    const [sortBy, setSortBy] = useState<'nome' | 'visita'>('nome');
+    const [sortBy] = useState<'nome' | 'visita'>('nome');
     const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
     // Remove duplicatas ao carregar (Segurança máxima para o Kanban)
