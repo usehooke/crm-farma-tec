@@ -1,16 +1,12 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Calendar as CalendarIcon, 
-    Clock, 
-    User, 
     ChevronLeft, 
     ChevronRight, 
     Plus, 
     CheckCircle2,
-    CalendarDays,
-    MapPin,
-    AlertCircle
+    CalendarDays
 } from 'lucide-react';
 import { 
     format, 
@@ -29,8 +25,8 @@ import { useMedicos } from '../hooks/useMedicos';
 import { toast } from 'sonner';
 
 /**
- * Agendamento Elite v3.0 (@Agent-UX)
- * Agora com estado descentralizado e otimização de renderização.
+ * Agendamento Elite v3.1 (@Agent-ZeroDefect)
+ * Correção de Build (Imports limpos) e Ergonomia (Padding do botão de ação).
  */
 export const Agendamento = () => {
     const { medicos, adicionarLog } = useMedicos();
@@ -91,7 +87,7 @@ export const Agendamento = () => {
 
     return (
         <motion.div
-            className="flex-1 bg-brand-white px-5 pt-8 pb-40"
+            className="flex-1 bg-brand-white px-5 pt-8 pb-52 shadow-inner"
             variants={pageVariants}
             initial="initial"
             animate="animate"
@@ -145,7 +141,6 @@ export const Agendamento = () => {
                                     key={i}
                                     onClick={() => {
                                         setSelectedDate(day);
-                                        // setView('day');
                                     }}
                                     className={`
                                         aspect-square flex flex-col items-center justify-center rounded-2xl text-xs font-bold transition-all relative
@@ -166,15 +161,13 @@ export const Agendamento = () => {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {/* Day View Implementation */}
                     <div className="bg-brand-teal p-6 rounded-[32px] text-white shadow-xl mb-6">
                         <h2 className="text-xl font-black italic">{format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}</h2>
-                        <p className="text-xs font-bold opacity-80 uppercase tracking-widest mt-1">3 Compromissos Confirmados</p>
+                        <p className="text-xs font-bold opacity-80 uppercase tracking-widest mt-1">Status: Visita no Itinerário</p>
                     </div>
                 </div>
             )}
 
-            {/* Listagem de Visitas do Dia Selecionado */}
             <div className="mt-8 space-y-4">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2 mb-4">Próximos Passos</h3>
                 <div className="bg-white rounded-[32px] p-6 shadow-soft-out border border-white flex items-center gap-4 group active:scale-[0.98] transition-all">
@@ -191,7 +184,6 @@ export const Agendamento = () => {
                 </div>
             </div>
 
-            {/* Modal de Agendamento - Elite v3.0 */}
             <AnimatePresence>
                 {showAddModal && (
                     <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-6">
@@ -290,11 +282,10 @@ export const Agendamento = () => {
                 )}
             </AnimatePresence>
 
-            {/* Fab Base Tela - Posicionado acima do Bottom Nav (@Agent-UX) */}
-            <div className="fixed bottom-28 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-5 z-20">
+            <div className="fixed bottom-36 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-5 z-20">
                 <button
                     onClick={handleSave}
-                    className="w-full py-5 rounded-[28px] bg-brand-dark text-white font-black text-sm uppercase tracking-widest shadow-2xl active:scale-95 transition-all flex justify-center items-center gap-3"
+                    className="w-full py-5 rounded-[28px] bg-brand-dark text-white font-black text-sm uppercase tracking-widest shadow-2xl active:scale-95 transition-all flex justify-center items-center gap-3 border-4 border-white"
                 >
                     Confirmar {modo === 'Visita' ? 'Agendamento' : 'Evento'}
                 </button>
