@@ -4,7 +4,8 @@ import { auth } from '../services/firebaseConfig';
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    updateProfile
+    updateProfile,
+    sendEmailVerification
 } from 'firebase/auth';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
 
@@ -19,17 +20,37 @@ export const Auth = () => {
         e.preventDefault();
         setErro('');
 
+        // Validação de Senha (Mínimo 6 caracteres conforme solicitado)
+        if (senha.length < 6) {
+           setErro('A senha deve ter pelo menos 6 caracteres.');
+           return;
+        }
+
         try {
             if (isLogin) {
                 await signInWithEmailAndPassword(auth, email, senha);
             } else {
+                // [Operação Blindagem]: Whitelist de Domínios
+                const domain = email.split('@')[1]?.toLowerCase();
+                const allowedDomains = ['elmeco.com.br'];
+                const allowedSpecialEmails = ['nando@farmacliniq.com.br', 'ariani@elmeco.com.br']; // Liste suas exceções aqui
+
+                if (!allowedDomains.includes(domain) && !allowedSpecialEmails.includes(email.toLowerCase())) {
+                    setErro('Cadastro restrito a e-mails corporativos @elmeco.com.br.');
+                    return;
+                }
+
                 const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-                // Atualiza o perfil no Firebase com o nome fornecido
+                
+                // Enviar e-mail de verificação IMEDIATAMENTE após criar conta
+                await sendEmailVerification(userCredential.user);
+                
                 await updateProfile(userCredential.user, { displayName: nome });
-                // Guarda também no LocalStorage para manter a lógica offline-first sincronizada
                 localStorage.setItem('@FarmaClinIQ:user_nome', nome);
+                
+                // Forçar um logout ou aviso seria ideal, mas o AppContent tratará a trava
             }
-        } catch (err: unknown) {
+        } catch (err: any) {
             console.error("Auth error:", err);
             setErro('Falha na autenticação. Verifique os dados e a ligação.');
         }

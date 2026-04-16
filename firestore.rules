@@ -1,14 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Garante que o utilizador só consiga ler e escrever na sua própria subcoleção de médicos
-    match /usuarios/{userId}/medicos/{medicoId} {
+    // [Operação Blindagem]: Garante isolamento total por UID
+    // A regra {allPaths=**} garante que qualquer subcoleção (médicos, notas, eventos)
+    // herde a proteção do dono do UID.
+    match /usuarios/{userId}/{allPaths=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Regra adicional para permitir gerir o metadata/lastSync do próprio perfil
-    match /usuarios/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Admins podem ter regras especiais no futuro aqui
+    match /admins/{adminId} {
+      allow read: if request.auth != null;
     }
   }
 }

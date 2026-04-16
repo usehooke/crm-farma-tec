@@ -14,6 +14,7 @@ import { hasValidConfig } from './services/firebaseConfig';
 import { Auth } from './views/Auth';
 import { useSyncManager } from './hooks/useSyncManager';
 import { ConfigErrorScreen } from './components/ConfigErrorScreen';
+import { EmailVerificationPending } from './components/EmailVerificationPending';
 
 // Lazy Loaded Views for Performance
 const DashboardBI = lazy(() => import('./components/DashboardBI').then(m => ({ default: m.DashboardBI })));
@@ -90,6 +91,11 @@ const AppContent = () => {
     return <Auth />;
   }
 
+  // [Operação Blindagem]: Trava de E-mail Verificado
+  if (!usuarioLogado.emailVerified) {
+    return <EmailVerificationPending />;
+  }
+
   return (
     <div className="font-sans text-slate-800">
       <Toaster position="top-center" richColors />
@@ -120,7 +126,7 @@ const AppContent = () => {
       {currentView === 'home' && (
         <button
           onClick={() => openModal('form')}
-          className="fixed bottom-24 right-6 bg-primary hover:bg-opacity-90 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-[4px_4px_10px_#e2e8f0,-4px_-4px_10px_#ffffff] transition-all active:scale-95 z-40"
+          className="fixed bottom-28 right-6 bg-primary hover:bg-opacity-90 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 z-[60]"
           title="Novo Registro"
         >
           <Plus size={28} />

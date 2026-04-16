@@ -6,7 +6,10 @@ export interface LogVisita {
     id: string;
     data: string; // ISO date string
     nota: string;
-    tipo?: 'presencial' | 'telefonema' | 'envio_material';
+    tipo?: 'presencial' | 'telefonema' | 'envio_material' | 'tecnico';
+    amostras?: string[]; // Amostras entregues
+    brindes?: string[]; // Brindes entregues
+    doubtResolved?: boolean; // Se uma dúvida técnica foi sanada
 }
 
 // Definição da estrutura do Médico para a V2.0
@@ -42,19 +45,20 @@ export function useMedicos() {
         setMedicos(medicos.map(m => m.id === id ? { ...m, ...dados } : m));
     };
 
-    const adicionarLog = (idMedico: string, nota: string, tipo: LogVisita['tipo'] = 'presencial') => {
+    const adicionarLog = (idMedico: string, nota: string, extras: Partial<LogVisita> = {}) => {
         setMedicos(medicos.map(m => {
             if (m.id === idMedico) {
                 const novoLog: LogVisita = {
                     id: generateUUID(),
                     data: new Date().toISOString(),
                     nota,
-                    tipo
+                    tipo: extras.tipo || 'presencial',
+                    ...extras
                 };
                 return {
                     ...m,
                     logVisitas: [novoLog, ...m.logVisitas],
-                    ultimoContato: new Date().toISOString() // Atualiza automaticamente o follow-up point
+                    ultimoContato: new Date().toISOString()
                 };
             }
             return m;

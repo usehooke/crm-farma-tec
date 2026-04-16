@@ -14,7 +14,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 interface CockpitDetalhesProps {
   medico: Medico | null;
   onAtualizarMedico: (id: string, updates: Partial<Medico>) => void;
-  onAdicionarLog: (idMedico: string, nota: string) => void;
+  onAdicionarLog: (idMedico: string, nota: string, extras?: any) => void;
   onFechar: () => void;
 }
 
@@ -35,7 +35,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
   // Estado local para o Bloco de Notas Estratégicas
   const [notaCrm, setNotaCrm] = useState(medico?.notasCrm || '');
   const [isSyncing, setIsSyncing] = useState(false);
-  const debouncedNotaCrm = useDebounce(notaCrm, 1000);
+  const debouncedNotaCrm = useDebounce(notaCrm, 400); // Debounce reduzido para agilizar no campo
 
   // Sincroniza o estado local quando o médico troca
   useEffect(() => {
@@ -45,13 +45,19 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
     }
   }, [medico?.id]);
 
+  // Função de persistência forçada (usada no Blur ou Troca de Médico)
+  const persistirNota = (valor: string) => {
+    if (medico && valor !== (medico.notasCrm || '')) {
+      onAtualizarMedico(medico.id, { notasCrm: valor });
+    }
+  };
+
   // Efeito de Auto-save (Debounce)
   useEffect(() => {
     if (medico && debouncedNotaCrm !== (medico.notasCrm || '')) {
       setIsSyncing(true);
-      onAtualizarMedico(medico.id, { notasCrm: debouncedNotaCrm });
+      persistirNota(debouncedNotaCrm);
       
-      // Simula feedback visual de conclusão de sincronia
       const timer = setTimeout(() => setIsSyncing(false), 800);
       return () => clearTimeout(timer);
     }
@@ -71,11 +77,29 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
     );
   }
 
+  const [tipoVisita, setTipoVisita] = useState<'presencial' | 'tecnico'>('presencial');
+  const [amostras, setAmostras] = useState<string[]>([]);
+  const [brindes, setBrindes] = useState<string[]>([]);
+
   const handleSalvarVisita = () => {
     if (!novaNota.trim()) return;
-    onAdicionarLog(medico.id, novaNota);
+    onAdicionarLog(medico!.id, novaNota, {
+        tipo: tipoVisita,
+        amostras,
+        brindes
+    });
     setNovaNota('');
+    setAmostras([]);
+    setBrindes([]);
     setIsRegistrando(false);
+  };
+
+  const toggleItem = (item: string, list: string[], setList: (l: string[]) => void) => {
+    if (list.includes(item)) {
+        setList(list.filter(i => i !== item));
+    } else {
+        setList([...list, item]);
+    }
   };
 
   return (
@@ -190,8 +214,9 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                         value={notaCrm}
                         onChange={(e) => {
                           setNotaCrm(e.target.value);
-                          setIsSyncing(true); // Feedback imediato de que está editando
+                          setIsSyncing(true);
                         }}
+                        onBlur={() => persistirNota(notaCrm)} // Salva IMEDIATAMENTE ao sair do campo
                         placeholder="Anote aqui informações fixas relevantes: hobbies do médico, preferências de produtos, dias que ele costuma operar..."
                         className="w-full neo-input min-h-[160px] p-6 text-sm font-semibold text-slate-600 bg-brand-white/50 border border-white/40 leading-relaxed placeholder:text-slate-300 placeholder:italic transition-all focus:bg-white"
                     />
@@ -247,11 +272,22 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                                         <p className="text-[10px] font-black text-brand-dark uppercase tracking-widest">
                                             {format(new Date(log.data), "eeee, dd 'de' MMMM", { locale: ptBR })}
                                         </p>
-                                        <span className="text-[8px] px-2 py-0.5 bg-slate-100 text-slate-500 font-black rounded-lg uppercase">
-                                            {log.tipo || 'Presencial'}
+                                        <span className={`text-[8px] px-2 py-0.5 font-black rounded-lg uppercase ${log.tipo === 'tecnico' ? 'bg-purple-100 text-purple-600' : 'bg-slate-100 text-slate-500'}`}>
+                                            {log.tipo === 'tecnico' ? 'Inquérito Científico' : (log.tipo || 'Presencial')}
                                         </span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed font-semibold italic">"{log.nota}"</p>
+                                    
+                                    {(log.amostras?.length || log.brindes?.length) && (
+                                        <div className="mt-3 flex flex-wrap gap-2 pt-3 border-t border-slate-50">
+                                            {log.amostras?.map(a => (
+                                                <span key={a} className="text-[8px] font-black text-brand-teal uppercase px-1.5 py-0.5 bg-brand-teal/5 rounded">Amostra: {a}</span>
+                                            ))}
+                                            {log.brindes?.map(b => (
+                                                <span key={b} className="text-[8px] font-black text-slate-400 uppercase px-1.5 py-0.5 bg-slate-50 rounded">Brinde: {b}</span>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))
@@ -282,16 +318,55 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                     className="neo-card p-6 w-full border border-white"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em]">Notas da Visita</h4>
-                        <div className="w-8 h-1 bg-slate-100 rounded-full" />
+                        <h4 className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em]">Relatório de Campo</h4>
+                        <div className="flex gap-2">
+                             <button 
+                                onClick={() => setTipoVisita('presencial')}
+                                className={`px-3 py-1 rounded-full text-[8px] font-black uppercase transition-all ${tipoVisita === 'presencial' ? 'bg-brand-teal text-white' : 'bg-slate-100 text-slate-400'}`}
+                             >Comercial</button>
+                             <button 
+                                onClick={() => setTipoVisita('tecnico')}
+                                className={`px-3 py-1 rounded-full text-[8px] font-black uppercase transition-all ${tipoVisita === 'tecnico' ? 'bg-purple-500 text-white shadow-lg shadow-purple-200' : 'bg-slate-100 text-slate-400'}`}
+                             >Científico</button>
+                        </div>
                     </div>
+
                     <textarea 
                         autoFocus
                         value={novaNota}
                         onChange={(e) => setNovaNota(e.target.value)}
-                        placeholder="Quais novidades a Ariani tem hoje? Relate o interesse em nossos produtos..."
-                        className="neo-input min-h-[120px] mb-4 resize-none !rounded-2xl"
+                        placeholder="Relate como foi a recepção, pontos discutidos e interesse..."
+                        className="neo-input min-h-[100px] mb-4 resize-none !rounded-2xl !text-xs"
                     />
+
+                    {/* Amostras e Brindes */}
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <p className="text-[8px] font-black text-slate-400 uppercase mb-2">Amostras</p>
+                            <div className="flex flex-wrap gap-1">
+                                {['Amostra A', 'Amostra B', 'Amostra C'].map(item => (
+                                    <button 
+                                        key={item}
+                                        onClick={() => toggleItem(item, amostras, setAmostras)}
+                                        className={`px-2 py-1 rounded-lg text-[8px] font-bold border transition-all ${amostras.includes(item) ? 'bg-brand-teal/10 border-brand-teal text-brand-teal' : 'bg-white border-slate-100 text-slate-400'}`}
+                                    >+ {item}</button>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-[8px] font-black text-slate-400 uppercase mb-2">Brindes</p>
+                            <div className="flex flex-wrap gap-1">
+                                {['Caneta', 'Bloco', 'Copo'].map(item => (
+                                    <button 
+                                        key={item}
+                                        onClick={() => toggleItem(item, brindes, setBrindes)}
+                                        className={`px-2 py-1 rounded-lg text-[8px] font-bold border transition-all ${brindes.includes(item) ? 'bg-brand-teal/10 border-brand-teal text-brand-teal' : 'bg-white border-slate-100 text-slate-400'}`}
+                                    >+ {item}</button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="flex gap-4">
                         <button 
                             onClick={() => setIsRegistrando(false)}
@@ -302,9 +377,9 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                         <button 
                             onClick={handleSalvarVisita}
                             disabled={!novaNota.trim()}
-                            className="flex-[2] neo-button-primary !rounded-2xl !text-[10px] !uppercase !tracking-[0.2em] shadow-lg shadow-brand-teal/20 disabled:opacity-50 hover:brightness-110 active:scale-[0.98] transition-all"
+                            className={`flex-[2] !rounded-2xl !text-[10px] !uppercase !tracking-[0.2em] shadow-lg disabled:opacity-50 hover:brightness-110 active:scale-[0.98] transition-all py-4 font-black flex items-center justify-center gap-2 ${tipoVisita === 'tecnico' ? 'bg-purple-600 text-white shadow-purple-200' : 'bg-brand-teal text-white shadow-brand-teal/20'}`}
                         >
-                            Salvar Registro
+                            {tipoVisita === 'tecnico' ? 'Salvar Inquérito Científico' : 'Salvar Visita Comercial'}
                         </button>
                     </div>
                 </motion.div>

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { fazerPushParaNuvem } from '../services/syncService';
 
 import type { User } from 'firebase/auth';
 
@@ -151,7 +152,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }, [user]);
 
-    // Persistência automática de médicos com chave dinâmica
+    // Persistência automática de médicos com chave dinâmica (LOCAL STORAGE)
     useEffect(() => {
         if (!loadingConfig && user) {
             const key = getStorageKey(user.uid);
@@ -160,6 +161,35 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             }
         }
     }, [medicos, loadingConfig, user]);
+
+    // AUTO-PUSH PARA NUVEM (FIREBASE) - @Agent-StateSync
+    // Implementa Sincronização Híbrida com Debounce de 2s para evitar overload no Firestore
+    const syncTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (!loadingConfig && user && medicos.length > 0 && isHydrated) {
+            // Limpa timer anterior
+            if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+
+            syncTimerRef.current = setTimeout(async () => {
+                setSyncInProgress(true);
+                try {
+                    await fazerPushParaNuvem(user.uid, medicos, eventos, notas);
+                    setCloudSyncError(null);
+                    console.log("[@Agent-StateSync] Sincronização automática concluída.");
+                } catch (error) {
+                    console.error("[@Agent-StateSync] Erro no auto-push:", error);
+                    // setCloudSyncError(error instanceof Error ? error.message : 'Erro no auto-push');
+                } finally {
+                    setSyncInProgress(false);
+                }
+            }, 2000); 
+        }
+
+        return () => {
+            if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+        };
+    }, [medicos, eventos, notas, user, loadingConfig, isHydrated]);
 
     useEffect(() => {
         if (!loadingConfig && user) {
