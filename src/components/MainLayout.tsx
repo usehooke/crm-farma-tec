@@ -11,9 +11,10 @@ interface MainLayoutProps {
     children: React.ReactNode;
     activeTab: ViewName;
     setActiveTab: (tab: ViewName) => void;
+    isContextActive?: boolean; // Nova prop para esconder o menu
 }
 
-export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProps) => {
+export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive = false }: MainLayoutProps) => {
     // Configuração das abas de navegação
     const navItems = [
         { id: 'home', label: 'Início', icon: Home },
@@ -55,7 +56,7 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
             <BannerInstalacao />
 
             {/* Área de Conteúdo principal (As telas são injetadas aqui) */}
-            <main className="w-full lg:max-w-none max-w-[600px] h-screen pb-24 lg:pb-0 overflow-x-hidden relative bg-brand-white shadow-2xl lg:shadow-none z-20">
+            <main className="w-full lg:max-w-none max-w-[600px] h-screen pb-32 lg:pb-0 overflow-x-hidden relative bg-brand-white shadow-2xl lg:shadow-none z-10 transition-all duration-300">
                 {/* Header Fixo do App */}
                 <header className="sticky top-0 z-40 bg-brand-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-transparent dark:border-slate-800/50">
                     <h1 className="text-2xl tracking-tighter">
@@ -85,8 +86,16 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
                 </aside>
             )}
 
-            {/* Bottom Navigation Bar (Neumórfica v2) */}
-            <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-4 pb-6 pt-3 bg-surface dark:bg-slate-900/80 dark:backdrop-blur-xl rounded-t-3xl shadow-[0_-8px_20px_rgba(0,0,0,0.03)] z-50 lg:hidden border-t border-white/5 dark:border-white/10">
+            {/* Bottom Navigation Bar (Otimizada: Esconde em Contexto Ativo) */}
+            <AnimatePresence>
+                {!isContextActive && (
+                    <motion.nav 
+                        initial={{ y: 100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 100, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-4 pb-6 pt-3 bg-surface/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-t-[32px] shadow-[0_-10px_30px_rgba(0,0,0,0.08)] z-40 lg:hidden border-t border-white/5 dark:border-white/10"
+                    >
                 <ul className="flex justify-between items-center px-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;
@@ -123,7 +132,9 @@ export const MainLayout = ({ children, activeTab, setActiveTab }: MainLayoutProp
                         );
                     })}
                 </ul>
-            </nav>
+                    </motion.nav>
+                )}
+            </AnimatePresence>
 
         </div>
     );

@@ -14,13 +14,14 @@ interface ViewHomeProps {
     atualizarMedico: (id: string, updates: Partial<Medico>) => void;
     adicionarLog: (idMedico: string, nota: string) => void;
     limparBaseDuplicada: () => void;
+    selectedMedicoId: string | null;
+    setSelectedMedicoId: (id: string | null) => void;
 }
 
-export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDuplicada }: ViewHomeProps) {
+export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDuplicada, selectedMedicoId, setSelectedMedicoId }: ViewHomeProps) {
     const { openModal } = useModal();
     const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedMedicoId, setSelectedMedicoId] = useState<string | null>(null);
     const [sortBy] = useState<'nome' | 'visita'>('nome');
     const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
@@ -180,30 +181,7 @@ export function ViewHome({ medicos, atualizarMedico, adicionarLog, limparBaseDup
                     </motion.div>
                 )}
             </AnimatePresence>
-            {/* Contextual FAB - Visível apenas em mobile e centrado para ergonomia Android */}
-            <div className="fixed bottom-28 left-0 right-0 flex justify-center pointer-events-none z-[60] lg:hidden">
-                <motion.button
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => {
-                        if (selectedMedicoId) {
-                            // Se já está selecionado, o Cockpit já está aberto. 
-                            // O UX v2 diz que o Cocpkit deve ter o botão de registro em destaque.
-                            // Mas podemos também forçar o scroll aqui.
-                            toast.info('Use o botão no rodapé do perfil para registrar!');
-                        } else {
-                            openModal('form');
-                        }
-                    }}
-                    className={`
-                        pointer-events-auto h-16 w-16 rounded-full flex items-center justify-center shadow-2xl transition-all border-4 border-white
-                        ${selectedMedicoId ? 'bg-brand-dark text-white' : 'bg-brand-teal text-white shadow-brand-teal/20'}
-                    `}
-                >
-                    {selectedMedicoId ? <ClipboardList size={28} /> : <Plus size={32} strokeWidth={3} />}
-                </motion.button>
-            </div>
+            {/* O FAB agora é controlado pelo App.tsx ou está dentro do Cockpit */}
         </div>
     );
 }

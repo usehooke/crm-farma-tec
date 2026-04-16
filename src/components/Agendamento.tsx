@@ -152,7 +152,7 @@ export const Agendamento = ({ medicos, adicionarLog }: AgendamentoProps) => {
 
     return (
         <motion.div
-            className="flex-1 bg-brand-white px-5 pt-8 pb-32"
+            className="flex-1 bg-brand-white px-5 pt-8 pb-40"
             variants={pageVariants}
             initial="initial"
             animate="animate"
@@ -413,8 +413,8 @@ export const Agendamento = ({ medicos, adicionarLog }: AgendamentoProps) => {
                 </div>
             </div>
 
-            {/* Fab Base Tela */}
-            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-5 z-10">
+            {/* Fab Base Tela - Posicionado acima do Bottom Nav */}
+            <div className="fixed bottom-28 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-5 z-20">
                 <button
                     onClick={handleSave}
                     className="w-full py-4 rounded-2xl bg-primary text-white font-bold text-lg shadow-[0_8px_20px_rgba(30,95,175,0.4)] active:scale-95 transition-transform flex justify-center items-center gap-2"

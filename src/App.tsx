@@ -31,6 +31,7 @@ const AppContent = () => {
 
   const [currentView, setCurrentView] = useState<ViewName>('home');
   const [showSplash, setShowSplash] = useState(true);
+  const [selectedMedicoId, setSelectedMedicoId] = useState<string | null>(null);
 
   // Authentication & Sync State (Gerenciado pelo useSyncManager)
   const { usuarioLogado, isAuthLoading } = useSyncManager();
@@ -104,7 +105,11 @@ const AppContent = () => {
         {showSplash && <SplashScreen key="splash" />}
       </AnimatePresence>
 
-      <MainLayout activeTab={currentView} setActiveTab={setCurrentView}>
+      <MainLayout 
+        activeTab={currentView} 
+        setActiveTab={setCurrentView}
+        isContextActive={!!selectedMedicoId}
+      >
         {/* Dynamic View Routing */}
         <Suspense fallback={
           <div className="flex-1 flex items-center justify-center p-20">
@@ -117,6 +122,8 @@ const AppContent = () => {
                 atualizarMedico={atualizarMedico} 
                 adicionarLog={adicionarLog} 
                 limparBaseDuplicada={limparBaseDuplicada}
+                selectedMedicoId={selectedMedicoId}
+                setSelectedMedicoId={setSelectedMedicoId}
             />
           )}
           {currentView === 'agenda' && <Agendamento medicos={medicos} adicionarLog={adicionarLog} />}
@@ -128,7 +135,17 @@ const AppContent = () => {
       </MainLayout>
 
       {/* FAB Oculto temporariamente, as Views devem prover seus botões de ação (Ex: Agendamento FAB) ou ViewHome */}
-      {/* O FAB foi movido para dentro da ViewHome para ser Contextual Inteligente */}
+      {/* FAB Contextual - Excluir se selecionado pois o Cockpit já tem seu próprio FAB UX v2 */}
+      {currentView === 'home' && !selectedMedicoId && (
+        <div className="fixed bottom-28 left-0 right-0 flex justify-center pointer-events-none z-[60] lg:hidden">
+            <button
+                onClick={() => openModal('form')}
+                 className="pointer-events-auto h-16 w-16 rounded-full bg-brand-teal text-white flex items-center justify-center shadow-2xl border-4 border-white active:scale-95 transition-all"
+            >
+                <Plus size={32} />
+            </button>
+        </div>
+      )}
     </div>
   );
 }

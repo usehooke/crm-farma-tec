@@ -89,7 +89,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
       onDragEnd={(_, info) => {
         if (info.offset.y > 150) onFechar();
       }}
-      className="flex-1 flex flex-col h-full bg-white dark:bg-slate-900 overflow-hidden relative border-l border-slate-200 dark:border-slate-800 z-50 shadow-2xl"
+      className="flex-1 flex flex-col h-full bg-white dark:bg-slate-900 overflow-hidden relative border-l border-slate-200 dark:border-slate-800 z-[70] shadow-2xl"
     >
       {/* Handle de Arraste Mobile (Visual) */}
       <div className="w-full flex justify-center pt-3 pb-1">
