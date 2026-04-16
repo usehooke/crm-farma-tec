@@ -1,4 +1,4 @@
-﻿import { doc, getDocs, writeBatch, collection, deleteDoc } from 'firebase/firestore';
+import { doc, getDocs, writeBatch, collection, deleteDoc } from 'firebase/firestore';
 import { generateUUID } from '../utils/utils';
 import { db } from './firebaseConfig';
 import medicosData from '../data/carteira_medicos_top50.json';
@@ -101,11 +101,12 @@ export const importarCarteiraTop50 = async (uid: string) => {
     const userMedicosRef = collection(db, 'usuarios', uid, 'medicos');
 
     medicosData.forEach((medico: any) => {
-        const novoMedicoRef = doc(userMedicosRef);
+        const id = generateUUID();
+        const novoMedicoRef = doc(userMedicosRef, id);
 
         batch.set(novoMedicoRef, {
             ...medico,
-            id: generateUUID(), // Sempre gera novo UUID para evitar colisões na carga
+            id: id, 
             ownerId: uid,
             consultor: 'Ariani',
             createdAt: new Date().toISOString(),
