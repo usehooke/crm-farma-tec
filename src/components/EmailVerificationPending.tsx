@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { auth } from '../services/firebaseConfig';
 import { sendEmailVerification, signOut } from 'firebase/auth';
 import { Mail, RefreshCcw, LogOut, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const EmailVerificationPending = () => {
     const [sending, setSending] = useState(false);
@@ -16,9 +17,15 @@ export const EmailVerificationPending = () => {
         try {
             await sendEmailVerification(user);
             setSent(true);
+            toast.success('E-mail de verificação reenviado!');
             setTimeout(() => setSent(false), 5000);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
+            if (error.code === 'auth/too-many-requests') {
+                toast.error('Muitas tentativas. Aguarde um momento antes de reenviar.');
+            } else {
+                toast.error('Erro ao enviar e-mail. Tente novamente.');
+            }
         } finally {
             setSending(false);
         }

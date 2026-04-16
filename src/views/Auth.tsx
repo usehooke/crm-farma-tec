@@ -33,7 +33,11 @@ export const Auth = () => {
                 // [Operação Blindagem]: Whitelist de Domínios
                 const domain = email.split('@')[1]?.toLowerCase();
                 const allowedDomains = ['elmeco.com.br'];
-                const allowedSpecialEmails = ['nando@farmacliniq.com.br', 'ariani@elmeco.com.br']; // Liste suas exceções aqui
+                const allowedSpecialEmails = [
+                    'nando@farmacliniq.com.br', 
+                    'ariani@elmeco.com.br',
+                    'ariani_vicente@yahoo.com.br'
+                ]; // Liste suas exceções aqui
 
                 if (!allowedDomains.includes(domain) && !allowedSpecialEmails.includes(email.toLowerCase())) {
                     setErro('Cadastro restrito a e-mails corporativos @elmeco.com.br.');
