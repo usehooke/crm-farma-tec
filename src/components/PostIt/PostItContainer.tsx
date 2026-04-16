@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Check, Search, ListPlus } from 'lucide-react';
+import { Plus, X, Check, Search } from 'lucide-react';
 import { usePostIts, PASTEL_COLORS } from '../../hooks/usePostIts';
 import { PostItCard } from './PostItCard';
 import { generateUUID } from '../../utils/utils';
