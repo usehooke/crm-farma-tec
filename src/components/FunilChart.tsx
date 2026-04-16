@@ -1,43 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { motion } from 'framer-motion';
+import { useMedicos } from '../hooks/useMedicos';
 
+/**
+ * Gráfico de Funil (Pizza/Donut) Otimizado (@Agent-UIArchitect v3.0)
+ * Agora consome dados em tempo real via useMedicos hook.
+ */
 export const FunilChart = () => {
-    const [dadosGrafico, setDadosGrafico] = useState<{ name: string; value: number }[]>([]);
+    const { medicos } = useMedicos();
 
-    // Cores exatas da identidade FarmaClinIQ para as fatias do gráfico
-    const CORES = ['#1E5FAF', '#00A8A8', '#0D2C5A', '#94A3B8'];
+    // Paleta de Cores Dinâmica (Extraída da Identidade Visual v2.1)
+    const CORES = ['#2dd4bf', '#1e293b', '#0ea5e9', '#64748b'];
 
-    useEffect(() => {
-        // 1. Busca os dados reais do dispositivo
-        const medicosRaw = localStorage.getItem('@FarmaClinIQ:medicos'); // Chave oficial v2.0
-        if (medicosRaw) {
-            const medicos = JSON.parse(medicosRaw);
+    const dadosGrafico = useMemo(() => {
+        if (!medicos || medicos.length === 0) return [];
 
-            // 2. Lógica de Agrupamento (Conta quantos médicos por Tag principal)
-            const contagem: Record<string, number> = {};
-            medicos.forEach((medico: any) => {
-                // Pega a primeira tag como status principal, ou 'Sem Categoria'
-                const categoria = medico.tags && medico.tags.length > 0 ? medico.tags[0] : 'Sem Categoria';
-                contagem[categoria] = (contagem[categoria] || 0) + 1;
-            });
+        const contagem: Record<string, number> = {};
+        medicos.forEach((medico) => {
+            // Normalização do Status para o gráfico
+            const status = medico.status || 'Sem Categoria';
+            contagem[status] = (contagem[status] || 0) + 1;
+        });
 
-            // 3. Formata para o padrão que o Recharts exige
-            const formatoRecharts = Object.keys(contagem).map((chave) => ({
-                name: chave,
-                value: contagem[chave]
-            }));
-
-            // Ordena do maior para o menor
-            formatoRecharts.sort((a, b) => b.value - a.value);
-            setDadosGrafico(formatoRecharts);
-        }
-    }, []);
+        return Object.keys(contagem)
+            .map((name) => ({ name, value: contagem[name] }))
+            .sort((a, b) => b.value - a.value);
+    }, [medicos]);
 
     if (dadosGrafico.length === 0) {
         return (
-            <div className="p-5 text-center text-sm text-slate-500 bg-surface rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800">
-                Cadastre médicos para visualizar o funil.
+            <div className="p-10 text-center text-[10px] font-black uppercase tracking-widest text-slate-300 bg-surface rounded-[32px] border-2 border-dashed border-slate-100 dark:border-slate-800">
+                Aguardando dados para gerar o funil...
             </div>
         );
     }
@@ -46,45 +40,50 @@ export const FunilChart = () => {
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-5 rounded-2xl bg-surface shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 flex flex-col items-center"
+            className="p-8 rounded-[32px] bg-surface dark:bg-slate-900/50 shadow-soft-out border border-white/50 dark:border-slate-800 flex flex-col items-center"
         >
-            <h2 className="text-sm font-bold text-brand-dark uppercase tracking-wide w-full text-left mb-4">
-                Visão do Funil (Status)
-            </h2>
+            <div className="w-full flex items-center justify-between mb-6">
+                <h2 className="text-[11px] font-black text-brand-dark dark:text-slate-400 uppercase tracking-[0.2em]">
+                    Distribuição de Carteira
+                </h2>
+                <div className="px-2 py-0.5 rounded-md bg-brand-teal/10 text-brand-teal text-[9px] font-black uppercase tracking-tighter">
+                    Real-time
+                </div>
+            </div>
 
-            <div className="w-full h-64">
+            <div className="w-full h-72">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
                             data={dadosGrafico}
                             cx="50%"
                             cy="50%"
-                            innerRadius={60} // Transforma a Pizza em Donut
-                            outerRadius={85}
-                            paddingAngle={5}
+                            innerRadius={70}
+                            outerRadius={95}
+                            paddingAngle={8}
                             dataKey="value"
-                            stroke="none" // Remove a borda branca padrão para um visual mais limpo
+                            stroke="none"
                         >
                             {dadosGrafico.map((_, index) => (
                                 <Cell key={`cell-${index}`} fill={CORES[index % CORES.length]} />
                             ))}
                         </Pie>
-                        {/* Tooltip Neumórfico customizado */}
                         <Tooltip
                             contentStyle={{
-                                borderRadius: '12px',
+                                borderRadius: '20px',
                                 border: 'none',
-                                boxShadow: '4px 4px 10px rgba(0,0,0,0.1)',
-                                backgroundColor: '#ffffff'
+                                boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                backdropFilter: 'blur(10px)',
+                                padding: '12px'
                             }}
-                            itemStyle={{ color: '#0D2C5A', fontWeight: 'bold' }}
+                            itemStyle={{ color: '#1e293b', fontWeight: '900', fontSize: '12px', textTransform: 'uppercase' }}
                         />
-                        {/* Legenda na base do gráfico */}
                         <Legend
                             verticalAlign="bottom"
-                            height={36}
+                            height={40}
                             iconType="circle"
-                            wrapperStyle={{ fontSize: '12px', fontWeight: '600', color: '#64748B' }}
+                            formatter={(value) => <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">{value}</span>}
                         />
                     </PieChart>
                 </ResponsiveContainer>
