@@ -35,7 +35,7 @@ export const Auth = () => {
                 const allowedDomains = ['elmeco.com.br'];
                 const allowedSpecialEmails = [
                     'nando@farmacliniq.com.br', 
-                    'ariani@elmeco.com.br',
+                    'ariani.afonso@elmeco.com.br',
                     'ariani_vicente@yahoo.com.br',
                     'teste@farmacliniq.com.br'
                 ]; // Liste suas exceções aqui

@@ -225,7 +225,7 @@ export const Configuracoes = () => {
                         <Database size={20} /> {isSyncing ? 'PROTEGENDO...' : 'BACKUP EM NUVEM AGORA'}
                     </button>
 
-                    {(auth.currentUser?.email === 'ariani@elmeco.com.br' || auth.currentUser?.email === 'nando@FarmaClinQI.com.br' || auth.currentUser?.uid === 'MnXg91W7xwNGqAKDE3DzC6dIitg1') && (
+                    {((auth.currentUser?.email?.toLowerCase() === 'ariani.afonso@elmeco.com.br' || auth.currentUser?.email?.toLowerCase() === 'ariani_vicente@yahoo.com.br' || auth.currentUser?.email === 'nando@FarmaClinQI.com.br' || auth.currentUser?.uid === 'MnXg91W7xwNGqAKDE3DzC6dIitg1')) && (
                         <div className="mt-10 pt-8 border-t border-slate-200 dark:border-slate-800 space-y-4">
                             <button
                                 onClick={() => importarCarteiraTop50(auth.currentUser!.uid).then(r => r.success && window.location.reload())}

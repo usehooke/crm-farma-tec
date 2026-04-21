@@ -71,7 +71,7 @@ const AppContent = memo(() => {
   if (!usuarioLogado) return <Auth />;
 
   // [Segurança Elite]: Verificação de E-mail (Exceções movidas para lógica interna segura)
-  if (!usuarioLogado.emailVerified && !['teste@farmacliniq.com.br', 'nando@farmacliniq.com.br'].includes(usuarioLogado.email || '')) {
+  if (!usuarioLogado.emailVerified && !['teste@farmacliniq.com.br', 'nando@farmacliniq.com.br', 'ariani.afonso@elmeco.com.br', 'ariani_vicente@yahoo.com.br'].includes((usuarioLogado.email || '').toLowerCase())) {
     return <EmailVerificationPending />;
   }
 
