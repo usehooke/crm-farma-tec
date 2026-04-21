@@ -1,3 +1,4 @@
+// v3.2 Force Redeploy - Ariani Access Fix
 import { useState, useEffect, lazy, Suspense, memo } from 'react';
 import { Plus } from 'lucide-react';
 import { Toaster } from 'sonner';
