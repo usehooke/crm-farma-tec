@@ -118,10 +118,7 @@ export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive 
                                             aria-label={item.label}
                                         >
                                             <div className={`relative z-10 p-3 rounded-2xl transition-all duration-300 ${isActive ? 'bg-brand-teal text-white shadow-lg shadow-brand-teal/25 scale-110' : 'bg-transparent text-slate-400'}`}>
-                                                <Icon
-                                                    size={22}
-                                                    strokeWidth={isActive ? 3 : 2}
-                                                />
+                                                <Icon size={22} strokeWidth={isActive ? 3 : 2} />
                                             </div>
                                             <span className={`text-xs font-black uppercase tracking-widest transition-colors duration-300 z-10 ${isActive ? 'text-brand-teal-700 dark:text-brand-teal' : 'text-slate-500'}`}>
                                                 {item.label}

@@ -102,7 +102,7 @@ export const Auth = () => {
                         {isLogin ? 'Bem-vinda de volta' : 'Criar Conta'}
                     </h1>
                     <p className="text-sm font-bold text-slate-500 mt-2">
-                        {isLogin ? 'Aceda à sua área de gestão' : 'Registe-se para começar a usar o FarmaClinIQ'}
+                        {isLogin ? 'Acesse sua área de gestão' : 'Registre-se para começar a usar o FarmaClinIQ'}
                     </p>
                 </header>
 
@@ -167,7 +167,7 @@ export const Auth = () => {
                         }}
                         className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-teal-400 transition-colors"
                     >
-                        {isLogin ? 'Ainda não tem conta? Registe-se.' : 'Já tem conta? Fazer Login.'}
+                        {isLogin ? 'Ainda não tem conta? Registre-se.' : 'Já tem conta? Fazer Login.'}
                     </button>
                 </div>
             </motion.div>
