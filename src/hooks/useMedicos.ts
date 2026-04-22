@@ -27,6 +27,8 @@ export interface Medico {
     ownerId?: string; 
     dataRetorno?: string; 
     dataCriacao?: string; 
+    isFavorite?: boolean;
+    isClient?: boolean;
 }
 
 /**
@@ -78,21 +80,34 @@ export function useMedicos() {
         let alterado = false;
 
         medicos.forEach(m => {
-            const key = `${m.nome.trim().toUpperCase()}-${(m.crm || m.localizacao || '').trim().toUpperCase()}`;
-            if (hash.has(key)) {
+            const idKey = m.id;
+            const contentKey = `${m.nome.trim().toUpperCase()}-${(m.crm || m.localizacao || '').trim().toUpperCase()}`;
+            
+            if (hash.has(contentKey)) {
                 alterado = true;
-                const existente = hash.get(key)!;
+                const existente = hash.get(contentKey)!;
+                // Mantém o que tem mais logs
                 if ((m.logVisitas?.length || 0) > (existente.logVisitas?.length || 0)) {
-                    hash.set(key, m);
+                    hash.set(contentKey, m);
                 }
             } else {
-                hash.set(key, m);
+                hash.set(contentKey, m);
             }
         });
 
         const totalFinal = hash.size;
         if (alterado) {
-            setMedicos(Array.from(hash.values()));
+            // Segunda passada: Garantir IDs únicos (caso IDs tenham sido duplicados mas conteúdo não)
+            const uniqueById = new Map<string, Medico>();
+            Array.from(hash.values()).forEach(m => {
+                if (!uniqueById.has(m.id)) {
+                    uniqueById.set(m.id, m);
+                } else {
+                    const newId = generateUUID();
+                    uniqueById.set(newId, { ...m, id: newId });
+                }
+            });
+            setMedicos(Array.from(uniqueById.values()));
         }
 
         return {

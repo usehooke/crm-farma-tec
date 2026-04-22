@@ -8,6 +8,8 @@ import {
     sendEmailVerification
 } from 'firebase/auth';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 
 export const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -15,16 +17,33 @@ export const Auth = () => {
     const [senha, setSenha] = useState('');
     const [nome, setNome] = useState('');
     const [erro, setErro] = useState('');
+    const [loading, setLoading] = useState(false);
+    
+    // Estados de erro específicos por campo (Validação no Submit)
+    const [errors, setErrors] = useState<{ email?: string; senha?: string; nome?: string }>({});
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setErro('');
+        setErrors({});
+        
+        let localErrors: { email?: string; senha?: string; nome?: string } = {};
 
-        // Validação de Senha (Mínimo 6 caracteres conforme solicitado)
-        if (senha.length < 6) {
-           setErro('A senha deve ter pelo menos 6 caracteres.');
-           return;
+        // Validação Manual antes do Submit
+        if (!isLogin && nome.trim().length < 3) {
+            localErrors.nome = 'Nome muito curto (mínimo 3 caracteres).';
         }
+        
+        if (senha.length < 6) {
+            localErrors.senha = 'A senha deve ter pelo menos 6 caracteres.';
+        }
+
+        if (Object.keys(localErrors).length > 0) {
+            setErrors(localErrors);
+            return;
+        }
+
+        setLoading(true);
 
         try {
             if (isLogin) {
@@ -42,6 +61,7 @@ export const Auth = () => {
 
                 if (!allowedDomains.includes(domain) && !allowedSpecialEmails.includes(email.toLowerCase())) {
                     setErro('Cadastro restrito a e-mails corporativos @elmeco.com.br.');
+                    setLoading(false);
                     return;
                 }
 
@@ -52,12 +72,12 @@ export const Auth = () => {
                 
                 await updateProfile(userCredential.user, { displayName: nome });
                 localStorage.setItem('@FarmaClinIQ:user_nome', nome);
-                
-                // Forçar um logout ou aviso seria ideal, mas o AppContent tratará a trava
             }
         } catch (err: any) {
             console.error("Auth error:", err);
             setErro('Falha na autenticação. Verifique os dados e a ligação.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -69,9 +89,9 @@ export const Auth = () => {
                 className="w-full max-w-sm mx-auto"
             >
                 {/* Logo/Icon Neumórfico v2 */}
-                <div className="flex justify-center mb-8">
-                    <div className="w-24 h-24 rounded-[var(--radius-corp)] bg-surface shadow-soft-out border border-white flex items-center justify-center">
-                        <div className="w-14 h-14 rounded-2xl bg-brand-teal flex items-center justify-center text-white font-black text-2xl shadow-lg">
+                <div className="flex justify-center mb-10">
+                    <div className="w-24 h-24 rounded-[32px] bg-surface shadow-soft-out border border-white flex items-center justify-center">
+                        <div className="w-14 h-14 rounded-2xl bg-brand-teal-400 flex items-center justify-center text-white font-black text-2xl shadow-lg">
                             IQ
                         </div>
                     </div>
@@ -81,69 +101,60 @@ export const Auth = () => {
                     <h1 className="text-3xl font-black text-brand-dark tracking-tight">
                         {isLogin ? 'Bem-vinda de volta' : 'Criar Conta'}
                     </h1>
-                    <p className="text-sm text-slate-500 mt-2">
+                    <p className="text-sm font-bold text-slate-500 mt-2">
                         {isLogin ? 'Aceda à sua área de gestão' : 'Registe-se para começar a usar o FarmaClinIQ'}
                     </p>
                 </header>
 
                 {erro && (
-                    <div className="mb-6 p-3 bg-red-100 text-red-600 text-sm font-bold rounded-xl text-center shadow-sm">
+                    <div className="mb-6 p-4 bg-red-100 text-red-600 text-xs font-black uppercase rounded-2xl text-center shadow-sm border border-red-200">
                         {erro}
                     </div>
                 )}
 
                 <form onSubmit={handleAuth} className="space-y-4">
                     {!isLogin && (
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <User size={18} className="text-slate-400" />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Seu Nome"
-                                value={nome}
-                                onChange={(e) => setNome(e.target.value)}
-                                required={!isLogin}
-                                className="neo-input !pl-10"
-                            />
-                        </div>
+                        <Input
+                            label="Seu Nome"
+                            placeholder="Ex: Ariani Afonso"
+                            value={nome}
+                            onChange={(e) => setNome(e.target.value)}
+                            leftIcon={User}
+                            error={errors.nome}
+                            required
+                        />
                     )}
 
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Mail size={18} className="text-slate-400" />
-                        </div>
-                        <input
-                            type="email"
-                            placeholder="Email Corporativo"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="neo-input !pl-10"
-                        />
-                    </div>
+                    <Input
+                        label="Email Corporativo"
+                        type="email"
+                        placeholder="nome@elmeco.com.br"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        leftIcon={Mail}
+                        error={errors.email}
+                        required
+                    />
 
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Lock size={18} className="text-slate-400" />
-                        </div>
-                        <input
-                            type="password"
-                            placeholder="Senha"
-                            value={senha}
-                            onChange={(e) => setSenha(e.target.value)}
-                            required
-                            className="neo-input !pl-10"
-                        />
-                    </div>
+                    <Input
+                        label="Senha"
+                        type="password"
+                        placeholder="******"
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                        leftIcon={Lock}
+                        error={errors.senha}
+                        required
+                    />
 
-                    <button
+                    <Button
                         type="submit"
-                        className="w-full mt-6 h-14 neo-button-primary !rounded-2xl"
+                        className="w-full mt-6 h-14"
+                        isLoading={loading}
+                        rightIcon={ArrowRight}
                     >
                         {isLogin ? 'Entrar no Hub' : 'Criar Conta Grátis'}
-                        <ArrowRight size={18} />
-                    </button>
+                    </Button>
                 </form>
 
                 <div className="mt-8 text-center">
@@ -152,8 +163,9 @@ export const Auth = () => {
                         onClick={() => {
                             setIsLogin(!isLogin);
                             setErro('');
+                            setErrors({});
                         }}
-                        className="text-xs font-bold text-slate-500 hover:text-primary transition-colors"
+                        className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-teal-400 transition-colors"
                     >
                         {isLogin ? 'Ainda não tem conta? Registe-se.' : 'Já tem conta? Fazer Login.'}
                     </button>
@@ -162,3 +174,4 @@ export const Auth = () => {
         </div>
     );
 };
+

@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts';
-import { ChevronDown, BarChart3 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, CartesianGrid } from 'recharts';
+import { ChevronDown, BarChart3, TrendingUp } from 'lucide-react';
+import { NeoCard } from './ui/NeoCard';
 import type { Medico } from '../hooks/useMedicos';
 
 interface MetricChartProps {
@@ -39,24 +40,24 @@ export function MetricChart({ medicos }: MetricChartProps) {
 
     return (
         <div className="px-5 mb-8">
-            <div className="bg-surface rounded-[32px] p-1 shadow-lg shadow-slate-200/40 border border-slate-100 dark:shadow-none dark:border-slate-800 border border-white/50">
+            <NeoCard noPadding className="overflow-hidden">
                 {/* Header do Gráfico */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="w-full flex items-center justify-between p-5 focus:outline-none"
+                    className="w-full flex items-center justify-between p-6 focus:outline-none"
                 >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-2xl bg-brand-teal/10 flex items-center justify-center text-brand-teal shadow-inner">
-                            <BarChart3 size={20} />
+                            <TrendingUp size={20} />
                         </div>
                         <div className="text-left">
-                            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Desempenho da Carteira</h3>
-                            <p className="text-[10px] text-slate-400 font-medium">Total: {totalMedicos} Médicos Estratégicos</p>
+                            <h3 className="text-sm font-black text-brand-dark dark:text-white uppercase tracking-tight">Desempenho da Carteira</h3>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Total: {totalMedicos} Médicos Estratégicos</p>
                         </div>
                     </div>
                     <motion.div
                         animate={{ rotate: isOpen ? 180 : 0 }}
-                        className="text-slate-400"
+                        className="text-slate-300"
                     >
                         <ChevronDown size={20} />
                     </motion.div>
@@ -67,40 +68,43 @@ export function MetricChart({ medicos }: MetricChartProps) {
                     {isOpen && (
                         <motion.div
                             initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 260, opacity: 1 }}
+                            animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.4, ease: "circOut" }}
-                            className="overflow-hidden px-4 pb-6"
+                            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                            className="overflow-hidden px-4 pb-8"
                         >
-                            <div className="h-full w-full min-h-[200px]">
-                                <ResponsiveContainer width="100%" height={200}>
+                            <div className="h-48 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={data} margin={{ top: 20, right: 10, left: -25, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.08)" />
                                         <XAxis
                                             dataKey="name"
                                             axisLine={false}
                                             tickLine={false}
-                                            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
+                                            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }}
+                                            dy={10}
                                         />
                                         <YAxis
                                             axisLine={false}
                                             tickLine={false}
-                                            tick={{ fill: '#94a3b8', fontSize: 10 }}
+                                            tick={false}
                                             width={30}
                                         />
                                         <Tooltip
-                                            cursor={{ fill: 'rgba(45, 212, 191, 0.05)' }}
+                                            cursor={{ fill: 'rgba(45, 212, 191, 0.03)' }}
                                             content={({ active, payload }) => {
                                                 if (active && payload && payload.length) {
                                                     return (
-                                                        <div className="bg-white p-3 rounded-2xl shadow-xl border border-slate-50 text-[10px] font-black text-slate-600">
-                                                            <span className="text-primary mr-1">{payload[0].value}</span> MÉDICOS
+                                                        <div className="bg-brand-dark text-white p-3 rounded-2xl shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
+                                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">{payload[0].payload.name}</p>
+                                                            <p className="text-lg font-black">{payload[0].value} <span className="text-[10px] opacity-40">MÉDICOS</span></p>
                                                         </div>
                                                     );
                                                 }
                                                 return null;
                                             }}
                                         />
-                                        <Bar dataKey="total" radius={[10, 10, 10, 10]} barSize={36}>
+                                        <Bar dataKey="total" radius={[8, 8, 8, 8]} barSize={32}>
                                             {data.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={entry.color} />
                                             ))}
@@ -111,7 +115,7 @@ export function MetricChart({ medicos }: MetricChartProps) {
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
+            </NeoCard>
         </div>
     );
 }

@@ -1,7 +1,7 @@
 // v3.2 Force Redeploy - Ariani Access Fix
 import { useState, useEffect, lazy, Suspense, memo } from 'react';
 import { Plus } from 'lucide-react';
-import { Toaster } from 'sonner';
+import { NotificationHub } from './components/ui/NotificationHub';
 import { MainLayout } from './components/MainLayout';
 import { ViewHome } from './components/ViewHome';
 import { Agendamento } from './components/Agendamento';
@@ -15,6 +15,7 @@ import { Auth } from './views/Auth';
 import { useSyncManager } from './hooks/useSyncManager';
 import { ConfigErrorScreen } from './components/ConfigErrorScreen';
 import { EmailVerificationPending } from './components/EmailVerificationPending';
+import { StyleGuide } from './components/StyleGuide';
 
 // Lazy Loaded Views for Performance
 const DashboardBI = lazy(() => import('./components/DashboardBI').then(m => ({ default: m.DashboardBI })));
@@ -78,7 +79,7 @@ const AppContent = memo(() => {
 
   return (
     <div className="font-sans text-slate-800 antialiased">
-      <Toaster position="top-right" richColors closeButton />
+      <NotificationHub />
 
       <AnimatePresence>
         {showSplash && <SplashScreen key="splash" />}
@@ -105,6 +106,7 @@ const AppContent = memo(() => {
           {currentView === 'documentos' && <DashboardBI />}
           {currentView === 'protocolos' && <Protocolos />}
           {currentView === 'configuracoes' && <Configuracoes />}
+          {currentView === 'design' && <StyleGuide />}
         </Suspense>
       </MainLayout>
 

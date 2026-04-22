@@ -1,93 +1,162 @@
-import { useMemo } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { motion } from 'framer-motion';
+import { useMemo, useState } from 'react';
+import { 
+    PieChart, 
+    Pie, 
+    Cell, 
+    ResponsiveContainer, 
+    Tooltip, 
+    Legend, 
+    Sector 
+} from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMedicos } from '../hooks/useMedicos';
+import { PieChart as PieIcon, Info, LayoutGrid } from 'lucide-react';
+import { NeoCard } from './ui/NeoCard';
 
 /**
- * Gráfico de Funil (Pizza/Donut) Otimizado (@Agent-UIArchitect v3.0)
- * Agora consome dados em tempo real via useMedicos hook.
+ * FunilChart Elite v4.0 — Radial Distribution Intelligence
+ * Visualização de alta tecnologia para distribuição de status.
  */
+const renderActiveShape = (props: any) => {
+    const RADIAN = Math.PI / 180;
+    const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, value } = props;
+    const sin = Math.sin(-RADIAN * midAngle);
+    const cos = Math.cos(-RADIAN * midAngle);
+    const sx = cx + (outerRadius + 10) * cos;
+    const sy = cy + (outerRadius + 10) * sin;
+    const mx = cx + (outerRadius + 30) * cos;
+    const my = cy + (outerRadius + 30) * sin;
+    const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+    const ey = my;
+    const textAnchor = cos >= 0 ? 'start' : 'end';
+
+    return (
+        <g>
+            <text x={cx} y={cy} dy={8} textAnchor="middle" fill="#1e293b" className="font-black text-xl dark:fill-white">
+                {payload.name}
+            </text>
+            <Sector
+                cx={cx}
+                cy={cy}
+                innerRadius={innerRadius}
+                outerRadius={outerRadius + 6}
+                startAngle={startAngle}
+                endAngle={endAngle}
+                fill={fill}
+            />
+            <Sector
+                cx={cx}
+                cy={cy}
+                startAngle={startAngle}
+                endAngle={endAngle}
+                innerRadius={outerRadius + 10}
+                outerRadius={outerRadius + 15}
+                fill={fill}
+                opacity={0.3}
+            />
+        </g>
+    );
+};
+
 export const FunilChart = () => {
     const { medicos } = useMedicos();
+    const [activeIndex, setActiveIndex] = useState(0);
 
-    // Paleta de Cores Dinâmica (Extraída da Identidade Visual v2.1)
-    const CORES = ['#2dd4bf', '#1e293b', '#0ea5e9', '#64748b'];
+    const CORES = [
+        '#2dd4bf', // Primary Teal
+        '#0f172a', // Deep Slate
+        '#0ea5e9', // Sky Blue
+        '#64748b', // Light Slate
+        '#14b8a6', // Dark Teal
+    ];
 
     const dadosGrafico = useMemo(() => {
         if (!medicos || medicos.length === 0) return [];
-
         const contagem: Record<string, number> = {};
         medicos.forEach((medico) => {
-            // Normalização do Status para o gráfico
             const status = medico.status || 'Sem Categoria';
             contagem[status] = (contagem[status] || 0) + 1;
         });
-
         return Object.keys(contagem)
             .map((name) => ({ name, value: contagem[name] }))
             .sort((a, b) => b.value - a.value);
     }, [medicos]);
 
-    if (dadosGrafico.length === 0) {
-        return (
-            <div className="p-10 text-center text-[10px] font-black uppercase tracking-widest text-slate-300 bg-surface rounded-[32px] border-2 border-dashed border-slate-100 dark:border-slate-800">
-                Aguardando dados para gerar o funil...
-            </div>
-        );
-    }
+    if (dadosGrafico.length === 0) return null;
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="p-8 rounded-[32px] bg-surface dark:bg-slate-900/50 shadow-soft-out border border-white/50 dark:border-slate-800 flex flex-col items-center"
-        >
-            <div className="w-full flex items-center justify-between mb-6">
-                <h2 className="text-[11px] font-black text-brand-dark dark:text-slate-400 uppercase tracking-[0.2em]">
-                    Distribuição de Carteira
-                </h2>
-                <div className="px-2 py-0.5 rounded-md bg-brand-teal/10 text-brand-teal text-[9px] font-black uppercase tracking-tighter">
-                    Real-time
+        <NeoCard className="relative overflow-hidden">
+            <header className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-brand-teal/10 flex items-center justify-center text-brand-teal">
+                        <LayoutGrid size={18} />
+                    </div>
+                    <h2 className="text-sm font-black text-brand-dark dark:text-white uppercase tracking-tight">Estatura de Carteira</h2>
                 </div>
-            </div>
+            </header>
 
-            <div className="w-full h-72">
+            <div className="w-full h-[280px] relative">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
+                            activeIndex={activeIndex}
+                            activeShape={renderActiveShape}
                             data={dadosGrafico}
                             cx="50%"
                             cy="50%"
-                            innerRadius={70}
-                            outerRadius={95}
-                            paddingAngle={8}
+                            innerRadius={65}
+                            outerRadius={85}
+                            paddingAngle={5}
                             dataKey="value"
+                            onMouseEnter={(_, index) => setActiveIndex(index)}
+                            onClick={(_, index) => setActiveIndex(index)}
                             stroke="none"
                         >
                             {dadosGrafico.map((_, index) => (
-                                <Cell key={`cell-${index}`} fill={CORES[index % CORES.length]} />
+                                <Cell 
+                                    key={`cell-${index}`} 
+                                    fill={CORES[index % CORES.length]} 
+                                    className="outline-none focus:outline-none"
+                                />
                             ))}
                         </Pie>
-                        <Tooltip
-                            contentStyle={{
-                                borderRadius: '20px',
-                                border: 'none',
-                                boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                backdropFilter: 'blur(10px)',
-                                padding: '12px'
+                        <Tooltip 
+                            content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                    return (
+                                        <div className="bg-brand-dark text-white p-4 rounded-3xl shadow-2xl border border-white/10">
+                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">{payload[0].name}</p>
+                                            <p className="text-xl font-black">{payload[0].value} <span className="text-xs opacity-40">MÉDICOS</span></p>
+                                        </div>
+                                    );
+                                }
+                                return null;
                             }}
-                            itemStyle={{ color: '#1e293b', fontWeight: '900', fontSize: '12px', textTransform: 'uppercase' }}
-                        />
-                        <Legend
-                            verticalAlign="bottom"
-                            height={40}
-                            iconType="circle"
-                            formatter={(value) => <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">{value}</span>}
                         />
                     </PieChart>
                 </ResponsiveContainer>
             </div>
-        </motion.div>
+
+            {/* Custom Interactive Legend */}
+            <div className="grid grid-cols-2 gap-3 mt-4">
+                {dadosGrafico.map((item, index) => (
+                    <button
+                        key={item.name}
+                        onClick={() => setActiveIndex(index)}
+                        className={`flex items-center gap-3 p-3 rounded-2xl transition-all duration-300 border-2 ${
+                            activeIndex === index 
+                            ? 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-sm' 
+                            : 'bg-transparent border-transparent opacity-60'
+                        }`}
+                    >
+                        <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: CORES[index % CORES.length] }} />
+                        <div className="text-left min-w-0">
+                            <p className="text-[10px] font-black text-brand-dark dark:text-white uppercase truncate">{item.name}</p>
+                            <p className="text-[9px] font-bold text-slate-400">{item.value} unidades</p>
+                        </div>
+                    </button>
+                ))}
+            </div>
+        </NeoCard>
     );
 };

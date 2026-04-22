@@ -1,22 +1,56 @@
 @import "tailwindcss";
 
 @theme {
-  /* Paleta de Cores Corporativas */
-  --color-brand-white: #f8fafc;
+  /* Paleta de Cores Corporativas (Escala Acessível) */
+  --color-brand-white: #ffffff;
   --color-surface: #f1f5f9;
-  --color-brand-dark: #1e293b;
-  --color-brand-teal: #2dd4bf;
-  --color-primary: #2dd4bf; /* [FIX]: Mapeando Primary para Teal */
-  --color-corp-blue: #0ea5e9;
-  --color-corp-green: #10b981;
+  --color-surface-dark: #e2e8f0;
+  --color-brand-dark: #0f172a;
+  
+  /* Teal / Primary (Base: #2dd4bf) */
+  --color-brand-teal-50: #f0fdfa;
+  --color-brand-teal-100: #ccfbf1;
+  --color-brand-teal-200: #99f6e4;
+  --color-brand-teal-300: #5eead4;
+  --color-brand-teal-400: #2dd4bf;
+  --color-brand-teal-500: #14b8a6;
+  --color-brand-teal-600: #0d9488;
+  --color-brand-teal-700: #0f766e;
+  --color-brand-teal-800: #115e59;
+  --color-brand-teal-900: #134e4a;
+  --color-brand-teal: var(--color-brand-teal-400);
+  
+  --color-primary: var(--color-brand-teal-400);
+  --color-primary-dark: var(--color-brand-teal-600);
+
+  /* Neutros para Tipografia (Escala de Slates) */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+
+  /* Escala Tipográfica Elite (Modern & Sharp) */
+  --font-size-xs: 0.75rem;    /* 12px - Labels Mínimas */
+  --font-size-sm: 0.8125rem; /* 13px - Texto de Apoio */
+  --font-size-base: 0.9375rem; /* 15px - Texto Principal */
+  --font-size-lg: 1.125rem;  /* 18px - Subtítulos */
+  --font-size-xl: 1.25rem;   /* 20px - Títulos de Card */
+  --font-size-2xl: 1.5rem;   /* 24px - Títulos de Página */
 
   /* Neumorfismo Dinâmico (Luz) - Contraste Reforçado para Outdoor */
-  --shadow-soft-out: 6px 6px 12px #e2e8f0, -6px -6px 12px #ffffff;
-  --shadow-soft-in: inset 4px 4px 8px #e2e8f0, inset -4px -4px 8px #ffffff;
-  --shadow-soft-hover: 8px 8px 16px #cbd5e1, -8px -8px 16px #ffffff;
+  --shadow-soft-out: 8px 8px 16px rgba(15, 23, 42, 0.08), -8px -8px 16px #ffffff;
+  --shadow-soft-in: inset 4px 4px 10px rgba(15, 23, 42, 0.08), inset -4px -4px 10px #ffffff;
+  --shadow-soft-hover: 12px 12px 24px rgba(15, 23, 42, 0.12), -12px -12px 24px #ffffff;
 
   /* Arredondamento Padrão */
   --radius-corp: 20px;
+  --radius-pill: 32px;
 }
 
 /* [DARK MODE]: Sobrescrita de Variáveis para Tema Noturno */
@@ -57,7 +91,7 @@
   }
 
   .neo-input {
-    @apply w-full bg-surface shadow-soft-in rounded-xl px-4 py-3 text-sm font-medium text-brand-dark outline-none border border-transparent focus:border-brand-teal/30 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500;
+    @apply w-full bg-white dark:bg-slate-800 shadow-soft-in rounded-xl px-4 py-3.5 text-base font-bold text-brand-dark dark:text-white outline-none border-2 border-slate-100 dark:border-slate-700 focus:border-brand-teal-400 focus:bg-white transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500;
   }
 }
 
