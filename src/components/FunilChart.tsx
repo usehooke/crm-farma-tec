@@ -4,59 +4,13 @@ import {
     Pie, 
     Cell, 
     ResponsiveContainer, 
-    Tooltip, 
-    Legend, 
-    Sector 
+    Tooltip
 } from 'recharts';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useMedicos } from '../hooks/useMedicos';
-import { PieChart as PieIcon, Info, LayoutGrid } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 import { NeoCard } from './ui/NeoCard';
 
-/**
- * FunilChart Elite v4.0 — Radial Distribution Intelligence
- * Visualização de alta tecnologia para distribuição de status.
- */
-const renderActiveShape = (props: any) => {
-    const RADIAN = Math.PI / 180;
-    const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, value } = props;
-    const sin = Math.sin(-RADIAN * midAngle);
-    const cos = Math.cos(-RADIAN * midAngle);
-    const sx = cx + (outerRadius + 10) * cos;
-    const sy = cy + (outerRadius + 10) * sin;
-    const mx = cx + (outerRadius + 30) * cos;
-    const my = cy + (outerRadius + 30) * sin;
-    const ex = mx + (cos >= 0 ? 1 : -1) * 22;
-    const ey = my;
-    const textAnchor = cos >= 0 ? 'start' : 'end';
 
-    return (
-        <g>
-            <text x={cx} y={cy} dy={8} textAnchor="middle" fill="#1e293b" className="font-black text-xl dark:fill-white">
-                {payload.name}
-            </text>
-            <Sector
-                cx={cx}
-                cy={cy}
-                innerRadius={innerRadius}
-                outerRadius={outerRadius + 6}
-                startAngle={startAngle}
-                endAngle={endAngle}
-                fill={fill}
-            />
-            <Sector
-                cx={cx}
-                cy={cy}
-                startAngle={startAngle}
-                endAngle={endAngle}
-                innerRadius={outerRadius + 10}
-                outerRadius={outerRadius + 15}
-                fill={fill}
-                opacity={0.3}
-            />
-        </g>
-    );
-};
 
 export const FunilChart = () => {
     const { medicos } = useMedicos();

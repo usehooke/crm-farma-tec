@@ -5,10 +5,8 @@ import {
     ChevronLeft, 
     ChevronRight, 
     Plus, 
-    CheckCircle2,
     CalendarDays,
     Clock,
-    User,
     MessageSquare,
     Check
 } from 'lucide-react';

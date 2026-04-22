@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useMemo, useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { 
     BarChart, 
     Bar, 
@@ -8,9 +8,7 @@ import {
     CartesianGrid, 
     Tooltip, 
     ResponsiveContainer, 
-    Cell,
-    AreaChart,
-    Area
+    Cell
 } from 'recharts';
 import { 
     Zap,
@@ -24,11 +22,7 @@ import {
 import { 
     format, 
     subDays, 
-    parseISO, 
-    startOfWeek, 
-    endOfWeek, 
-    isWithinInterval,
-    subWeeks
+    parseISO
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useMedicos } from '../hooks/useMedicos';
@@ -36,10 +30,12 @@ import { FunilChart } from './FunilChart';
 import { PerformanceIntelligence } from './PerformanceIntelligence';
 import { NeoCard } from './ui/NeoCard';
 
+
+
 /**
  * Counter Animation Component
  */
-function Counter({ value, duration = 1 }: { value: number; duration?: number }) {
+function Counter({ value }: { value: number }) {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
@@ -75,34 +71,7 @@ export function DashboardBI() {
     const { medicos } = useMedicos();
     const [hoveredBar, setHoveredBar] = useState<number | null>(null);
 
-    // [INTELLIGENCE]: Comparative Analysis
-    const intelligence = useMemo(() => {
-        const now = new Date();
-        const thisWeek = { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) };
-        const lastWeek = { start: startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 }), end: endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 }) };
 
-        let visitsThisWeek = 0;
-        let visitsLastWeek = 0;
-
-        medicos.forEach(m => {
-            (m.logVisitas || []).forEach(log => {
-                const logDate = parseISO(log.data);
-                if (isWithinInterval(logDate, thisWeek)) visitsThisWeek++;
-                if (isWithinInterval(logDate, lastWeek)) visitsLastWeek++;
-            });
-        });
-
-        const diff = visitsThisWeek - visitsLastWeek;
-        const percentChange = visitsLastWeek > 0 ? (diff / visitsLastWeek) * 100 : 0;
-        
-        return {
-            visitsThisWeek,
-            visitsLastWeek,
-            diff,
-            percentChange,
-            status: diff >= 0 ? 'up' : 'down'
-        };
-    }, [medicos]);
 
     // [DATA MANAGEMENT]: Last 7 Days Activity
     const chartData = useMemo(() => {
@@ -243,7 +212,7 @@ export function DashboardBI() {
                             <BarChart 
                                 data={chartData} 
                                 margin={{ top: 0, right: 0, left: -20, bottom: 0 }}
-                                onMouseMove={(s) => setHoveredBar(s.activeTooltipIndex ?? null)}
+                                onMouseMove={(s) => setHoveredBar(typeof s.activeTooltipIndex === 'number' ? s.activeTooltipIndex : null)}
                                 onMouseLeave={() => setHoveredBar(null)}
                             >
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.08)" />
