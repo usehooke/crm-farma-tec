@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { X, Camera, Zap } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { X, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ScannerQRProps {
     onScan: (decodedText: string) => void;
@@ -14,7 +14,6 @@ interface ScannerQRProps {
  */
 export const ScannerQR = ({ onScan, onClose }: ScannerQRProps) => {
     const scannerRef = useRef<Html5QrcodeScanner | null>(null);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         // Inicializa o scanner
@@ -36,9 +35,8 @@ export const ScannerQR = ({ onScan, onClose }: ScannerQRProps) => {
                 }
                 onScan(decodedText);
             },
-            (errorMessage) => {
+            () => {
                 // Erros de leitura (ignorar para não poluir o console)
-                // console.log(errorMessage);
             }
         );
 
@@ -85,15 +83,9 @@ export const ScannerQR = ({ onScan, onClose }: ScannerQRProps) => {
             </div>
 
             <div className="mt-12 flex items-center gap-3 text-slate-500">
-                <Camera size={20} />
+                <Zap size={20} className="animate-pulse" />
                 <span className="text-xs font-bold uppercase tracking-widest">Ativando Câmera...</span>
             </div>
-
-            {error && (
-                <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-xs font-bold">
-                    {error}
-                </div>
-            )}
         </motion.div>
     );
 };
