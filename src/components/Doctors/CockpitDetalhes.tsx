@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, X, MessageSquare, ClipboardList, ChevronDown, Save, Star, CheckCircle2
@@ -7,6 +7,7 @@ import type { Medico, LogVisita } from '../../hooks/useMedicos';
 import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useAutoResizeTextArea } from '../../hooks/useAutoResizeTextArea';
 
 interface CockpitDetalhesProps {
   medico: Medico | null;
@@ -25,9 +26,10 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
   onAdicionarLog,
   onFechar
 }) => {
-  const [novaNota, setNovaNota] = useState('');
-  const [isRegistrando, setIsRegistrando] = useState(false);
   const [tipoVisita] = useState<'presencial' | 'tecnico'>('presencial');
+  
+  const notaCrmRef = useRef<HTMLTextAreaElement>(null);
+  const novaNotaRef = useRef<HTMLTextAreaElement>(null);
   
   const [notaCrm, setNotaCrm] = useState('');
   const debouncedNotaCrm = useDebounce(notaCrm, 400);
@@ -43,6 +45,9 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
       onAtualizarMedico(medico.id, { notasCrm: debouncedNotaCrm });
     }
   }, [debouncedNotaCrm]);
+
+  useAutoResizeTextArea(notaCrmRef.current, notaCrm);
+  useAutoResizeTextArea(novaNotaRef.current, novaNota);
 
   const safeFormat = (date: string | undefined | null, formatStr: string, fallback: string) => {
     if (!date) return fallback;
@@ -105,19 +110,19 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                 <div>
                     <h2 className="text-2xl font-black text-brand-dark dark:text-white tracking-tight leading-none mb-2">{medico.nome}</h2>
                     <div className="flex flex-wrap gap-2">
-                        <span className="px-2 py-0.5 bg-brand-teal/10 text-brand-teal text-[10px] font-black rounded-md uppercase tracking-widest border border-brand-teal/20">
+                        <span className="px-2 py-0.5 bg-brand-teal/10 text-brand-teal-700 dark:text-brand-teal text-xs font-black rounded-md uppercase tracking-widest border border-brand-teal/20">
                             {medico.especialidade}
                         </span>
-                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-md uppercase tracking-widest">
+                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-black rounded-md uppercase tracking-widest">
                             CRM {medico.crm || '---'}
                         </span>
                         {medico.isFavorite && (
-                            <span className="px-2 py-0.5 bg-amber-400/10 text-amber-500 text-[10px] font-black rounded-md uppercase tracking-widest border border-amber-400/20 flex items-center gap-1">
+                            <span className="px-2 py-0.5 bg-amber-400/10 text-amber-600 text-xs font-black rounded-md uppercase tracking-widest border border-amber-400/20 flex items-center gap-1">
                                 <Star size={10} fill="currentColor" /> Favorito
                             </span>
                         )}
                         {medico.isClient && (
-                            <span className="px-2 py-0.5 bg-brand-teal/10 text-brand-teal text-[10px] font-black rounded-md uppercase tracking-widest border border-brand-teal/20 flex items-center gap-1">
+                            <span className="px-2 py-0.5 bg-brand-teal/10 text-brand-teal-700 dark:text-brand-teal text-xs font-black rounded-md uppercase tracking-widest border border-brand-teal/20 flex items-center gap-1">
                                 <CheckCircle2 size={10} fill="currentColor" /> Cliente
                             </span>
                         )}
@@ -133,7 +138,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
         <div className="flex gap-3 mb-4">
             <button 
                 onClick={() => onAtualizarMedico(medico.id, { isFavorite: !medico.isFavorite })}
-                className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 flex items-center justify-center gap-2 ${
+                className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center justify-center gap-2 ${
                     medico.isFavorite 
                     ? 'bg-amber-400 border-amber-400 text-white shadow-lg shadow-amber-400/20' 
                     : 'bg-transparent border-slate-100 dark:border-slate-800 text-slate-400'
@@ -143,7 +148,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
             </button>
             <button 
                 onClick={() => onAtualizarMedico(medico.id, { isClient: !medico.isClient })}
-                className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 flex items-center justify-center gap-2 ${
+                className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border-2 flex items-center justify-center gap-2 ${
                     medico.isClient 
                     ? 'bg-brand-teal border-brand-teal text-white shadow-lg shadow-brand-teal/20' 
                     : 'bg-transparent border-slate-100 dark:border-slate-800 text-slate-400'
@@ -167,9 +172,10 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                     </div>
                 </header>
                 <textarea 
+                    ref={notaCrmRef}
                     value={notaCrm}
                     onChange={(e) => { setNotaCrm(e.target.value); }}
-                    className="w-full neo-input min-h-[160px] !text-sm !font-bold !leading-relaxed !bg-white dark:!bg-slate-800/50 !rounded-[28px] !shadow-inner border-2 border-slate-50 dark:border-slate-800 focus:border-brand-teal transition-all p-5"
+                    className="w-full neo-input min-h-[120px] !text-sm !font-bold !leading-relaxed !bg-white dark:!bg-slate-800/50 !rounded-[28px] !shadow-inner border-2 border-slate-50 dark:border-slate-800 focus:border-brand-teal transition-all p-5 resize-none overflow-hidden"
                     placeholder="Informações críticas sobre o perfil deste médico para a próxima visita..."
                 />
             </section>
@@ -187,7 +193,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                         (medico.logVisitas || []).map((log, index) => (
                             <div key={log.id || `log-${index}`} className="p-6 bg-slate-50/50 dark:bg-slate-800/30 rounded-[28px] border border-white dark:border-slate-800 relative overflow-hidden group">
                                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-teal/20 group-hover:bg-brand-teal transition-all" />
-                                <p className="text-[10px] font-black text-brand-teal uppercase tracking-widest mb-3">
+                                <p className="text-xs font-black text-brand-teal-700 dark:text-brand-teal uppercase tracking-widest mb-3">
                                   {safeFormat(log.data, "eeee, dd MMMM", "---")}
                                 </p>
                                 <p className="text-[13px] text-slate-700 dark:text-slate-300 font-bold leading-relaxed italic">"{log.nota}"</p>
@@ -225,15 +231,16 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                         <h4 className="text-[10px] font-black text-brand-dark dark:text-white uppercase tracking-widest">Relatório em Tempo Real</h4>
                     </div>
                     <textarea 
+                        ref={novaNotaRef}
                         autoFocus
                         value={novaNota}
                         onChange={(e) => setNovaNota(e.target.value)}
-                        className="neo-input min-h-[120px] mb-6 !bg-slate-50 dark:!bg-slate-900 !text-sm !font-bold"
+                        className="neo-input min-h-[100px] mb-6 !bg-slate-50 dark:!bg-slate-900 !text-sm !font-bold resize-none overflow-hidden"
                         placeholder="Quais novidades da visita de hoje?"
                     />
                     <div className="flex gap-4">
-                        <button onClick={() => setIsRegistrando(false)} className="flex-1 py-4 text-[10px] font-black text-slate-400 bg-slate-50 dark:bg-slate-900 rounded-2xl uppercase tracking-widest">DESCARTAR</button>
-                        <button onClick={handleSalvarVisita} className="flex-[2] py-4 text-[10px] font-black text-white bg-brand-teal rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest">
+                        <button onClick={() => setIsRegistrando(false)} className="flex-1 py-4 text-xs font-black text-slate-400 bg-slate-50 dark:bg-slate-900 rounded-2xl uppercase tracking-widest">DESCARTAR</button>
+                        <button onClick={handleSalvarVisita} className="flex-[2] py-4 text-xs font-black text-white bg-brand-teal rounded-2xl shadow-xl flex items-center justify-center gap-2 uppercase tracking-widest">
                             <Save size={16} /> FINALIZAR RELATÓRIO
                         </button>
                     </div>

@@ -9,6 +9,7 @@ import { SplashScreen } from './components/SplashScreen';
 import { PostItContainer } from './components/PostIt/PostItContainer';
 import type { ViewName } from './components/MainLayout';
 import { AnimatePresence, motion } from 'framer-motion';
+import { CardSkeleton } from './components/ui/Skeleton';
 
 import { hasValidConfig } from './services/firebaseConfig';
 import { Auth } from './views/Auth';
@@ -91,8 +92,11 @@ const AppContent = memo(() => {
         isContextActive={!!selectedMedicoId}
       >
         <Suspense fallback={
-          <div className="flex-1 flex items-center justify-center p-20">
-            <div className="w-8 h-8 border-2 border-brand-teal/20 border-t-brand-teal rounded-full animate-spin" />
+          <div className="flex-1 flex flex-col gap-4 p-5 overflow-hidden">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
           </div>
         }>
           {currentView === 'home' && (

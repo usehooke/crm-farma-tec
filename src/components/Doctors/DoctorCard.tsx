@@ -58,31 +58,31 @@ const DoctorCardComponent: React.FC<DoctorCardProps> = ({
                     {medico.isClient && (
                         <CheckCircle2 size={14} className="text-brand-teal-400 fill-brand-teal-400/10 shrink-0" />
                     )}
-                    <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg ${
-                        isSelected ? 'bg-brand-teal-400 text-white shadow-lg shadow-brand-teal-400/20' : 'bg-brand-teal-50 text-brand-teal-600 border border-brand-teal-100'
+                    <span className={`text-xs font-black uppercase tracking-widest px-2 py-1 rounded-lg ${
+                        isSelected ? 'bg-brand-teal-400 text-brand-dark shadow-lg shadow-brand-teal-400/20' : 'bg-brand-teal-50 text-brand-teal-700 border border-brand-teal-100 dark:bg-slate-800 dark:text-brand-teal dark:border-slate-700'
                     }`}>
                         {medico.crm || 'CRM'}
                     </span>
                 </div>
             </div>
             
-            <p className={`text-xs font-bold mb-4 flex items-center gap-2 ${isSelected ? 'text-slate-300' : 'text-slate-500 dark:text-slate-400'}`}>
-                <MapPin size={12} className={isSelected ? 'text-brand-teal-300' : 'text-brand-teal-400'} />
+            <p className={`text-xs font-bold mb-4 flex items-center gap-2 ${isSelected ? 'text-slate-300' : 'text-slate-600 dark:text-slate-400'}`}>
+                <MapPin size={12} className={isSelected ? 'text-brand-teal-300' : 'text-brand-teal-600'} />
                 {medico.localizacao}
             </p>
 
             <div className="flex items-center justify-between mt-auto">
                 <div className="flex items-center gap-2">
-                    <Calendar size={14} className={isSelected ? 'text-brand-teal-300' : 'text-brand-teal-500'} />
-                    <span className={`text-xs font-black uppercase tracking-wider ${isSelected ? 'text-white' : 'text-slate-600 dark:text-slate-300'}`}>
+                    <Calendar size={14} className={isSelected ? 'text-brand-teal-300' : 'text-brand-teal-600'} />
+                    <span className={`text-xs font-black uppercase tracking-wider ${isSelected ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                         {safeDate(medico.ultimoContato)}
                     </span>
                 </div>
                 
                 {/* Status Indicator Elite - High Contrast */}
                 <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${isSelected ? 'bg-white/10' : 'bg-slate-50 dark:bg-slate-800 shadow-inner border border-slate-100/50 dark:border-white/5'}`}>
-                    <div className={`w-2 h-2 rounded-full ${medico.status === 'Parceiro Ativo' ? 'bg-brand-teal-400 animate-pulse shadow-[0_0_8px_rgba(45,212,191,0.5)]' : 'bg-amber-500'}`} />
-                    <span className={`text-[10px] font-black uppercase tracking-tighter ${isSelected ? 'text-slate-200' : 'text-slate-500 dark:text-slate-400'}`}>
+                    <div className={`w-2 h-2 rounded-full ${medico.status === 'Parceiro Ativo' ? 'bg-brand-teal-500 animate-pulse shadow-[0_0_8px_rgba(45,212,191,0.5)]' : 'bg-amber-600'}`} />
+                    <span className={`text-xs font-black uppercase tracking-tighter ${isSelected ? 'text-slate-200' : 'text-slate-600 dark:text-slate-400'}`}>
                         {medico.status?.split(' ')[0] || 'Status'}
                     </span>
                 </div>

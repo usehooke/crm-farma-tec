@@ -103,7 +103,7 @@ export const Agendamento = () => {
             <header className="mb-8 flex justify-between items-end px-2">
                 <div>
                     <h1 className="text-3xl font-black text-brand-dark dark:text-white tracking-tighter leading-none">Agenda Elite</h1>
-                    <p className="text-[10px] font-black text-brand-teal-400 uppercase tracking-[0.3em] mt-2">Intelligence Planning</p>
+                    <p className="text-xs font-black text-brand-teal-700 dark:text-brand-teal-400 uppercase tracking-[0.2em] mt-2">Intelligence Planning</p>
                 </div>
                 <div className="flex gap-3">
                     <Button 
@@ -143,7 +143,7 @@ export const Agendamento = () => {
 
                     <div className="grid grid-cols-7 mb-4">
                         {['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'].map(d => (
-                            <div key={d} className="text-center text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase py-2">{d}</div>
+                            <div key={d} className="text-center text-xs font-black text-slate-400 dark:text-slate-600 uppercase py-2">{d}</div>
                         ))}
                     </div>
 
@@ -196,7 +196,7 @@ export const Agendamento = () => {
                                 <X size={20} />
                             </Button>
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70">Day Intelligence</p>
+                        <p className="text-xs font-black uppercase tracking-[0.2em] opacity-80">Day Intelligence</p>
                     </div>
 
                     <div className="space-y-4">
@@ -211,9 +211,9 @@ export const Agendamento = () => {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                         <h4 className="text-sm font-black text-brand-dark dark:text-white truncate">{m.nome}</h4>
-                                        <span className="px-2 py-0.5 bg-brand-teal-400 text-white text-[8px] font-black rounded-full uppercase">Retorno IQ</span>
+                                        <span className="px-2 py-0.5 bg-brand-teal-400 text-brand-dark text-xs font-black rounded-full uppercase">Retorno IQ</span>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate mt-1">
+                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest truncate mt-1">
                                         Vencimento configurado no cadastro
                                     </p>
                                 </div>
@@ -258,23 +258,23 @@ export const Agendamento = () => {
                             <header className="flex justify-between items-center mb-8">
                                 <div>
                                     <h2 className="text-3xl font-black text-brand-dark dark:text-white tracking-tighter italic">Novo Registro</h2>
-                                    <p className="text-[10px] font-black text-brand-teal-400 uppercase tracking-widest mt-1">Intelligence Entry</p>
+                                    <p className="text-xs font-black text-brand-teal-700 dark:text-brand-teal-400 uppercase tracking-widest mt-1">Intelligence Entry</p>
                                 </div>
                                 <Button variant="ghost" size="icon" onClick={() => setShowAddModal(false)} className="rounded-full">
                                     <X size={24} />
                                 </Button>
                             </header>
 
-                            <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl mb-8">
+                             <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl mb-8">
                                 <button 
                                     onClick={() => setModo('Visita')}
-                                    className={`flex-1 py-3 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest ${modo === 'Visita' ? 'bg-white dark:bg-slate-700 shadow-sm text-brand-teal-400' : 'text-slate-400'}`}
+                                    className={`flex-1 py-3 rounded-xl text-xs font-black transition-all uppercase tracking-widest ${modo === 'Visita' ? 'bg-white dark:bg-slate-700 shadow-sm text-brand-teal-700' : 'text-slate-500'}`}
                                 >
                                     Visita
                                 </button>
                                 <button 
                                     onClick={() => setModo('Evento')}
-                                    className={`flex-1 py-3 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest ${modo === 'Evento' ? 'bg-white dark:bg-slate-700 shadow-sm text-brand-teal-400' : 'text-slate-400'}`}
+                                    className={`flex-1 py-3 rounded-xl text-xs font-black transition-all uppercase tracking-widest ${modo === 'Evento' ? 'bg-white dark:bg-slate-700 shadow-sm text-brand-teal-700' : 'text-slate-500'}`}
                                 >
                                     Evento
                                 </button>

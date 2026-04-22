@@ -7,18 +7,19 @@
   --color-surface-dark: #e2e8f0;
   --color-brand-dark: #0f172a;
   
-  /* Teal / Primary (Base: #2dd4bf) */
+  /* Teal / Primary (Escala de Contraste Otimizada) */
   --color-brand-teal-50: #f0fdfa;
   --color-brand-teal-100: #ccfbf1;
   --color-brand-teal-200: #99f6e4;
   --color-brand-teal-300: #5eead4;
-  --color-brand-teal-400: #2dd4bf;
+  --color-brand-teal-400: #2dd4bf; /* Use apenas em fundos escuros ou ícones */
   --color-brand-teal-500: #14b8a6;
-  --color-brand-teal-600: #0d9488;
-  --color-brand-teal-700: #0f766e;
+  --color-brand-teal-600: #0d9488; /* Contraste AA em fundos claros */
+  --color-brand-teal-700: #0f766e; /* Contraste AAA em fundos claros */
   --color-brand-teal-800: #115e59;
   --color-brand-teal-900: #134e4a;
   --color-brand-teal: var(--color-brand-teal-400);
+  --color-brand-teal-contrast: var(--color-brand-teal-600);
   
   --color-primary: var(--color-brand-teal-400);
   --color-primary-dark: var(--color-brand-teal-600);
@@ -36,12 +37,12 @@
   --color-slate-900: #0f172a;
 
   /* Escala Tipográfica Elite (Modern & Sharp) */
-  --font-size-xs: 0.75rem;    /* 12px - Labels Mínimas */
-  --font-size-sm: 0.8125rem; /* 13px - Texto de Apoio */
-  --font-size-base: 0.9375rem; /* 15px - Texto Principal */
-  --font-size-lg: 1.125rem;  /* 18px - Subtítulos */
-  --font-size-xl: 1.25rem;   /* 20px - Títulos de Card */
-  --font-size-2xl: 1.5rem;   /* 24px - Títulos de Página */
+  --font-size-xs: 0.75rem;    /* 12px - Labels Mínimas (Garantido) */
+  --font-size-sm: 0.875rem;   /* 14px - Texto de Apoio */
+  --font-size-base: 1rem;     /* 16px - Texto Principal */
+  --font-size-lg: 1.125rem;   /* 18px - Subtítulos */
+  --font-size-xl: 1.25rem;    /* 20px - Títulos de Card */
+  --font-size-2xl: 1.5rem;    /* 24px - Títulos de Página */
 
   /* Neumorfismo Dinâmico (Luz) - Contraste Reforçado para Outdoor */
   --shadow-soft-out: 8px 8px 16px rgba(15, 23, 42, 0.08), -8px -8px 16px #ffffff;
