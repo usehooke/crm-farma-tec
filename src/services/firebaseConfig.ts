@@ -1,6 +1,6 @@
-﻿import { initializeApp } from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -21,6 +21,17 @@ if (hasValidConfig) {
     app = initializeApp(firebaseConfig);
     firebaseAuth = getAuth(app);
     firestoreDb = getFirestore(app);
+
+    // Habilitar Persistência Offline para PWA Elite
+    if (typeof window !== 'undefined') {
+        enableIndexedDbPersistence(firestoreDb).catch((err) => {
+            if (err.code === 'failed-precondition') {
+                console.warn("Múltiplas abas abertas: persistência limitada.");
+            } else if (err.code === 'unimplemented') {
+                console.warn("Navegador não suporta persistência.");
+            }
+        });
+    }
 }
 
 export const auth = firebaseAuth as any;
