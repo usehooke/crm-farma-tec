@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Palette, Type, Box, Smartphone, CheckCircle2 } from 'lucide-react';
 
 /**

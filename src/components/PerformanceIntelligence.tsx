@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Lightbulb, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, Lightbulb, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { 
     startOfWeek, 
     endOfWeek, 

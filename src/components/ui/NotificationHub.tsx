@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Toaster as SonnerToaster } from 'sonner';
 import { Bell, Info, AlertTriangle, CheckCircle2 } from 'lucide-react';
 

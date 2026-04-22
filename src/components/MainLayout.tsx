@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Calendar, BarChart2, Settings, BookOpen, StickyNote, Palette, X } from 'lucide-react';
+import { Home, Calendar, BarChart2, Settings, BookOpen, StickyNote, Palette } from 'lucide-react';
 import { BannerInstalacao } from './BannerInstalacao';
 import { PostItContainer } from './PostIt/PostItContainer';
 import { StatusIndicator } from './ui/NotificationHub';

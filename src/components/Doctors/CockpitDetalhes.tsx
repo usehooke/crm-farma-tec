@@ -127,8 +127,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
             <button onClick={onFechar} className="p-3 text-slate-300 hover:text-red-500 bg-slate-50 dark:bg-slate-800 rounded-full transition-all"><X size={24} /></button>
         </div>
 
-        {/* Dash de Métricas Rápidas (Padrão Android Premium) */}
-        </div>
+        {/* Quick Status Toggles */}
 
         {/* Quick Status Toggles */}
         <div className="flex gap-3 mb-4">

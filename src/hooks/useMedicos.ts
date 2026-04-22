@@ -80,7 +80,6 @@ export function useMedicos() {
         let alterado = false;
 
         medicos.forEach(m => {
-            const idKey = m.id;
             const contentKey = `${m.nome.trim().toUpperCase()}-${(m.crm || m.localizacao || '').trim().toUpperCase()}`;
             
             if (hash.has(contentKey)) {
