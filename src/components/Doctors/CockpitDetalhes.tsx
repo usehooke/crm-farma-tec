@@ -165,26 +165,26 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
         <div className="flex flex-col gap-10">
             <section>
                 <header className="flex items-center justify-between mb-4">
-                    <h3 className="text-[11px] font-black text-brand-dark dark:text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <ClipboardList size={14} className="text-brand-teal" /> NOTAS ESTRATÉGICAS IQ
+                    <h3 className="text-xs font-black text-brand-dark dark:text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <ClipboardList size={14} className="text-brand-teal-700 dark:text-brand-teal" /> NOTAS ESTRATÉGICAS IQ
                     </h3>
-                    <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-slate-50 dark:bg-slate-800">
-                         <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                         <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Auto-save ON</span>
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                         <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Salvando automaticamente</span>
                     </div>
                 </header>
                 <textarea 
                     ref={notaCrmRef}
                     value={notaCrm}
                     onChange={(e) => { setNotaCrm(e.target.value); }}
-                    className="w-full neo-input min-h-[120px] !text-sm !font-bold !leading-relaxed !bg-white dark:!bg-slate-800/50 !rounded-[28px] !shadow-inner border-2 border-slate-50 dark:border-slate-800 focus:border-brand-teal transition-all p-5 resize-none overflow-hidden"
-                    placeholder="Informações críticas sobre o perfil deste médico para a próxima visita..."
+                    className="w-full neo-input min-h-[120px] !text-base !font-bold !leading-relaxed !bg-white dark:!bg-slate-800/50 !rounded-[28px] !shadow-inner border-2 border-slate-100 dark:border-slate-800 focus:border-brand-teal transition-all p-6 resize-none overflow-hidden"
+                    placeholder="Escreva aqui informações importantes sobre este médico para não esquecer na próxima visita..."
                 />
             </section>
 
             <section>
-                <h3 className="text-[11px] font-black text-brand-dark dark:text-slate-400 uppercase tracking-[0.2em] mb-5 flex items-center gap-2">
-                    <MessageSquare size={14} className="text-brand-teal" /> HISTÓRICO DE INTERAÇÕES
+                <h3 className="text-xs font-black text-brand-dark dark:text-slate-400 uppercase tracking-[0.2em] mb-5 flex items-center gap-2">
+                    <MessageSquare size={14} className="text-brand-teal-700 dark:text-brand-teal" /> O QUE JÁ FOI FEITO
                 </h3>
                 <div className="space-y-4">
                     {(medico.logVisitas || []).length === 0 ? (

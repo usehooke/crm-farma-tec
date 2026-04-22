@@ -5,7 +5,7 @@ import { BannerInstalacao } from './BannerInstalacao';
 import { PostItContainer } from './PostIt/PostItContainer';
 import { StatusIndicator } from './ui/NotificationHub';
 
-export type ViewName = 'home' | 'agenda' | 'notas' | 'documentos' | 'protocolos' | 'configuracoes' | 'design';
+export type ViewName = 'home' | 'agenda' | 'notas' | 'documentos' | 'protocolos' | 'configuracoes' | 'design' | 'ajuda';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -23,6 +23,7 @@ export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive 
         { id: 'protocolos', label: 'Biblioteca', icon: BookOpen },
         { id: 'configuracoes', label: 'Ajustes', icon: Settings },
         { id: 'design', label: 'Design', icon: Palette },
+        { id: 'ajuda', label: 'Ajuda', icon: BookOpen },
     ] as const;
 
     return (
@@ -122,7 +123,7 @@ export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive 
                                                     />
                                                 )}
                                             </div>
-                                            <span className={`text-[9px] font-black uppercase tracking-widest transition-colors duration-300 z-10 ${isActive ? 'text-brand-teal' : 'text-slate-400'}`}>
+                                            <span className={`text-[11px] font-black uppercase tracking-widest transition-colors duration-300 z-10 ${isActive ? 'text-brand-teal-700 dark:text-brand-teal' : 'text-slate-500'}`}>
                                                 {item.label}
                                             </span>
                                         </button>

@@ -22,6 +22,7 @@ import { StyleGuide } from './components/StyleGuide';
 const DashboardBI = lazy(() => import('./components/DashboardBI').then(m => ({ default: m.DashboardBI })));
 const Protocolos = lazy(() => import('./components/Protocolos').then(m => ({ default: m.Protocolos })));
 const Configuracoes = lazy(() => import('./components/Configuracoes').then(m => ({ default: m.Configuracoes })));
+const GuiaUsuario = lazy(() => import('./components/GuiaUsuario').then(m => ({ default: m.GuiaUsuario })));
 
 import { ConfigProvider, useConfig } from './context/ConfigContext';
 import { ModalProvider, useModal } from './context/ModalContext';
@@ -111,6 +112,7 @@ const AppContent = memo(() => {
           {currentView === 'protocolos' && <Protocolos />}
           {currentView === 'configuracoes' && <Configuracoes />}
           {currentView === 'design' && <StyleGuide />}
+          {currentView === 'ajuda' && <GuiaUsuario />}
         </Suspense>
       </MainLayout>
 
