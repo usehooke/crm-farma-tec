@@ -29,18 +29,18 @@ export const NotificationHub = () => {
 // Componente decorativo opcional para o status da rede ou atualizações em tempo real
 export const StatusIndicator = ({ status = 'online' }: { status?: 'online' | 'offline' | 'syncing' }) => {
   const configs = {
-    online: { color: 'bg-brand-teal-400', text: 'Conectado', icon: <CheckCircle2 size={10} /> },
-    offline: { color: 'bg-red-500', text: 'Desconectado', icon: <Bell size={10} /> },
-    syncing: { color: 'bg-amber-400 animate-pulse', text: 'Sincronizando', icon: <Bell size={10} /> },
+    online: { color: 'bg-green-500', text: 'Tudo Salvo', icon: <CheckCircle2 size={12} className="text-white" /> },
+    offline: { color: 'bg-red-500', text: 'Sem Internet', icon: <AlertTriangle size={12} className="text-white" /> },
+    syncing: { color: 'bg-amber-500 animate-pulse', text: 'Salvando...', icon: <CheckCircle2 size={12} className="text-white" /> },
   };
 
   const current = configs[status] || configs.online;
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-white/20 shadow-sm transition-all hover:shadow-md cursor-help group">
-      <div className={`w-2 h-2 rounded-full ${current.color}`} />
-      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hidden sm:block">
-        Hub {current.text}
+    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm transition-all group">
+      <div className={`w-2.5 h-2.5 rounded-full ${current.color} shadow-sm`} />
+      <span className="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">
+        {current.text}
       </span>
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-slate-900 border border-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-2xl scale-95 group-hover:scale-100 duration-300 transform origin-bottom">
         <p className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">

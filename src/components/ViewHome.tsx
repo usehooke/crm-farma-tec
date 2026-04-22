@@ -5,7 +5,9 @@ import { SidebarFiltros } from './Navigation/SidebarFiltros';
 import { DoctorCard } from './Doctors/DoctorCard';
 import { CockpitDetalhes } from './Doctors/CockpitDetalhes';
 import { KanbanBoard } from './Kanban/KanbanBoard';
-import { LayoutGrid, List, Search as SearchIcon } from 'lucide-react';
+import { LayoutGrid, List, Search as SearchIcon, QrCode } from 'lucide-react';
+import { ScannerQR } from './ScannerQR';
+import { toast } from 'sonner';
 
 interface ViewHomeProps {
     selectedMedicoId: string | null;
@@ -23,6 +25,7 @@ export const ViewHome = memo(({ selectedMedicoId, setSelectedMedicoId }: ViewHom
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy] = useState<'nome' | 'visita'>('nome');
     const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
 
     // Remove duplicatas ao carregar (Segurança máxima para o Kanban)
     useEffect(() => {
@@ -101,17 +104,25 @@ export const ViewHome = memo(({ selectedMedicoId, setSelectedMedicoId }: ViewHom
                         </div>
                     </div>
                     
-                    <div className="mt-4 relative lg:hidden">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-teal z-10">
-                            <SearchIcon size={16} strokeWidth={3} />
+                    <div className="mt-4 flex items-center gap-3 lg:hidden">
+                        <div className="relative flex-1">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-teal z-10">
+                                <SearchIcon size={16} strokeWidth={3} />
+                            </div>
+                            <input 
+                                type="text"
+                                placeholder="Buscar nome, CRM..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full bg-slate-50 border-2 border-transparent focus:border-brand-teal/20 rounded-2xl pl-12 pr-4 py-3 text-xs font-bold transition-all shadow-inner"
+                            />
                         </div>
-                        <input 
-                            type="text"
-                            placeholder="Buscar nome, CRM ou cidade..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-slate-50 border-2 border-transparent focus:border-brand-teal/20 rounded-2xl pl-12 pr-4 py-3 text-xs font-bold transition-all shadow-inner"
-                        />
+                        <button 
+                            onClick={() => setIsScannerOpen(true)}
+                            className="p-3 bg-brand-teal text-white rounded-2xl shadow-lg active:scale-90 transition-all"
+                        >
+                            <QrCode size={20} />
+                        </button>
                     </div>
                 </header>
 
@@ -174,6 +185,24 @@ export const ViewHome = memo(({ selectedMedicoId, setSelectedMedicoId }: ViewHom
                             onFechar={() => setSelectedMedicoId(null)}
                         />
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {isScannerOpen && (
+                    <ScannerQR 
+                        onClose={() => setIsScannerOpen(false)}
+                        onScan={(code) => {
+                            const found = medicos.find(m => m.id === code || m.crm === code || m.nome.includes(code));
+                            if (found) {
+                                setSelectedMedicoId(found.id);
+                                setIsScannerOpen(false);
+                                toast.success(`Médico localizado: ${found.nome}`);
+                            } else {
+                                toast.error("Código não reconhecido na base.");
+                            }
+                        }}
+                    />
                 )}
             </AnimatePresence>
         </div>
