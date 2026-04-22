@@ -3,7 +3,7 @@ import { useState, useEffect, lazy, Suspense, memo } from 'react';
 import { Plus } from 'lucide-react';
 import { NotificationHub } from './components/ui/NotificationHub';
 import { MainLayout } from './components/MainLayout';
-import { ViewHome } from './components/ViewHome';
+import { ViewLaunchpad } from './components/ViewLaunchpad';
 import { Agendamento } from './components/Agendamento';
 import { SplashScreen } from './components/SplashScreen';
 import { PostItContainer } from './components/PostIt/PostItContainer';
@@ -23,6 +23,7 @@ const DashboardBI = lazy(() => import('./components/DashboardBI').then(m => ({ d
 const Protocolos = lazy(() => import('./components/Protocolos').then(m => ({ default: m.Protocolos })));
 const Configuracoes = lazy(() => import('./components/Configuracoes').then(m => ({ default: m.Configuracoes })));
 const GuiaUsuario = lazy(() => import('./components/GuiaUsuario').then(m => ({ default: m.GuiaUsuario })));
+const ViewHome = lazy(() => import('./components/ViewHome').then(m => ({ default: m.ViewHome })));
 
 import { ConfigProvider, useConfig } from './context/ConfigContext';
 import { ModalProvider, useModal } from './context/ModalContext';
@@ -39,6 +40,7 @@ const AppContent = memo(() => {
   const [currentView, setCurrentView] = useState<ViewName>('home');
   const [showSplash, setShowSplash] = useState(true);
   const [selectedMedicoId, setSelectedMedicoId] = useState<string | null>(null);
+  const [isShowingList, setIsShowingList] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2000);
@@ -101,10 +103,24 @@ const AppContent = memo(() => {
           </div>
         }>
           {currentView === 'home' && (
-            <ViewHome 
-                selectedMedicoId={selectedMedicoId}
-                setSelectedMedicoId={setSelectedMedicoId}
-            />
+            !isShowingList ? (
+              <ViewLaunchpad 
+                onNavigate={(view) => {
+                  if (view === 'home') setIsShowingList(true);
+                  else {
+                    setCurrentView(view);
+                    setIsShowingList(false);
+                  }
+                }}
+                userName={usuarioLogado?.displayName || 'Ariani'}
+              />
+            ) : (
+              <ViewHome 
+                  selectedMedicoId={selectedMedicoId}
+                  setSelectedMedicoId={setSelectedMedicoId}
+                  onBack={() => setIsShowingList(false)}
+              />
+            )
           )}
           {currentView === 'agenda' && <Agendamento />}
           {currentView === 'notas' && <PostItContainer />}

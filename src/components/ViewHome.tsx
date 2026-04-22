@@ -5,20 +5,21 @@ import { SidebarFiltros } from './Navigation/SidebarFiltros';
 import { DoctorCard } from './Doctors/DoctorCard';
 import { CockpitDetalhes } from './Doctors/CockpitDetalhes';
 import { KanbanBoard } from './Kanban/KanbanBoard';
-import { LayoutGrid, List, Search as SearchIcon, QrCode } from 'lucide-react';
+import { LayoutGrid, List, Search as SearchIcon, QrCode, ChevronLeft } from 'lucide-react';
 import { ScannerQR } from './ScannerQR';
 import { toast } from 'sonner';
 
 interface ViewHomeProps {
     selectedMedicoId: string | null;
     setSelectedMedicoId: (id: string | null) => void;
+    onBack?: () => void;
 }
 
 /**
  * ViewHome Elite v3.0 (@Agent-UX)
  * Agora consome seu próprio estado, isolando renderizações do MainLayout.
  */
-export const ViewHome = memo(({ selectedMedicoId, setSelectedMedicoId }: ViewHomeProps) => {
+export const ViewHome = memo(({ selectedMedicoId, setSelectedMedicoId, onBack }: ViewHomeProps) => {
     const { medicos, atualizarMedico, adicionarLog, limparBaseDuplicada } = useMedicos();
     
     const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
@@ -80,10 +81,17 @@ export const ViewHome = memo(({ selectedMedicoId, setSelectedMedicoId }: ViewHom
                 <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl p-4 lg:p-6 border-b border-slate-100 shadow-sm w-full">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex flex-col flex-1 min-w-0">
-                            <h2 className="text-lg lg:text-xl font-black text-brand-dark truncate tracking-tight">
-                                {viewMode === 'list' ? 'Médicos' : 'Quadro Estratégico'}
-                            </h2>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5">
+                            <div className="flex items-center gap-2">
+                                {onBack && (
+                                    <button onClick={onBack} className="lg:hidden text-slate-400 p-1">
+                                        <ChevronLeft size={24} />
+                                    </button>
+                                )}
+                                <h2 className="text-lg lg:text-xl font-black text-brand-dark truncate tracking-tight">
+                                    {viewMode === 'list' ? 'Médicos' : 'Quadro Estratégico'}
+                                </h2>
+                            </div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5 ml-1">
                                 {medicosFiltrados.length} Profissionais
                             </p>
                         </div>

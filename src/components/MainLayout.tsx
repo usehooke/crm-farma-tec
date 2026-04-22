@@ -18,12 +18,19 @@ export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive 
     const navItems = [
         { id: 'home', label: 'Início', icon: Home },
         { id: 'agenda', label: 'Agenda', icon: Calendar },
+        { id: 'ajuda', label: 'Ajuda', icon: BookOpen },
+    ] as const;
+
+    // Itens estendidos apenas para o Desktop Sidebar
+    const desktopNavItems = [
+        { id: 'home', label: 'Início', icon: Home },
+        { id: 'agenda', label: 'Agenda', icon: Calendar },
         { id: 'notas', label: 'Notas', icon: StickyNote },
         { id: 'documentos', label: 'Estatísticas', icon: BarChart2 },
         { id: 'protocolos', label: 'Biblioteca', icon: BookOpen },
         { id: 'configuracoes', label: 'Ajustes', icon: Settings },
-        { id: 'design', label: 'Design', icon: Palette },
         { id: 'ajuda', label: 'Ajuda', icon: BookOpen },
+        { id: 'design', label: 'Design', icon: Palette },
     ] as const;
 
     return (
@@ -35,7 +42,7 @@ export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive 
                     IQ
                 </div>
                 <ul className="flex flex-col gap-6 w-full px-2">
-                    {navItems.map((item) => {
+                    {desktopNavItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = activeTab === item.id;
                         return (
@@ -98,34 +105,33 @@ export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive 
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-4 pb-6 pt-3 bg-surface/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-t-[32px] shadow-[0_-10px_30px_rgba(0,0,0,0.08)] z-40 lg:hidden border-t border-white/5 dark:border-white/10"
                     >
-                        <ul className="flex justify-between items-center px-2">
+                        <ul className="flex justify-around items-center px-4">
                             {navItems.map((item) => {
                                 const Icon = item.icon;
                                 const isActive = activeTab === item.id;
 
                                 return (
-                                    <li key={item.id} className="flex-1">
+                                    <li key={item.id} className="flex-1 max-w-[120px]">
                                         <button
                                             onClick={() => setActiveTab(item.id as ViewName)}
-                                            className="w-full h-12 flex flex-col items-center justify-center gap-0.5 relative active:scale-90 transition-transform"
+                                            className="w-full h-16 flex flex-col items-center justify-center gap-1.5 relative active:scale-95 transition-all"
                                             aria-label={item.label}
                                         >
-                                            <div className={`relative z-10 p-2 rounded-2xl transition-all duration-300 ${isActive ? 'bg-brand-teal/10 scale-110 shadow-[0_0_15px_rgba(30,95,175,0.1)]' : 'bg-transparent'}`}>
+                                            <div className={`relative z-10 p-3 rounded-2xl transition-all duration-300 ${isActive ? 'bg-brand-teal text-white shadow-xl shadow-brand-teal/20 scale-110' : 'bg-transparent text-slate-400'}`}>
                                                 <Icon
-                                                    size={22}
+                                                    size={24}
                                                     strokeWidth={isActive ? 3 : 2}
-                                                    className={`transition-colors duration-300 ${isActive ? 'text-brand-teal' : 'text-slate-400'}`}
                                                 />
-                                                {isActive && (
-                                                    <motion.div
-                                                        layoutId="activeIndicator"
-                                                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-teal rounded-full"
-                                                    />
-                                                )}
                                             </div>
-                                            <span className={`text-[11px] font-black uppercase tracking-widest transition-colors duration-300 z-10 ${isActive ? 'text-brand-teal-700 dark:text-brand-teal' : 'text-slate-500'}`}>
+                                            <span className={`text-xs font-black uppercase tracking-widest transition-colors duration-300 z-10 ${isActive ? 'text-brand-teal-700 dark:text-brand-teal' : 'text-slate-500'}`}>
                                                 {item.label}
                                             </span>
+                                            {isActive && (
+                                                <motion.div
+                                                    layoutId="activeIndicator"
+                                                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-teal rounded-full"
+                                                />
+                                            )}
                                         </button>
                                     </li>
                                 );
