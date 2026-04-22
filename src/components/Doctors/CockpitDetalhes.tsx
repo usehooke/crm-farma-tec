@@ -26,6 +26,8 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
   onAdicionarLog,
   onFechar
 }) => {
+  const [novaNota, setNovaNota] = useState('');
+  const [isRegistrando, setIsRegistrando] = useState(false);
   const [tipoVisita] = useState<'presencial' | 'tecnico'>('presencial');
   
   const notaCrmRef = useRef<HTMLTextAreaElement>(null);
