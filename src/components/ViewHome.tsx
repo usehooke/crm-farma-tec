@@ -78,21 +78,21 @@ export const ViewHome = memo(({ selectedMedicoId, setSelectedMedicoId, onBack }:
             <section className="flex-1 h-full flex flex-col bg-white relative overflow-hidden">
                 
                 {/* Sticky Header com Lupa para Mobile */}
-                <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl p-4 lg:p-6 border-b border-slate-100 shadow-sm w-full">
+                <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl p-6 lg:p-8 border-b border-slate-100/50 shadow-sm w-full">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex flex-col flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                                 {onBack && (
-                                    <button onClick={onBack} className="lg:hidden text-slate-400 p-1">
-                                        <ChevronLeft size={24} />
+                                    <button onClick={onBack} className="lg:hidden text-brand-dark dark:text-white p-2 bg-slate-50 dark:bg-slate-800 rounded-xl shadow-sm active:scale-95 transition-all">
+                                        <ChevronLeft size={20} />
                                     </button>
                                 )}
-                                <h2 className="text-lg lg:text-xl font-black text-brand-dark truncate tracking-tight">
+                                <h2 className="text-xl lg:text-2xl font-black text-brand-dark dark:text-white truncate tracking-tighter italic">
                                     {viewMode === 'list' ? 'Médicos' : 'Quadro Estratégico'}
                                 </h2>
                             </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5 ml-1">
-                                {medicosFiltrados.length} Profissionais
+                            <p className="text-[10px] font-black text-brand-teal-700 dark:text-brand-teal uppercase tracking-[0.3em] mt-1.5 ml-1">
+                                {medicosFiltrados.length} Profissionais na Base
                             </p>
                         </div>
                         
@@ -139,7 +139,7 @@ export const ViewHome = memo(({ selectedMedicoId, setSelectedMedicoId, onBack }:
                     {viewMode === 'list' ? (
                         <div 
                             key={`list-${searchTerm}-${selectedSpecialty}`}
-                            className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 no-scrollbar bg-slate-50/20"
+                            className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 no-scrollbar bg-slate-50/20 pb-40"
                         >
                             {medicosFiltrados.map((medico) => (
                                 <DoctorCard 

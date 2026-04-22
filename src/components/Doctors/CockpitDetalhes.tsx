@@ -161,7 +161,7 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-8 pb-40 no-scrollbar touch-pan-y">
+            <div className="flex-1 overflow-y-auto no-scrollbar p-6 lg:p-8 space-y-12 pb-40">
         <div className="flex flex-col gap-10">
             <section>
                 <header className="flex items-center justify-between mb-4">
@@ -188,8 +188,8 @@ export const CockpitDetalhes: React.FC<CockpitDetalhesProps> = ({
                 </h3>
                 <div className="space-y-4">
                     {(medico.logVisitas || []).length === 0 ? (
-                        <div className="p-10 text-center border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[28px]">
-                            <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Nenhuma visita registrada</p>
+                        <div className="py-12 px-6 text-center bg-slate-50 dark:bg-slate-900/50 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-inner">
+                            <p className="text-xs text-slate-400 font-bold italic tracking-tight">Nenhuma interação registrada ainda.</p>
                         </div>
                     ) : (
                         (medico.logVisitas || []).map((log, index) => (

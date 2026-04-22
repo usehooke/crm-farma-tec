@@ -117,9 +117,9 @@ export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive 
                                             className="w-full h-16 flex flex-col items-center justify-center gap-1.5 relative active:scale-95 transition-all"
                                             aria-label={item.label}
                                         >
-                                            <div className={`relative z-10 p-3 rounded-2xl transition-all duration-300 ${isActive ? 'bg-brand-teal text-white shadow-xl shadow-brand-teal/20 scale-110' : 'bg-transparent text-slate-400'}`}>
+                                            <div className={`relative z-10 p-3 rounded-2xl transition-all duration-300 ${isActive ? 'bg-brand-teal text-white shadow-lg shadow-brand-teal/25 scale-110' : 'bg-transparent text-slate-400'}`}>
                                                 <Icon
-                                                    size={24}
+                                                    size={22}
                                                     strokeWidth={isActive ? 3 : 2}
                                                 />
                                             </div>
@@ -129,7 +129,7 @@ export const MainLayout = ({ children, activeTab, setActiveTab, isContextActive 
                                             {isActive && (
                                                 <motion.div
                                                     layoutId="activeIndicator"
-                                                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-teal rounded-full"
+                                                    className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-teal rounded-full shadow-[0_0_8px_rgba(30,95,175,0.8)]"
                                                 />
                                             )}
                                         </button>

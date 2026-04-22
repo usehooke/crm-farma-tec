@@ -70,18 +70,18 @@ export const ViewLaunchpad = ({ onNavigate, userName = "Ariani" }: ViewLaunchpad
                         <motion.button
                             key={app.id}
                             variants={item}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.96 }}
                             onClick={() => onNavigate(app.id === 'home_list' ? 'home' : app.id as ViewName)}
-                            className="group flex items-center gap-5 p-6 bg-white dark:bg-slate-900 rounded-[32px] shadow-soft-out dark:shadow-none border border-slate-50 dark:border-slate-800 text-left transition-all hover:shadow-xl"
+                            className="group flex items-center gap-5 p-7 bg-white dark:bg-slate-900 rounded-[32px] shadow-soft-out dark:shadow-none border border-white dark:border-slate-800 text-left transition-all hover:shadow-xl active:bg-slate-50 dark:active:bg-slate-800"
                         >
-                            <div className={`w-16 h-16 rounded-2xl ${app.color} text-white flex items-center justify-center shadow-lg shadow-current/20 shrink-0`}>
-                                <Icon size={32} />
+                            <div className={`w-14 h-14 rounded-[20px] ${app.color} text-white flex items-center justify-center shadow-lg shadow-current/10 shrink-0`}>
+                                <Icon size={28} />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h3 className="text-lg font-black text-brand-dark dark:text-white leading-none mb-1">{app.label}</h3>
-                                <p className="text-xs text-slate-400 font-bold truncate">{app.desc}</p>
+                                <h3 className="text-lg font-black text-brand-dark dark:text-white leading-none mb-1.5">{app.label}</h3>
+                                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wide truncate">{app.desc}</p>
                             </div>
-                            <ChevronRight size={20} className="text-slate-300 group-hover:text-brand-teal transition-colors" />
+                            <ChevronRight size={18} className="text-slate-200 group-hover:text-brand-teal transition-colors" />
                         </motion.button>
                     );
                 })}

@@ -1,30 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  /* Paleta de Cores Corporativas (Escala Acessível) */
-  --color-brand-white: #ffffff;
-  --color-surface: #f1f5f9;
-  --color-surface-dark: #e2e8f0;
+  --color-brand-teal: #1e5faf;
+  --color-brand-teal-400: #2dd4bf;
+  --color-brand-teal-700: #0f766e;
   --color-brand-dark: #0f172a;
-  
-  /* Teal / Primary (Escala de Contraste Otimizada) */
-  --color-brand-teal-50: #f0fdfa;
-  --color-brand-teal-100: #ccfbf1;
-  --color-brand-teal-200: #99f6e4;
-  --color-brand-teal-300: #5eead4;
-  --color-brand-teal-400: #2dd4bf; /* Use apenas em fundos escuros ou ícones */
-  --color-brand-teal-500: #14b8a6;
-  --color-brand-teal-600: #0d9488; /* Contraste AA em fundos claros */
-  --color-brand-teal-700: #0f766e; /* Contraste AAA em fundos claros */
-  --color-brand-teal-800: #115e59;
-  --color-brand-teal-900: #134e4a;
-  --color-brand-teal: var(--color-brand-teal-400);
-  --color-brand-teal-contrast: var(--color-brand-teal-600);
-  
-  --color-primary: var(--color-brand-teal-400);
-  --color-primary-dark: var(--color-brand-teal-600);
+  --color-brand-white: #f8fafc;
+  --color-surface: #ffffff;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
 
-  /* Neutros para Tipografia (Escala de Slates) */
+  /* Cores Slate Custom para Neumorfismo */
   --color-slate-50: #f8fafc;
   --color-slate-100: #f1f5f9;
   --color-slate-200: #e2e8f0;
@@ -36,68 +23,75 @@
   --color-slate-800: #1e293b;
   --color-slate-900: #0f172a;
 
-  /* Escala Tipográfica Elite (Modern & Sharp) */
-  --font-size-xs: 0.75rem;    /* 12px - Labels Mínimas (Garantido) */
-  --font-size-sm: 0.875rem;   /* 14px - Texto de Apoio */
-  --font-size-base: 1rem;     /* 16px - Texto Principal */
-  --font-size-lg: 1.125rem;   /* 18px - Subtítulos */
-  --font-size-xl: 1.25rem;    /* 20px - Títulos de Card */
-  --font-size-2xl: 1.5rem;    /* 24px - Títulos de Página */
-
-  /* Neumorfismo Dinâmico (Luz) - Contraste Reforçado para Outdoor */
-  --shadow-soft-out: 8px 8px 16px rgba(15, 23, 42, 0.08), -8px -8px 16px #ffffff;
-  --shadow-soft-in: inset 4px 4px 10px rgba(15, 23, 42, 0.08), inset -4px -4px 10px #ffffff;
-  --shadow-soft-hover: 12px 12px 24px rgba(15, 23, 42, 0.12), -12px -12px 24px #ffffff;
+  /* Sombras Neumórficas de Luxo (Multi-layered) */
+  --shadow-soft-out: 
+      8px 8px 16px rgba(0, 0, 0, 0.03), 
+      -8px -8px 16px rgba(255, 255, 255, 0.8);
+  --shadow-soft-in: 
+      inset 6px 6px 12px rgba(0, 0, 0, 0.03), 
+      inset -6px -6px 12px rgba(255, 255, 255, 0.9);
+  
+  /* Escala Tipográfica Elite (Otimizada para leitura sênior e estética premium) */
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+  --font-size-3xl: 2rem;       /* 32px */
+  --font-size-4xl: 2.5rem;     /* 40px */
 
   /* Arredondamento Padrão */
   --radius-corp: 20px;
-  --radius-pill: 32px;
-}
-
-/* [DARK MODE]: Sobrescrita de Variáveis para Tema Noturno */
-@variant dark (&:where(.dark, .dark *));
-
-.dark {
-  --color-brand-white: #0a0f1e; /* deeper slate for better OLED contrast */
-  --color-surface: #131c31;
-  --color-brand-dark: #f8fafc;
-  --color-brand-teal: #2dd4bf;
-  --color-primary: #2dd4bf;
-  
-  --shadow-soft-out: 8px 8px 16px #02040a, -2px -2px 8px #1e293b;
-  --shadow-soft-in: inset 4px 4px 8px #02040a, inset -4px -4px 8px #131b2d;
+  --radius-neo: 32px;
 }
 
 @layer base {
   body {
-    @apply bg-brand-white text-brand-dark antialiased transition-colors duration-300;
-    overscroll-behavior-y: none; 
+    @apply bg-brand-white text-brand-dark overflow-x-hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
-
-  .hide-scrollbar::-webkit-scrollbar { display: none; }
-  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
 @layer components {
   .neo-card {
-    @apply bg-surface rounded-[var(--radius-corp)] shadow-soft-out transition-all duration-300 border border-white/5 dark:border-white/10;
+    @apply bg-white dark:bg-slate-900 rounded-[32px] shadow-soft-out border border-white/50 dark:border-white/5;
   }
   
-  .neo-card-pressed {
-    @apply bg-surface rounded-[var(--radius-corp)] shadow-soft-in transition-all duration-300 border border-slate-200/50 dark:border-black/20;
-  }
-
-  .neo-button-primary {
-    @apply bg-brand-teal text-white font-bold rounded-xl shadow-[0_8px_20px_rgba(45,212,191,0.4)] active:scale-95 transition-all duration-200 flex justify-center items-center gap-2;
-  }
-
   .neo-input {
-    @apply w-full bg-white dark:bg-slate-800 shadow-soft-in rounded-xl px-4 py-3.5 text-base font-bold text-brand-dark dark:text-white outline-none border-2 border-slate-100 dark:border-slate-700 focus:border-brand-teal-400 focus:bg-white transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500;
+    @apply bg-slate-50 dark:bg-slate-900/50 rounded-2xl shadow-soft-in border-none focus:ring-2 ring-brand-teal/20 outline-none transition-all;
+  }
+
+  .shadow-soft-out {
+    box-shadow: var(--shadow-soft-out);
+  }
+
+  .shadow-soft-in {
+    box-shadow: var(--shadow-soft-in);
   }
 }
 
-@layer utilities {
-  main { @apply min-w-[320px]; }
-  header { @apply min-w-[320px]; }
-  .bottom-nav { @apply min-w-[320px]; }
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 dark:bg-slate-800 rounded-full;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }
